@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Classes\Permissions\Permissions;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasRoles, HasApiTokens, HasFactory, Notifiable;
 
@@ -71,7 +74,7 @@ class User extends Authenticatable
 
     public function phonenumbers(): MorphMany
     {
-        return $this->morphMany(PhoneNumber::class, 'phoneable');
+        return $this->morphMany(Phonenumber::class, 'phoneable');
     }
 
     public function dates(): MorphMany
@@ -100,6 +103,16 @@ class User extends Authenticatable
         });
 
         return $settings;
+    }
+
+    public function get_is_admin_attribute()
+    {
+        return $this->canAny([Permissions::SYSTEM_SUPER_ADMIN, Permissions::SYSTEM_ADMIN]);
+    }
+
+    public function get_is_super_admin_attribute()
+    {
+        return $this->can(Permissions::SYSTEM_SUPER_ADMIN);
     }
     // END: Attributes
 

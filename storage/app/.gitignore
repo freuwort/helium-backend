@@ -1,3 +1,7 @@
 *
 !public/
+!private/
+!thumbnails/
+!profile_banners/
+!profile_pictures/
 !.gitignore
