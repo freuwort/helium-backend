@@ -15,6 +15,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return PrivateUserResource::make($request->user());
+Route::prefix('domain')->group(function () {
+    Route::get('/company-meta', function (Request $request) {
+        return response()->json([
+            'name' => 'FDBS',
+            'legalName' => 'Fleischer Dienst Braunschweig eG',
+            'slogan' => 'the competence in foodservice',
+            'logo' => 'https://fdbs.de/storage/media/branding/logos/logo_no_spacing.png',
+            'favicon' => '',
+        ]);
+    });
+});
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/user', function (Request $request) {
+        return PrivateUserResource::make($request->user());
+    });
 });
