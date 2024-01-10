@@ -124,9 +124,25 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->settings()->where('key', $key)->exists();
     }
 
-    public function setSetting($key, $value)
+    public function setSetting(string|array $key, $value = null): void
     {
-        $this->settings()->updateOrCreate(['key' => $key], ['value' => $value]);
+        // If the key is an array
+        if (is_array($key))
+        {
+            // Loop through the array and then set each key-value pair
+            foreach ($key as $k => $v)
+            {
+                $this->setSetting($k, $v);
+            }
+
+            return;
+        }
+
+        // Set the key-value pair
+        $this->settings()->updateOrCreate(
+            ['key' => $key],
+            ['value' => $value]
+        );
     }
 
     public function unsetSetting($key)

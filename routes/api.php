@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Resources\User\PrivateUserResource;
+use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\Auth\UserSettingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,7 +29,9 @@ Route::prefix('domain')->group(function () {
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/user', function (Request $request) {
-        return PrivateUserResource::make($request->user());
+    Route::prefix('user')->group(function () {
+        Route::get('/', [UserController::class, 'index']);
+
+        Route::patch('/settings', [UserSettingController::class, 'update']);
     });
 });
