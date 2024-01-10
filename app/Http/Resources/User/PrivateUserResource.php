@@ -16,7 +16,7 @@ class PrivateUserResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'image' => 'https://avatar.iran.liara.run/public/?username=' . $this->name . '&size=80',
+            'profile_image' => $this->profile_image,
             'name' => $this->name,
             'email' => $this->email,
             'username' => $this->username,
@@ -26,6 +26,11 @@ class PrivateUserResource extends JsonResource
             'deleted_at' => $this->deleted_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            
+            'settings' => $this->settings,
+
+            'roles' => $this->roles,
+            'permissions' => $this->permissions->pluck('name'),
         ];
     }
 }

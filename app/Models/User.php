@@ -52,7 +52,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(UserCompany::class);
     }
 
-    public function settings()
+    public function raw_settings()
     {
         return $this->hasMany(UserSetting::class);
     }
@@ -91,26 +91,24 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
     // START: Attributes
-    public function get_profile_image_attribute()
+    public function getProfileImageAttribute()
     {
-        return '/images/app/default/user.png';
+        return 'https://avatar.iran.liara.run/public/?username=' . $this->name . '&size=80';
     }
 
-    public function get_setting_values_attribute()
+    public function getSettingsAttribute()
     {
-        $settings = $this->settings->mapWithKeys(function ($item) {
+        return $this->raw_settings->mapWithKeys(function ($item) {
             return [$item['key'] => $item['value']];
         });
-
-        return $settings;
     }
 
-    public function get_is_admin_attribute()
+    public function getIsAdminAttribute()
     {
         return $this->canAny([Permissions::SYSTEM_SUPER_ADMIN, Permissions::SYSTEM_ADMIN]);
     }
 
-    public function get_is_super_admin_attribute()
+    public function getIsSuperAdminAttribute()
     {
         return $this->can(Permissions::SYSTEM_SUPER_ADMIN);
     }
@@ -121,7 +119,7 @@ class User extends Authenticatable implements MustVerifyEmail
     // START: Settings
     public function hasSetting($key)
     {
-        return $this->settings()->where('key', $key)->exists();
+        return $this->raw_settings()->where('key', $key)->exists();
     }
 
     public function setSetting(string|array $key, $value = null): void
@@ -139,7 +137,7 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         // Set the key-value pair
-        $this->settings()->updateOrCreate(
+        $this->raw_settings()->updateOrCreate(
             ['key' => $key],
             ['value' => $value]
         );
@@ -147,13 +145,13 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function unsetSetting($key)
     {
-        $this->settings()->where('key', $key)->delete();
+        $this->raw_settings()->where('key', $key)->delete();
     }
 
     public function getSetting($key)
     {
         if (!$this->hasSetting($key)) return null;
-        return $this->settings()->firstWhere('key', $key)->value;
+        return $this->raw_settings()->firstWhere('key', $key)->value;
     }
     // END: Settings
 }
