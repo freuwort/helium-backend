@@ -16,11 +16,25 @@ class PrivateUserResource extends JsonResource
     {
         return [
             'id' => $this->id,
+
             'profile_image' => $this->profile_image,
-            'name' => $this->name,
             'email' => $this->email,
             'username' => $this->username,
             'ident_number' => $this->ident_number,
+
+            'name' => $this->name,
+            'prefix' => $this->user_name->prefix || '',
+            'firstname' => $this->user_name->firstname || '',
+            'middlename' => $this->user_name->middlename || '',
+            'lastname' => $this->user_name->lastname || '',
+            'suffix' => $this->user_name->suffix || '',
+            'nickname' => $this->user_name->nickname || '',
+            'legalname' => $this->user_name->legalname || '',
+
+            'company' => $this->user_company->company || '',
+            'department' => $this->user_company->department || '',
+            'title' => $this->user_company->title || '',
+
             'email_verified_at' => $this->email_verified_at,
             'enabled_at' => $this->enabled_at,
             'deleted_at' => $this->deleted_at,
