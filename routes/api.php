@@ -35,3 +35,21 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/settings', [UserSettingController::class, 'update']);
     });
 });
+
+
+
+Route::prefix('debug')->group(function () {
+    Route::get('/status/{status}', function (Request $request) {
+        
+        if ($request->status == 422)
+        {
+            $request->validate([
+                'name' => 'required',
+                'email' => 'required|email',
+                'password' => 'required|min:8',
+            ]);
+        }
+        
+        return response()->json(['message' => 'This is a message from the server. code_'. $request->status], $request->status);
+    });
+});
