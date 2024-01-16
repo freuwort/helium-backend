@@ -33,6 +33,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/', [UserController::class, 'index']);
 
         Route::patch('/settings', [UserSettingController::class, 'update']);
+
+        Route::patch('/password', [UserController::class, 'updatePassword']);
     });
 });
 
