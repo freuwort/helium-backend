@@ -5,7 +5,7 @@ namespace App\Http\Requests\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Hash;
 
-class UpdateUserPasswordRequest extends FormRequest
+class DestroyUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +24,6 @@ class UpdateUserPasswordRequest extends FormRequest
     {
         return [
             'password' => 'required',
-            'new_password' => 'required|min:8',
         ];
     }
 

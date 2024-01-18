@@ -35,6 +35,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/settings', [UserSettingController::class, 'update']);
 
         Route::patch('/password', [UserController::class, 'updatePassword']);
+
+        Route::delete('/', [UserController::class, 'delete']);
     });
 });
 

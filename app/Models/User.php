@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -113,6 +114,21 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->can(Permissions::SYSTEM_SUPER_ADMIN);
     }
     // END: Attributes
+
+
+
+    /**
+     * Update the user's password. The password is hashed automatically.
+     *
+     * @param  array  $password
+     * @return void
+     */
+    public function updatePassword(string $password): void
+    {
+        $this->update([
+            'password' => Hash::make($password),
+        ]);
+    }
 
 
 
