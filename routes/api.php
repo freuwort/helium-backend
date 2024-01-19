@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\Auth\UserSettingController;
+use App\Http\Controllers\Domain\DomainSettingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +38,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/password', [UserController::class, 'updatePassword']);
 
         Route::delete('/', [UserController::class, 'delete']);
+    });
+
+    Route::prefix('/settings')->group(function () {
+        Route::patch('/', [DomainSettingController::class, 'update']);
     });
 });
 
