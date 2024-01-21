@@ -55,4 +55,10 @@ class Setting extends Model
             ['value' => $value]
         );
     }
+
+    public static function getSetting(string $key, $default = null)
+    {
+        // Get the value
+        return self::firstWhere('key', $key)->value ?? $default;
+    }
 }

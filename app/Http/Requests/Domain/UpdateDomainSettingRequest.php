@@ -25,6 +25,8 @@ class UpdateDomainSettingRequest extends FormRequest
             'company_name' => 'nullable|string|max:255',
             'company_legalname' => 'nullable|string|max:255',
             'company_slogan' => 'nullable|string|max:255',
+            'company_logo' => 'nullable|string|max:255',
+            'company_favicon' => 'nullable|string|max:255',
             'default_currency' => 'nullable|string|in:EUR,USD,GBP',
             'default_unit_length' => 'nullable|string|in:m,ft',
             'default_unit_weight' => 'nullable|string|in:kg,lb',

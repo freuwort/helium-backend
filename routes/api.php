@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\Auth\UserSettingController;
+use App\Http\Controllers\Domain\DomainController;
 use App\Http\Controllers\Domain\DomainSettingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -18,15 +19,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('domain')->group(function () {
-    Route::get('/company-meta', function (Request $request) {
-        return response()->json([
-            'name' => 'FDBS',
-            'legalName' => 'Fleischer Dienst Braunschweig eG',
-            'slogan' => 'the competence in foodservice',
-            'logo' => 'https://fdbs.de/storage/media/branding/logos/logo_no_spacing.png',
-            'favicon' => '',
-        ]);
-    });
+    Route::get('/settings', [DomainController::class, 'index']);
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
