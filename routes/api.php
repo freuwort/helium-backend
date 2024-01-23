@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\Auth\UserController as AuthUserController;
 use App\Http\Controllers\Auth\UserSettingController;
 use App\Http\Controllers\Domain\DomainController;
 use App\Http\Controllers\Domain\DomainSettingController;
+use App\Http\Controllers\User\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,17 +25,23 @@ Route::prefix('domain')->group(function () {
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('user')->group(function () {
-        Route::get('/', [UserController::class, 'index']);
+        Route::get('/', [AuthUserController::class, 'index']);
 
         Route::patch('/settings', [UserSettingController::class, 'update']);
 
-        Route::patch('/password', [UserController::class, 'updatePassword']);
+        Route::patch('/password', [AuthUserController::class, 'updatePassword']);
 
-        Route::delete('/', [UserController::class, 'delete']);
+        Route::delete('/', [AuthUserController::class, 'delete']);
     });
 
     Route::prefix('/settings')->group(function () {
         Route::patch('/', [DomainSettingController::class, 'update']);
+    });
+
+
+
+    Route::prefix('users')->group(function () {
+        Route::resource('/', UserController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
     });
 });
 
