@@ -30,12 +30,12 @@ class UserName extends Model
 
 
 
-    public function get_fullname_attribute()
+    public function getFullnameAttribute()
     {
         return implode(' ', array_filter([$this->prefix, $this->firstname, $this->middlename, $this->lastname, $this->suffix]));
     }
 
-    public function get_fullname_or_nickname_attribute()
+    public function getFullnameOrNicknameAttribute()
     {
         return $this->fullname ? $this->fullname : $this->nickname;
     }

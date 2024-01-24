@@ -32,7 +32,7 @@ class Address extends Model
 
 
 
-    public function get_full_address_attribute(): string
+    public function getFullAddressAttribute(): string
     {
         
         return implode(', ', array_filter([

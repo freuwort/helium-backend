@@ -94,7 +94,7 @@ class User extends Authenticatable implements MustVerifyEmail
     // START: Attributes
     public function getProfileImageAttribute()
     {
-        return 'https://avatar.iran.liara.run/public/?username=' . $this->name . '&size=80';
+        return 'https://avatar.iran.liara.run/public/?username=' . $this->username . '&size=72';
     }
 
     public function getSettingsAttribute()
