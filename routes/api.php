@@ -40,9 +40,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 
-    Route::prefix('users')->group(function () {
-        Route::resource('/', UserController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
-    });
+    Route::resource('/users', UserController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
 });
 
 
