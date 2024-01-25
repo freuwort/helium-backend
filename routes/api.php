@@ -5,7 +5,6 @@ use App\Http\Controllers\Auth\UserSettingController;
 use App\Http\Controllers\Domain\DomainController;
 use App\Http\Controllers\Domain\DomainSettingController;
 use App\Http\Controllers\User\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,24 +18,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+require __DIR__ . '/api/debug.php';
+
+// Public Domain Routes
 Route::prefix('domain')->group(function () {
     Route::get('/settings', [DomainController::class, 'index']);
 });
 
+// Authenticated Routes
 Route::middleware(['auth:sanctum'])->group(function () {
-
-    // Auth
+    // User (self)
     Route::prefix('user')->group(function () {
-        // Get Authenticated User
         Route::get('/', [AuthUserController::class, 'index']);
-
-        // Update Authenticated User Settings
         Route::patch('/settings', [UserSettingController::class, 'update']);
-
-        // Update Authenticated User Password
         Route::patch('/password', [AuthUserController::class, 'updatePassword']);
-
-        // Delete Authenticated User
         Route::delete('/', [AuthUserController::class, 'delete']);
     });
 
@@ -46,22 +41,4 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Users
     Route::resource('/users', UserController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
     Route::delete('/users', [UserController::class, 'destroyMany']);
-});
-
-
-
-Route::prefix('debug')->group(function () {
-    Route::get('/status/{status}', function (Request $request) {
-        
-        if ($request->status == 422)
-        {
-            $request->validate([
-                'name' => 'required',
-                'email' => 'required|email',
-                'password' => 'required|min:8',
-            ]);
-        }
-        
-        return response()->json(['message' => 'This is a message from the server. code_'. $request->status], $request->status);
-    });
 });
