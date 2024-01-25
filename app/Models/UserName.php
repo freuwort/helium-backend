@@ -12,6 +12,7 @@ class UserName extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'salutation',
         'prefix',
         'firstname',
         'middlename',
