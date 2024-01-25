@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\User\UpdateUserSettingRequest;
+use App\Http\Requests\Auth\UpdateUserSettingRequest;
 use Illuminate\Http\Request;
 
 class UserSettingController extends Controller

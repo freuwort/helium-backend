@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\User\DestroyUserRequest;
-use App\Http\Requests\User\UpdateUserPasswordRequest;
+use App\Http\Requests\Auth\DestroyUserRequest;
+use App\Http\Requests\Auth\UpdateUserPasswordRequest;
 use App\Http\Resources\User\PrivateUserResource;
 use Illuminate\Http\Request;
 
