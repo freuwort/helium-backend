@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -183,5 +184,40 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($this->can(Permissions::SYSTEM_ADMIN) && !$user->can(Permissions::SYSTEM_ADMIN)) return true;
 
         return false;
+    }
+    // END: Permissions
+
+
+
+    // Sync a model with the user
+    public function syncModel(string $model, array $data, string $model_name = null): void
+    {
+        // Get the model class
+        $model_class = new $model;
+
+        // Get the model name
+        $model_name = $model_name ?? strtolower(class_basename($model_class));
+
+        // Get the model's relationship name
+        $model_relationship_name = Str::plural($model_name);
+
+        // Get the model's relationship
+        $model_relationship = $this->$model_relationship_name();
+
+        // Get the model's relationship IDs
+        $model_relationship_ids = $model_relationship->pluck('id');
+
+        // Get the model's relationship IDs that are not in the data
+        $unused_model_relationship_ids = $model_relationship_ids->diff(collect($data)->pluck('id'));
+
+        // Delete the unused model relationship IDs
+        $model_relationship->whereIn('id', $unused_model_relationship_ids)->delete();
+
+        // Loop through the data
+        foreach ($data as $item)
+        {
+            // Update or create the model
+            $model_relationship->updateOrCreate(['id' => $item['id']], $item);
+        }
     }
 }

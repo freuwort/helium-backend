@@ -8,6 +8,7 @@ use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\User\EditorUserResource;
 use App\Http\Resources\User\UserResource;
+use App\Models\Address;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -129,6 +130,9 @@ class UserController extends Controller
 
         // Update user company model
         $user->user_company()->updateOrCreate([], $request->user_company);
+
+        // Update addresses
+        $user->syncModel(Address::class, $request->addresses);
 
         // Update roles
         // $user->syncRoles($request->roles);

@@ -48,6 +48,19 @@ class UpdateUserRequest extends FormRequest
             'user_company.company' => ['nullable', 'string', 'max:255'],
             'user_company.department' => ['nullable', 'string', 'max:255'],
             'user_company.title' => ['nullable', 'string', 'max:255'],
+
+            // User Address Model
+            'addresses' => ['nullable', 'array'],
+            'addresses.*.type' => ['required', 'string', 'max:255'],
+            'addresses.*.address_line_1' => ['nullable', 'string', 'max:255'],
+            'addresses.*.address_line_2' => ['nullable', 'string', 'max:255'],
+            'addresses.*.city' => ['nullable', 'string', 'max:255'],
+            'addresses.*.state' => ['nullable', 'string', 'max:255'],
+            'addresses.*.postal_code' => ['nullable', 'string', 'max:255'],
+            'addresses.*.country' => ['nullable', 'string', 'max:255'],
+            'addresses.*.latitude' => ['nullable', 'numeric'],
+            'addresses.*.longitude' => ['nullable', 'numeric'],
+            'addresses.*.notes' => ['nullable', 'string', 'max:255'],
         ];
     }
 }
