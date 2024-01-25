@@ -170,4 +170,18 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->raw_settings()->firstWhere('key', $key)->value;
     }
     // END: Settings
+
+
+
+    // START: Permissions
+    public function hasHigherPermissionsThan(User $user)
+    {
+        // If the user is a super admin and the other user is not
+        if ($this->can(Permissions::SYSTEM_SUPER_ADMIN) && !$user->can(Permissions::SYSTEM_SUPER_ADMIN)) return true;
+
+        // If the user is an admin and the other user is not
+        if ($this->can(Permissions::SYSTEM_ADMIN) && !$user->can(Permissions::SYSTEM_ADMIN)) return true;
+
+        return false;
+    }
 }

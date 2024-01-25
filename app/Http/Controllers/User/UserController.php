@@ -3,15 +3,23 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\DestroyManyUserRequest;
+use App\Http\Requests\User\CreateUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Resources\User\EditorUserResource;
 use App\Http\Resources\User\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct()
+    {
+        $this->authorizeResource(User::class, 'user');
+    }
+
+
+
     public function index(Request $request)
     {
         $query = User::query();
@@ -76,35 +84,75 @@ class UserController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
+    
+    
     public function show(User $user)
     {
-        return response()->json(UserResource::make($user));
+        return response()->json(EditorUserResource::make($user));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    
+    
+    public function store(CreateUserRequest $request)
     {
-        //
+        // Update user model
+        $user = User::create($request->model);
+
+        // Update password if set
+        if ($request->password) $user->updatePassword($request->password);
+
+        // Update user name model
+        $user->user_name()->updateOrCreate([], $request->user_name);
+
+        // Update user company model
+        $user->user_company()->updateOrCreate([], $request->user_company);
+
+        // Update roles
+        // $user->syncRoles($request->roles);
+
+        // Return updated user
+        return response()->json(EditorUserResource::make($user));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    
+    
+    public function update(UpdateUserRequest $request, User $user)
     {
-        //
+        // Update user model
+        $user->update($request->model);
+
+        // Update password if set
+        if ($request->password) $user->updatePassword($request->password);
+
+        // Update user name model
+        $user->user_name()->updateOrCreate([], $request->user_name);
+
+        // Update user company model
+        $user->user_company()->updateOrCreate([], $request->user_company);
+
+        // Update roles
+        // $user->syncRoles($request->roles);
+
+        // Return updated user
+        return response()->json(EditorUserResource::make($user));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    
+    
+    public function destroy(User $user)
     {
-        //
+        // Delete resource
+        $user->delete();
+    }
+
+    
+    
+    public function destroyMany(DestroyManyUserRequest $request)
+    {
+        // Authorize action
+        $this->authorize('deleteMany', [User::class, $request->ids]);
+
+        // Delete resources
+        User::destroy($request->ids);
     }
 }

@@ -24,23 +24,28 @@ Route::prefix('domain')->group(function () {
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
+
+    // Auth
     Route::prefix('user')->group(function () {
+        // Get Authenticated User
         Route::get('/', [AuthUserController::class, 'index']);
 
+        // Update Authenticated User Settings
         Route::patch('/settings', [UserSettingController::class, 'update']);
 
+        // Update Authenticated User Password
         Route::patch('/password', [AuthUserController::class, 'updatePassword']);
 
+        // Delete Authenticated User
         Route::delete('/', [AuthUserController::class, 'delete']);
     });
 
-    Route::prefix('/settings')->group(function () {
-        Route::patch('/', [DomainSettingController::class, 'update']);
-    });
+    // Domain
+    Route::patch('/settings', [DomainSettingController::class, 'update']);
 
-
-
+    // Users
     Route::resource('/users', UserController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+    Route::delete('/users', [UserController::class, 'destroyMany']);
 });
 
 
