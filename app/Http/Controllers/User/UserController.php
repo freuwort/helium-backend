@@ -28,9 +28,10 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
+        // Base query
         $query = User::query();
 
-        // START: Search
+        // Search
         if ($request->search)
         {
             $query->whereFuzzy(function ($query) use ($request) {
@@ -40,50 +41,23 @@ class UserController extends Controller
                     ->orWhereFuzzy('email', $request->search);
             });
         }
-        // END: Search
 
-
-
-        // START: Filter
+        // Filter
         if ($request->roles)
         {
             $query->whereHas('roles', function ($query) use ($request) {
                 $query->whereIn('name', $request->roles);
             });
         }
-        // END: Filter
 
-
-
-        // START: Sort
+        // Sort
         $field = $request->sort_field ?? 'created_at';
         $order = $request->sort_order ?? 'desc';
 
         $query->orderBy($field, $order);
-        // END: Sort
 
-
-
-        // START: Identifiers
-        $ids = $query->pluck('users.id')->toArray();
-        // END: Identifiers
-
-
-
-        // START: Pagination
-        $total = $query->count();
-
-        $limit = $request->pagination_size ?? 20;
-        $offset = $request->pagination_size * ($request->pagination_page ?? 0) - $request->pagination_size;
-
-        // Clamp the offset to 0 and limit
-        $offset = max(0, $offset);
-        $offset = min($offset, intdiv($total, $limit) * $limit);
-
-        $query->limit($limit)->offset($offset);
-        // END: Pagination
-
-        return response()->json($query->paginate($request->pagination_size ?? 20),);
+        // Return collection + pagination
+        return UserResource::collection($query->paginate($request->size ?? 20));
     }
 
     
