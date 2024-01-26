@@ -132,7 +132,7 @@ class UserController extends Controller
         $user->user_company()->updateOrCreate([], $request->user_company);
 
         // Update addresses
-        $user->syncModel(Address::class, $request->addresses);
+        $user->syncMany(Address::class, $request->addresses);
 
         // Update roles
         // $user->syncRoles($request->roles);
