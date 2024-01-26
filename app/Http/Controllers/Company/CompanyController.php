@@ -18,13 +18,13 @@ class CompanyController extends Controller
         $query = Company::query();
 
         // Search
-        if ($request->search)
+        if ($request->filter_search)
         {
             $query->whereFuzzy(function ($query) use ($request) {
                 $query
-                    ->orWhereFuzzy('name', $request->search)
-                    ->orWhereFuzzy('notes', $request->search)
-                    ->orWhereFuzzy('description', $request->search);
+                    ->orWhereFuzzy('name', $request->filter_search)
+                    ->orWhereFuzzy('notes', $request->filter_search)
+                    ->orWhereFuzzy('description', $request->filter_search);
             });
         }
 
