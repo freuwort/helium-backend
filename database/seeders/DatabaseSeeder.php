@@ -15,9 +15,11 @@ class DatabaseSeeder extends Seeder
         $this->call(PermissionsSeeder::class);
         $this->call(RolesSeeder::class);
         $this->call(SuperAdminSeeder::class);
+        $this->call(DomainSettingSeeder::class);
+
 
         // Test Users
-        \App\Models\User::factory(10)->create()->each(function ($user) {
+        \App\Models\User::factory(60)->create()->each(function ($user) {
             $user->assignRole('Personal');
         });
     }
