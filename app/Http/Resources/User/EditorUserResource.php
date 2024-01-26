@@ -33,6 +33,7 @@ class EditorUserResource extends JsonResource
             'user_name' => $this->user_name,
             'user_company' => $this->user_company,
             'addresses' => $this->addresses,
+            'bank_connections' => $this->bank_connections,
 
             'roles' => $this->roles,
             'permissions' => $this->permissions->pluck('name'),

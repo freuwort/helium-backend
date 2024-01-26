@@ -9,6 +9,7 @@ use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\User\EditorUserResource;
 use App\Http\Resources\User\UserResource;
 use App\Models\Address;
+use App\Models\BankConnection;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -133,6 +134,9 @@ class UserController extends Controller
 
         // Update addresses
         $user->syncMany(Address::class, $request->addresses);
+
+        // Update bank connections
+        $user->syncMany(BankConnection::class, $request->bank_connections);
 
         // Update roles
         // $user->syncRoles($request->roles);
