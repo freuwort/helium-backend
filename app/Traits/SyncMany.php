@@ -17,8 +17,11 @@ trait SyncMany
      * 
      * @return Model
      */
-    public function syncMany(string $modelClass, iterable $data, string $relation = null, string $primaryKey = 'id'): Model
+    public function syncMany(string $modelClass, iterable | null $data, string $relation = null, string $primaryKey = 'id'): Model
     {
+        // If no data is given, exit early
+        if (is_null($data)) return $this;
+        
         // Get the relation name
         $relation = $relation ?? Str::plural(strtolower(class_basename($modelClass)));
 
