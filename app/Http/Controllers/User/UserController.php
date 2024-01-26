@@ -10,6 +10,10 @@ use App\Http\Resources\User\EditorUserResource;
 use App\Http\Resources\User\UserResource;
 use App\Models\Address;
 use App\Models\BankConnection;
+use App\Models\Date;
+use App\Models\Email;
+use App\Models\Link;
+use App\Models\Phonenumber;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -126,17 +130,15 @@ class UserController extends Controller
         // Update password if set
         if ($request->password) $user->updatePassword($request->password);
 
-        // Update user name model
+        // Update extended user information
         $user->user_name()->updateOrCreate([], $request->user_name);
-
-        // Update user company model
         $user->user_company()->updateOrCreate([], $request->user_company);
-
-        // Update addresses
         $user->syncMany(Address::class, $request->addresses);
-
-        // Update bank connections
-        $user->syncMany(BankConnection::class, $request->bank_connections);
+        $user->syncMany(BankConnection::class, $request->bank_connections, 'bank_connections');
+        $user->syncMany(Email::class, $request->emails);
+        $user->syncMany(Phonenumber::class, $request->phonenumbers);
+        $user->syncMany(Date::class, $request->dates);
+        $user->syncMany(Link::class, $request->links);
 
         // Update roles
         // $user->syncRoles($request->roles);
