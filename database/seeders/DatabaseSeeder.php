@@ -22,5 +22,8 @@ class DatabaseSeeder extends Seeder
         \App\Models\User::factory(60)->create()->each(function ($user) {
             $user->assignRole('Personal');
         });
+
+        // Test Companies
+        \App\Models\Company::factory(20)->create();
     }
 }

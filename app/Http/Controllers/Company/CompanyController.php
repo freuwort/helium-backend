@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Company\CompanyResource;
 use App\Models\Company;
 use Illuminate\Http\Request;
 
@@ -11,9 +12,30 @@ class CompanyController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        // Base query
+        $query = Company::query();
+
+        // Search
+        if ($request->search)
+        {
+            $query->whereFuzzy(function ($query) use ($request) {
+                $query
+                    ->orWhereFuzzy('name', $request->search)
+                    ->orWhereFuzzy('notes', $request->search)
+                    ->orWhereFuzzy('description', $request->search);
+            });
+        }
+
+        // Sort
+        $field = $request->sort_field ?? 'created_at';
+        $order = $request->sort_order ?? 'desc';
+
+        $query->orderBy($field, $order);
+
+        // Return collection + pagination
+        return CompanyResource::collection($query->paginate($request->size ?? 20));
     }
 
     /**
