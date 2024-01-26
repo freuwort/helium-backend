@@ -83,11 +83,7 @@ class UserController extends Controller
         $query->limit($limit)->offset($offset);
         // END: Pagination
 
-        return response()->json([
-            'items' => UserResource::collection($query->get()),
-            'item_ids' => $ids,
-            'total' => $total,
-        ]);
+        return response()->json($query->paginate($request->pagination_size ?? 20),);
     }
 
     
