@@ -33,7 +33,7 @@ class CreateUserRequest extends FormRequest
             // User Password
             'password' => ['nullable', 'string', 'min:8'],
 
-            // User Name Model
+            // User Name
             'user_name.salutation' => ['nullable', 'string', 'max:255'],
             'user_name.prefix' => ['nullable', 'string', 'max:255'],
             'user_name.firstname' => ['nullable', 'string', 'max:255'],
@@ -43,10 +43,55 @@ class CreateUserRequest extends FormRequest
             'user_name.legalname' => ['nullable', 'string', 'max:255'],
             'user_name.nickname' => ['nullable', 'string', 'max:255'],
 
-            // User Company Model
+            // User Company
             'user_company.company' => ['nullable', 'string', 'max:255'],
             'user_company.department' => ['nullable', 'string', 'max:255'],
             'user_company.title' => ['nullable', 'string', 'max:255'],
+
+            // User Addresses
+            'addresses' => ['nullable', 'array'],
+            'addresses.*.type' => ['required', 'string', 'max:255'],
+            'addresses.*.address_line_1' => ['nullable', 'string', 'max:255'],
+            'addresses.*.address_line_2' => ['nullable', 'string', 'max:255'],
+            'addresses.*.city' => ['nullable', 'string', 'max:255'],
+            'addresses.*.state' => ['nullable', 'string', 'max:255'],
+            'addresses.*.postal_code' => ['nullable', 'string', 'max:255'],
+            'addresses.*.country' => ['nullable', 'string', 'max:255'],
+            'addresses.*.latitude' => ['nullable', 'numeric'],
+            'addresses.*.longitude' => ['nullable', 'numeric'],
+            'addresses.*.notes' => ['nullable', 'string', 'max:255'],
+
+            // User Bank Connections
+            'bank_connections' => ['nullable', 'array'],
+            'bank_connections.*.type' => ['required', 'string', 'max:255'],
+            'bank_connections.*.bank_name' => ['nullable', 'string', 'max:255'],
+            'bank_connections.*.branch' => ['nullable', 'string', 'max:255'],
+            'bank_connections.*.account_name' => ['nullable', 'string', 'max:255'],
+            'bank_connections.*.account_number' => ['nullable', 'string', 'max:255'],
+            'bank_connections.*.swift_code' => ['nullable', 'string', 'max:255'],
+            'bank_connections.*.iban' => ['nullable', 'string', 'max:255'],
+
+            // User Emails
+            'emails' => ['nullable', 'array'],
+            'emails.*.type' => ['required', 'string', 'max:255'],
+            'emails.*.email' => ['required', 'string', 'email', 'max:255'],
+
+            // User Phonenumbers
+            'phonenumbers' => ['nullable', 'array'],
+            'phonenumbers.*.type' => ['required', 'string', 'max:255'],
+            'phonenumbers.*.number' => ['required', 'string', 'max:255'],
+
+            // User Dates
+            'dates' => ['nullable', 'array'],
+            'dates.*.type' => ['required', 'string', 'max:255'],
+            'dates.*.date' => ['required', 'date'],
+            'dates.*.ignore_year' => ['nullable', 'boolean'],
+            'dates.*.repeats_annually' => ['nullable', 'boolean'],
+
+            // User Links
+            'links' => ['nullable', 'array'],
+            'links.*.name' => ['required', 'string', 'max:255'],
+            'links.*.url' => ['required', 'string', 'max:255'],
         ];
     }
 }
