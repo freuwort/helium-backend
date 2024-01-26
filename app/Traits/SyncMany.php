@@ -11,13 +11,13 @@ trait SyncMany
      * Sync a one-to-many relationship.
      * 
      * @param string $modelClass The class name of the model to sync.
-     * @param iterable $data The data to sync.
+     * @param iterable|null $data The data to sync.
      * @param string $relation The name of the relationship to sync.
      * @param string $primaryKey The name of the primary key of the model to sync.
      * 
      * @return Model
      */
-    public function syncMany(string $modelClass, iterable | null $data, string $relation = null, string $primaryKey = 'id'): Model
+    public function syncMany(string $modelClass, iterable|null $data, string $relation = null, string $primaryKey = 'id'): Model
     {
         // If no data is given, exit early
         if (is_null($data)) return $this;
