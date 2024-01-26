@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\UserController as AuthUserController;
 use App\Http\Controllers\Auth\UserSettingController;
+use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Domain\DomainController;
 use App\Http\Controllers\Domain\DomainSettingController;
 use App\Http\Controllers\User\UserController;
@@ -41,4 +42,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Users
     Route::resource('/users', UserController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
     Route::delete('/users', [UserController::class, 'destroyMany']);
+
+    // Companies
+    Route::resource('/companies', CompanyController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+    Route::delete('/companies', [CompanyController::class, 'destroyMany']);
 });
