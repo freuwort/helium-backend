@@ -64,20 +64,18 @@ class UserController extends Controller
     
     public function show(User $user)
     {
-        return response()->json(EditorUserResource::make($user));
+        return EditorUserResource::make($user);
     }
 
     
     
     public function store(CreateUserRequest $request)
     {
-        // Update user model
         $user = User::create($request->model);
 
         // Update password if set
         if ($request->password) $user->updatePassword($request->password);
 
-        // Update extended user information
         $user->user_name()->updateOrCreate([], $request->user_name);
         $user->user_company()->updateOrCreate([], $request->user_company);
         $user->syncMany(Address::class, $request->addresses);
@@ -90,21 +88,18 @@ class UserController extends Controller
         // Update roles
         // $user->syncRoles($request->roles);
 
-        // Return updated user
-        return response()->json(EditorUserResource::make($user));
+        return EditorUserResource::make($user);
     }
 
     
     
     public function update(UpdateUserRequest $request, User $user)
     {
-        // Update user model
         $user->update($request->model);
 
         // Update password if set
         if ($request->password) $user->updatePassword($request->password);
 
-        // Update extended user information
         $user->user_name()->updateOrCreate([], $request->user_name);
         $user->user_company()->updateOrCreate([], $request->user_company);
         $user->syncMany(Address::class, $request->addresses);
@@ -117,15 +112,13 @@ class UserController extends Controller
         // Update roles
         // $user->syncRoles($request->roles);
 
-        // Return updated user
-        return response()->json(EditorUserResource::make($user));
+        return EditorUserResource::make($user);
     }
 
     
     
     public function destroy(User $user)
     {
-        // Delete resource
         $user->delete();
     }
 
@@ -133,10 +126,8 @@ class UserController extends Controller
     
     public function destroyMany(DestroyManyUserRequest $request)
     {
-        // Authorize action
         $this->authorize('deleteMany', [User::class, $request->ids]);
 
-        // Delete resources
-        User::destroy($request->ids);
+        User::whereIn('id', $request->ids)->delete();
     }
 }

@@ -61,10 +61,8 @@ class CompanyController extends Controller
     
     public function store(Request $request)
     {
-        // Create company
         $company = Company::create($request->model);
 
-        // Update extended company information
         $company->syncMany(LegalDetail::class, $request->legal_details, 'legal_details');
         $company->syncMany(Address::class, $request->addresses);
         $company->syncMany(BankConnection::class, $request->bank_connections, 'bank_connections');
@@ -73,7 +71,6 @@ class CompanyController extends Controller
         $company->syncMany(Date::class, $request->dates);
         $company->syncMany(Link::class, $request->links);
 
-        // Return resource
         return EditorCompanyResource::make($company);
     }
 
@@ -81,10 +78,8 @@ class CompanyController extends Controller
     
     public function update(Request $request, Company $company)
     {
-        // Update company
         $company->update($request->model);
 
-        // Update extended company information
         $company->syncMany(LegalDetail::class, $request->legal_details, 'legal_details');
         $company->syncMany(Address::class, $request->addresses);
         $company->syncMany(BankConnection::class, $request->bank_connections, 'bank_connections');
@@ -93,7 +88,6 @@ class CompanyController extends Controller
         $company->syncMany(Date::class, $request->dates);
         $company->syncMany(Link::class, $request->links);
 
-        // Return resource
         return EditorCompanyResource::make($company);
     }
 
@@ -101,7 +95,6 @@ class CompanyController extends Controller
     
     public function destroy(Company $company)
     {
-        // Delete company
         $company->delete();
     }
 
@@ -109,7 +102,8 @@ class CompanyController extends Controller
 
     public function destroyMany(Request $request)
     {
-        // Delete companies
+        $this->authorize('deleteMany', Company::class);
+        
         Company::whereIn('id', $request->ids)->delete();
     }
 }

@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\UserSettingController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Domain\DomainController;
 use App\Http\Controllers\Domain\DomainSettingController;
+use App\Http\Controllers\Permission\PermissionController;
+use App\Http\Controllers\Permission\RoleController;
 use App\Http\Controllers\User\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +40,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Domain
     Route::patch('/settings', [DomainSettingController::class, 'update']);
+
+    // Permissions
+    Route::get('/permissions', [PermissionController::class, 'index']);
+
+    // Roles
+    Route::resource('/roles', RoleController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+    Route::delete('/roles', [RoleController::class, 'destroyMany']);
 
     // Users
     Route::resource('/users', UserController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
