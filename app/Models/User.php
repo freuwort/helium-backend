@@ -96,7 +96,8 @@ class User extends Authenticatable implements MustVerifyEmail
     // START: Attributes
     public function getProfileImageAttribute()
     {
-        return 'https://avatar.iran.liara.run/public/?username=' . $this->username . '&size=72';
+        $seed = $this->username;
+        return "https://api.dicebear.com/7.x/identicon/svg?seed=$seed&scale=65&size=72&backgroundColor=eeeeee";
     }
 
     public function getSettingsAttribute()

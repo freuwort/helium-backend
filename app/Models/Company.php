@@ -69,7 +69,8 @@ class Company extends Model
     // START: Attributes
     public function getProfileImageAttribute()
     {
-        return 'https://avatar.iran.liara.run/public/?username=' . $this->name . '&size=72';
+        $seed = $this->name;
+        return "https://api.dicebear.com/7.x/identicon/svg?seed=$seed&scale=65&size=72&backgroundColor=eeeeee";
     }
     // END: Attributes
 
