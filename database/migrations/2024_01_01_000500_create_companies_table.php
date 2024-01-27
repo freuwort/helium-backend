@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('legal_form')->nullable();
             $table->text('description')->nullable();
             $table->text('notes')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

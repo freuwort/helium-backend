@@ -4,14 +4,26 @@ namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Company\CompanyResource;
+use App\Http\Resources\Company\EditorCompanyResource;
+use App\Models\Address;
+use App\Models\BankConnection;
 use App\Models\Company;
+use App\Models\Date;
+use App\Models\Email;
+use App\Models\LegalDetail;
+use App\Models\Link;
+use App\Models\Phonenumber;
 use Illuminate\Http\Request;
 
 class CompanyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct()
+    {
+        $this->authorizeResource(Company::class, 'company');
+    }
+
+
+    
     public function index(Request $request)
     {
         // Base query
@@ -38,51 +50,66 @@ class CompanyController extends Controller
         return CompanyResource::collection($query->paginate($request->size ?? 20));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
+    
+    
     public function show(Company $company)
     {
-        //
+        return EditorCompanyResource::make($company);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Company $company)
+    
+    
+    public function store(Request $request)
     {
-        //
+        // Create company
+        $company = Company::create($request->model);
+
+        // Update extended company information
+        $company->syncMany(LegalDetail::class, $request->legal_details, 'legal_details');
+        $company->syncMany(Address::class, $request->addresses);
+        $company->syncMany(BankConnection::class, $request->bank_connections, 'bank_connections');
+        $company->syncMany(Email::class, $request->emails);
+        $company->syncMany(Phonenumber::class, $request->phonenumbers);
+        $company->syncMany(Date::class, $request->dates);
+        $company->syncMany(Link::class, $request->links);
+
+        // Return resource
+        return EditorCompanyResource::make($company);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    
+    
     public function update(Request $request, Company $company)
     {
-        //
+        // Update company
+        $company->update($request->model);
+
+        // Update extended company information
+        $company->syncMany(LegalDetail::class, $request->legal_details, 'legal_details');
+        $company->syncMany(Address::class, $request->addresses);
+        $company->syncMany(BankConnection::class, $request->bank_connections, 'bank_connections');
+        $company->syncMany(Email::class, $request->emails);
+        $company->syncMany(Phonenumber::class, $request->phonenumbers);
+        $company->syncMany(Date::class, $request->dates);
+        $company->syncMany(Link::class, $request->links);
+
+        // Return resource
+        return EditorCompanyResource::make($company);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    
+    
     public function destroy(Company $company)
     {
-        //
+        // Delete company
+        $company->delete();
+    }
+
+
+
+    public function destroyMany(Request $request)
+    {
+        // Delete companies
+        Company::whereIn('id', $request->ids)->delete();
     }
 }

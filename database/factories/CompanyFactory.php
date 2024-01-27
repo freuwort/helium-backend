@@ -18,8 +18,8 @@ class CompanyFactory extends Factory
     {
         return [
             'name' => $this->faker->company,
-            'legal_form' => $this->faker->randomElement(['AG', 'GmbH', 'KG', 'e.V.']),
-            'description' => $this->faker->paragraph,
+            'legal_form' => $this->faker->randomElement(['ag', 'gmbh', 'kg', 'ev', 'sole-proprietor']),
+            'description' => $this->faker->catchPhrase(),
             'notes' => $this->faker->paragraph,
         ];
     }

@@ -2,19 +2,27 @@
 
 namespace App\Models;
 
+use App\Traits\SyncMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Permission\Traits\HasRoles;
 
 class Company extends Model
 {
-    use HasFactory;
+    use HasRoles, HasFactory, SyncMany, SoftDeletes;
 
     protected $fillable = [
         'name',
         'legal_form',
         'description',
         'notes',
+        'deleted_at',
+    ];
+
+    protected $casts = [
+        'deleted_at' => 'datetime',
     ];
 
 
@@ -40,7 +48,7 @@ class Company extends Model
         return $this->morphMany(Email::class, 'emailable');
     }
 
-    public function phone_numbers(): MorphMany
+    public function phonenumbers(): MorphMany
     {
         return $this->morphMany(PhoneNumber::class, 'phoneable');
     }
@@ -55,6 +63,15 @@ class Company extends Model
         return $this->morphMany(Link::class, 'linkable');
     }
     // END: Relationships
+
+
+
+    // START: Attributes
+    public function getProfileImageAttribute()
+    {
+        return 'https://avatar.iran.liara.run/public/?username=' . $this->name . '&size=72';
+    }
+    // END: Attributes
 
 
 
@@ -82,7 +99,7 @@ class Company extends Model
         $model->legal_details()->saveMany($this->legal_details()->get()->map(function ($item) { return $item->replicate(); }));
         $model->bank_details()->saveMany($this->bank_details()->get()->map(function ($item) { return $item->replicate(); }));
         $model->emails()->saveMany($this->emails()->get()->map(function ($item) { return $item->replicate(); }));
-        $model->phone_numbers()->saveMany($this->phone_numbers()->get()->map(function ($item) { return $item->replicate(); }));
+        $model->phonenumbers()->saveMany($this->phonenumbers()->get()->map(function ($item) { return $item->replicate(); }));
         $model->significant_dates()->saveMany($this->significant_dates()->get()->map(function ($item) { return $item->replicate(); }));
         $model->website_links()->saveMany($this->website_links()->get()->map(function ($item) { return $item->replicate(); }));
 
