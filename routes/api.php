@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\UserSettingController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Domain\DomainController;
 use App\Http\Controllers\Domain\DomainSettingController;
+use App\Http\Controllers\Media\MediaController;
 use App\Http\Controllers\Permission\PermissionController;
 use App\Http\Controllers\Permission\RoleController;
 use App\Http\Controllers\User\UserController;
@@ -55,4 +56,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Companies
     Route::resource('/companies', CompanyController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
     Route::delete('/companies', [CompanyController::class, 'destroyMany']);
+
+    // File Upload
+    Route::post('/upload', [MediaController::class, 'upload']);
 });

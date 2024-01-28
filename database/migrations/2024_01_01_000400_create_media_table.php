@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('media', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('parent_id')->constrained('media')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('parent_id')->nullable()->constrained('media')->onDelete('cascade')->onUpdate('cascade');
             $table->string('drive')->nullable();
             $table->string('src_path');
             $table->string('thumbnail_path')->nullable();
