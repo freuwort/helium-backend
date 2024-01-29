@@ -34,6 +34,7 @@ return [
             'driver' => 'local',
             'root' => storage_path('app'),
             'throw' => false,
+            'use_for_media' => false,
         ],
 
         'public' => [
@@ -66,7 +67,7 @@ return [
             'throw' => false,
             'allow_subfolder_creation' => false,
             'allow_custom_filename' => false,
-            'use_for_media' => true,
+            'use_for_media' => false,
         ],
 
         'profile_pictures' => [
@@ -101,6 +102,7 @@ return [
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
+            'use_for_media' => false,
         ],
 
     ],

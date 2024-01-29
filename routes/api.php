@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\UserSettingController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Domain\DomainController;
 use App\Http\Controllers\Domain\DomainSettingController;
+use App\Http\Controllers\Media\FileController;
+use App\Http\Controllers\Media\FolderController;
 use App\Http\Controllers\Media\MediaController;
 use App\Http\Controllers\Permission\PermissionController;
 use App\Http\Controllers\Permission\RoleController;
@@ -57,6 +59,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::resource('/companies', CompanyController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
     Route::delete('/companies', [CompanyController::class, 'destroyMany']);
 
-    // File Upload
-    Route::post('/upload', [MediaController::class, 'upload']);
+    // Media Upload
+    Route::post('/upload', [FileController::class, 'upload']);
+
+    // Media Folder
+    Route::post('/folder', [FolderController::class, 'store']);
+
+    // Media
+    Route::get('/media/{path}', [MediaController::class, 'index'])->where('path', '(.*)');
+    Route::post('/media/copy', [MediaController::class, 'copy']);
+    Route::patch('/media/move', [MediaController::class, 'move']);
+    Route::patch('/media/rename', [MediaController::class, 'rename']);
+    Route::delete('/media', [MediaController::class, 'destroy']);
 });
