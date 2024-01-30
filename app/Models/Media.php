@@ -65,6 +65,15 @@ class Media extends Model
 
 
 
+    // START: Selectors
+    public static function findPath(string $path): ?Media
+    {
+        return self::where('src_path', $path)->firstOrFail();
+    }
+    // END: Selectors
+
+
+
     public static function dissectPath(string $path): object
     {
         return (object) [
@@ -102,10 +111,36 @@ class Media extends Model
 
 
 
+    private function recursivePathUpdate(string $oldPath, string $newPath): void
+    {
+        $children = $this->children()->get();
+
+        foreach ($children as $child)
+        {
+            $child->update([
+                'src_path' => Str::replaceFirst($oldPath, $newPath, $child->src_path),
+            ]);
+
+            $child->recursivePathUpdate($oldPath, $newPath);
+        }
+    }
+
+
+
+    public function getCdnPathAttribute(): string
+    {
+        return config('app.url') . '/media/' . $this->src_path;
+    }
+
+
+
     public static function upload(string $path, UploadedFile $file, string $name = null): Media
     {
         // Check if a file was uploaded
-        if (!$file) throw new \Exception('No file was uploaded.');
+        if (!$file)
+        {
+            throw new \Exception('No file was uploaded.');
+        }
 
         // Parse path
         $path = self::dissectPath($path);
@@ -238,16 +273,45 @@ class Media extends Model
 
     public function move(string $newPath): Media
     {
+        // Parse paths
         $oldPath = $this->dissectPath($this->src_path);
         $newPath = $this->dissectPath($newPath);
+        $disk = self::getMediaDisk($newPath->diskname);
+        $parent = self::getFolder($newPath->filepath);
 
-        // Move the file on disk
-        Storage::move($oldPath->path, $newPath->path);
+        // Check if the disk exists and is allowed for media
+        if (!$disk)
+        {
+            throw new \Exception('The disk "' . $newPath->diskname . '" does not exist or is not allowed for media.');
+        }
+
+        // When subfolder exists: check if the parent media model exists
+        // (We dissect the path again because the dissect method assumes the path doesn't include a filename)
+        if ($this->dissectPath($newPath->filepath)->hasSubfolder && !$parent)
+        {
+            throw new \Exception('The parent folder does not exist.');
+        }
+
+        // Check if the new path already exists
+        if (Storage::exists($newPath->path))
+        {
+            throw new \Exception('The media already exists in destination.');
+        }
+
+
+
+        // Try moving the file on disk
+        if (!Storage::move($oldPath->path, $newPath->path))
+        {
+            throw new \Exception('The media could not be moved to destination.');
+        }
 
         // Update the media model
         $this->update([
-            'name' => $newPath->filename,
+            'parent_id' => optional($parent)->id,
+            'drive' => $newPath->diskname,
             'src_path' => $newPath->path,
+            'name' => $newPath->filename,
         ]);
 
         // Update the path of all children
@@ -259,17 +323,82 @@ class Media extends Model
 
 
 
-    private function recursivePathUpdate(string $oldPath, string $newPath): void
+    public function copy(string $newPath): Media
     {
+        // Parse paths
+        $oldPath = $this->dissectPath($this->src_path);
+        $newPath = $this->dissectPath($newPath);
+        $disk = self::getMediaDisk($newPath->diskname);
+        $parent = self::getFolder($newPath->filepath);
+
+        // Check if the disk exists and is allowed for media
+        if (!$disk)
+        {
+            throw new \Exception('The disk "' . $newPath->diskname . '" does not exist or is not allowed for media.');
+        }
+
+        // When subfolder exists: check if the parent media model exists
+        // (We dissect the path again because the dissect method assumes the path doesn't include a filename)
+        if ($this->dissectPath($newPath->filepath)->hasSubfolder && !$parent)
+        {
+            throw new \Exception('The parent folder does not exist.');
+        }
+
+        // Check if media is a folder
+        if ($this->mime_type == 'folder')
+        {
+            throw new \Exception('The media is a folder and cannot be copied.');
+        }
+
+        // Check if the new path already exists
+        if (Storage::exists($newPath->path))
+        {
+            throw new \Exception('The media already exists in destination.');
+        }
+
+
+
+        // Try copying the file on disk
+        // Todo: implement folder copying
+        if (!Storage::copy($oldPath->path, $newPath->path))
+        {
+            throw new \Exception('The media could not be copied to destination.');
+        }
+
+        // Copy the media model recursively
+        $copy = $this->copyModelRecursive($parent, $newPath->path);
+
+        // Return the media model
+        return $copy;
+    }
+
+
+
+    private function copyModelRecursive(?Media $parent, string $newPath): Model
+    {
+        // Parse paths
+        $newPath = $this->dissectPath($newPath);
+
+        // Copy self
+        $newModel = $this->replicate()->fill([
+            'parent_id' => optional($parent)->id,
+            'drive' => $newPath->diskname,
+            'src_path' => $newPath->path,
+            'name' => $newPath->filename,
+        ]);
+
+        // Save the new model
+        $newModel->save();
+
+        // Copy its children
         $children = $this->children()->get();
 
         foreach ($children as $child)
         {
-            $child->update([
-                'src_path' => Str::replaceFirst($oldPath, $newPath, $child->src_path),
-            ]);
-
-            $child->recursivePathUpdate($oldPath, $newPath);
+            $child->copyModelRecursive($this, $newPath->path . '/' . $child->name);
         }
+
+        // Return the new model
+        return $newModel;
     }
 }
