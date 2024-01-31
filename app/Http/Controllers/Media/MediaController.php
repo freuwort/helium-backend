@@ -35,6 +35,13 @@ class MediaController extends Controller
 
 
 
+    public function discovery(Request $request)
+    {
+        Media::discovery($request->path);
+    }
+
+
+
     public function move(MoveMediaRequest $request)
     {
         Media::findPath($request->path)->move($request->destination);

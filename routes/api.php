@@ -70,5 +70,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/media/copy', [MediaController::class, 'copy']);
     Route::patch('/media/move', [MediaController::class, 'move']);
     Route::patch('/media/rename', [MediaController::class, 'rename']);
+    Route::patch('/media/discovery', [MediaController::class, 'discovery']);
     Route::delete('/media', [MediaController::class, 'destroy']);
 });

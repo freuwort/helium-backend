@@ -134,6 +134,83 @@ class Media extends Model
 
 
 
+    public static function discovery(string $path)
+    {
+        // Parse path
+        $path = self::dissectPath($path);
+        $disk = self::getMediaDisk($path->diskname);
+        $parent = self::getFolder($path->path);
+
+        // Check if the disk exists and is allowed for media
+        if (!$disk)
+        {
+            throw new \Exception('The disk "' . $path->diskname . '" does not exist or is not allowed for media.');
+        }
+
+        // When subfolder exists: check if the parent media model exists
+        if ($path->hasSubfolder && !$parent)
+        {
+            throw new \Exception('The parent folder does not exist.');
+        }
+
+
+
+        // Get all files and folders in the path
+        $files = Storage::files($path->path);
+        $folders = Storage::directories($path->path);
+
+        // Loop through all files
+        foreach ($files as $file)
+        {
+            // Check if the file already exists in the database
+            $media = self::where('src_path', $file)->first();
+
+            // If it doesn't exist, create it
+            if (!$media)
+            {
+                $media = self::create([
+                    'parent_id' => optional($parent)->id,
+                    'drive' => $path->diskname,
+                    'src_path' => $file,
+                    'name' => Str::afterLast($file, '/'),
+                    'mime_type' => Storage::mimeType($file),
+                    'meta' => [
+                        'extension' => Str::afterLast($file, '.'),
+                        'size' => Storage::size($file),
+                    ],
+                ]);
+            }
+        }
+
+        // Loop through all folders
+        foreach ($folders as $folder)
+        {
+            // Check if the folder already exists in the database
+            $media = self::where('src_path', $folder)->first();
+
+            // If it doesn't exist, create it
+            if (!$media)
+            {
+                $media = self::create([
+                    'parent_id' => optional($parent)->id,
+                    'drive' => $path->diskname,
+                    'src_path' => $folder,
+                    'name' => Str::afterLast($folder, '/'),
+                    'mime_type' => 'folder',
+                    'meta' => [
+                        'extension' => null,
+                        'size' => null,
+                    ],
+                ]);
+            }
+
+            // Recursively discover the folder
+            self::discovery($folder);
+        }
+    }
+
+
+
     public static function upload(string $path, UploadedFile $file, string $name = null): Media
     {
         // Check if a file was uploaded
