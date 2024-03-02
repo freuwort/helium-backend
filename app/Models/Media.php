@@ -339,20 +339,19 @@ class Media extends Model
     public function rename(string $newName): Media
     {
         $oldPath = $this->dissectPath($this->src_path);
-        $newPath = $oldPath->filepath . '/' . $newName;
 
-        $this->move($newPath);
+        $this->move($oldPath->filepath, $newName);
 
         return $this->fresh();
     }
 
 
 
-    public function move(string $newPath): Media
+    public function move(string $destinationPath, string $name = null): Media
     {
         // Parse paths
         $oldPath = $this->dissectPath($this->src_path);
-        $newPath = $this->dissectPath($newPath);
+        $newPath = $this->dissectPath($destinationPath.'/'.($name ?? $oldPath->filename));
         $disk = self::getMediaDisk($newPath->diskname);
         $parent = self::getFolder($newPath->filepath);
 
