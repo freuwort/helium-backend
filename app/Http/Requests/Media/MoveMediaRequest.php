@@ -22,7 +22,8 @@ class MoveMediaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'path' => ['required', 'string', 'max:255'],
+            'paths' => ['required', 'array'],
+            'paths.*' => ['required', 'string', 'max:255'],
             'destination' => ['required', 'string', 'max:255'],
         ];
     }

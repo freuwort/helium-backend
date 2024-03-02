@@ -347,6 +347,15 @@ class Media extends Model
 
 
 
+    public static function moveMany(array $paths, string $destinationPath): void
+    {
+        foreach ($paths as $path)
+        {
+            $media = self::findPath($path);
+            $media->move($destinationPath);
+        }
+    }
+
     public function move(string $destinationPath, string $name = null): Media
     {
         // Parse paths
@@ -399,11 +408,20 @@ class Media extends Model
 
 
 
-    public function copy(string $newPath): Media
+    public static function copyMany(array $paths, string $destinationPath): void
+    {
+        foreach ($paths as $path)
+        {
+            $media = self::findPath($path);
+            $media->copy($destinationPath);
+        }
+    }
+
+    public function copy(string $destinationPath, string $name = null): Media
     {
         // Parse paths
         $oldPath = $this->dissectPath($this->src_path);
-        $newPath = $this->dissectPath($newPath);
+        $newPath = $this->dissectPath($destinationPath.'/'.($name ?? $oldPath->filename));
         $disk = self::getMediaDisk($newPath->diskname);
         $parent = self::getFolder($newPath->filepath);
 
@@ -476,5 +494,15 @@ class Media extends Model
 
         // Return the new model
         return $newModel;
+    }
+
+
+
+    public static function deleteMany(array $paths): void
+    {
+        foreach ($paths as $path)
+        {
+            self::findPath($path)->delete();
+        }
     }
 }

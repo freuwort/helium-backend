@@ -42,13 +42,6 @@ class MediaController extends Controller
 
 
 
-    public function move(MoveMediaRequest $request)
-    {
-        Media::findPath($request->path)->move($request->destination);
-    }
-
-
-
     public function rename(RenameMediaRequest $request)
     {
         Media::findPath($request->path)->rename($request->name);
@@ -56,15 +49,22 @@ class MediaController extends Controller
 
 
 
+    public function move(MoveMediaRequest $request)
+    {
+        Media::moveMany($request->paths, $request->destination);
+    }
+
+
+
     public function copy(CopyMediaRequest $request)
     {
-        Media::findPath($request->path)->copy($request->destination);
+        Media::copyMany($request->paths, $request->destination);
     }
 
 
 
     public function destroy(DestroyMediaRequest $request)
     {
-        Media::findPath($request->path)->delete();
+        Media::deleteMany($request->paths);
     }
 }
