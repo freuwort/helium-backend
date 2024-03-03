@@ -349,10 +349,54 @@ class Media extends Model
 
     public static function moveMany(array $paths, string $destinationPath): void
     {
+        $destinationPath = self::dissectPath($destinationPath);
+        $disk = self::getMediaDisk($destinationPath->diskname);
+        $parent = self::getFolder($destinationPath->path);
+
+        // Check if the disk exists and is allowed for media
+        if (!$disk)
+        {
+            throw new \Exception('The disk "' . $destinationPath->diskname . '" does not exist or is not allowed for media.');
+        }
+
+        // When subfolder exists: check if the parent media model exists
+        if ($destinationPath->hasSubfolder && !$parent)
+        {
+            throw new \Exception('The parent folder does not exist.');
+        }
+
+        // Loop through all paths
         foreach ($paths as $path)
         {
             $media = self::findPath($path);
-            $media->move($destinationPath);
+            $oldPath = self::dissectPath($media->src_path);
+            $newPath = self::dissectPath($destinationPath->path . '/' . $oldPath->filename);
+
+            // Check if the new path already exists
+            if (Storage::exists($newPath->path))
+            {
+                throw new \Exception('The media already exists in destination.');
+            }
+
+            // Try moving the file on disk
+            if (!Storage::move($oldPath->path, $newPath->path))
+            {
+                throw new \Exception('The media could not be moved to destination.');
+            }
+
+            // Update the media model
+            $media->update([
+                'parent_id' => optional($parent)->id,
+                'drive' => $newPath->diskname,
+                'src_path' => $newPath->path,
+                'name' => $newPath->filename,
+            ]);
+
+            // Update the path of all children
+            if ($media->mime_type == 'folder')
+            {
+                $media->recursivePathUpdate($oldPath->path, $newPath->path);
+            }
         }
     }
 
