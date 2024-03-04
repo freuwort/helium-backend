@@ -19,7 +19,7 @@ class MediaController extends Controller
         
         if ($path->hasSubfolder)
         {
-            $media = Media::findPath($path->path)->children()->get();
+            $media = Media::findPathOrFail($path->path)->children()->get();
         }
         else
         {
@@ -44,7 +44,7 @@ class MediaController extends Controller
 
     public function rename(RenameMediaRequest $request)
     {
-        Media::findPath($request->path)->rename($request->name);
+        Media::findPathOrFail($request->path)->rename($request->name);
     }
 
 
