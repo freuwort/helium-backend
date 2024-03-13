@@ -4,6 +4,7 @@ namespace App\Models;
 
 
 use App\Classes\Permissions\Permissions;
+use App\Traits\HasTwoFactorAuthentication;
 use App\Traits\SyncMany;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +18,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasRoles, HasApiTokens, HasFactory, Notifiable, SyncMany, SoftDeletes;
+    use HasRoles, HasApiTokens, HasFactory, HasTwoFactorAuthentication, Notifiable, SyncMany, SoftDeletes;
 
     protected $fillable = [
         'name',
