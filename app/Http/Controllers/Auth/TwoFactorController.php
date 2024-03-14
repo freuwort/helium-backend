@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Events\TwoFactorMethodEnabled;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class TwoFactorController extends Controller
 {
     // START: General Methods
-    public function setDefaultTwoFactorMethod(Request $request)
+    public function setDefaultTfaMethod(Request $request)
     {
-        $request->user()->setDefaultTwoFactorMethod($request->method);
+        $request->user()->setDefaultTfaMethod($request->method);
 
         return response()->json(['message' => __('Default two factor method set')], 204);
     }
 
-    public function destroyTwoFactorMethod(Request $request)
+    public function destroyTfaMethod(Request $request)
     {
-        $request->user()->destroyTwoFactorMethod($request->method);
+        $request->user()->destroyTfaMethod($request->method);
 
         return response()->json(['message' => __('Two factor method removed')], 204);
     }
@@ -26,45 +27,85 @@ class TwoFactorController extends Controller
 
 
     // START: TOTP Methods
-    public function setupTotp(Request $request)
+    public function setupTfaTotp(Request $request)
     {
-        $request->user()->setupTotp();
+        $request->user()->setupTfaTotp();
 
         return response()->json([
-            'secret' => $request->user()->TfaTotpMethod()->secret,
-            'qr' => $request->user()->TotpProvisioningQrCode($request->user()->email ?? config('app.name')),
+            'secret' => optional($request->user()->tfa_totp_method)->secret,
+            'qr' => $request->user()->TfaTotpQrCode($request->user()->email ?? config('app.name')),
         ]);
     }
 
-    public function enableTotp(Request $request)
+    public function enableTfaTotp(Request $request)
     {
         $request->validate([
             'code' => 'required|digits:6',
         ]);
 
         // Check if code is valid and enable TOTP in the database
-        $status = $request->user()->enableTotp($request->code);
+        $method = $request->user()->enableTfaTotp($request->code);
 
-        if (!$status) return response()->json(['message' => __($status ? 'hgghdgh' : 'Invalid code')], 422);
+        if (!$method) return response()->json(['message' => __('Invalid code')], 422);
 
         // Set two factor verified session
         session([ 'two_factor_verified' => true ]);
 
+        event(new TwoFactorMethodEnabled($method, $request->user()));
+
         return response()->json(['message' => __('TOTP enabled')], 204);
     }
-    // END: TOTP Methods
 
-
-
-    // START: Verify Methods
-    public function verifyTotp(Request $request)
+    public function verifyTfaTotp(Request $request)
     {
         $request->validate([
             'code' => 'required|digits:6',
         ]);
 
         // Check if code is valid
-        $status = $request->user()->verifyTotp($request->code);
+        $status = $request->user()->verifyTfaTotp($request->code);
+
+        if (!$status) return response()->json(['message' => __('Invalid code')], 422);
+
+        // Set two factor verified session
+        session([ 'two_factor_verified' => true ]);
+
+        return response()->json(['message' => __('Two factor verified')], 204);
+    }
+    // END: TOTP Methods
+
+
+
+    // START: Backup Codes Methods
+    public function generateTfaBackupCodes(Request $request)
+    {
+        $request->user()->generateTfaBackupCodes();
+
+        return response()->json([
+            'codes' => $request->user()->twoFactorBackupCodes()->pluck('code'),
+        ]);
+    }
+
+    public function showTfaBackupCodes(Request $request)
+    {
+        return response()->json([
+            'codes' => $request->user()->twoFactorBackupCodes()->pluck('code'),
+        ]);
+    }
+    // END: Backup Codes Methods
+
+
+
+    // START: Verify Methods
+
+    public function verifyTfaBackupCode(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|digits:8',
+        ]);
+
+        // Check if code is valid
+        $status = $request->user()->verifyTfaBackupCode($request->code);
 
         if (!$status) return response()->json(['message' => __('Invalid code')], 422);
 

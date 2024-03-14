@@ -5,26 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TwoFactorMethod extends Model
+class TwoFactorBackupCode extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'type',
-        'recipient',
-        'secret',
-        'code',
-        'default',
-        'enabled',
-    ];
+    public $timestamps = false;
 
-    protected $casts = [
-        'default' => 'boolean',
-        'enabled' => 'boolean',
+    protected $fillable = [
+        'code',
     ];
 
     protected $hidden = [
-        'secret',
         'code',
     ];
 

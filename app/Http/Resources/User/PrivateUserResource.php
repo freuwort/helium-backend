@@ -17,10 +17,11 @@ class PrivateUserResource extends JsonResource
         return [
             'id' => $this->id,
 
-            'has_two_factor_enabled' => $this->has_two_factor_enabled,
-            'has_tfa_totp_enabled' => $this->has_tfa_totp_enabled,
-            'has_tfa_sms_enabled' => $this->has_tfa_sms_enabled,
-            'default_two_factor_method' => optional($this->defaultTwoFactorMethod())->type ?? null,
+            'has_tfa_enabled' => $this->has_tfa_enabled,
+            'has_tfa_totp_method_enabled' => $this->has_tfa_totp_method_enabled,
+            'has_tfa_sms_method_enabled' => $this->has_tfa_sms_method_enabled,
+            'has_tfa_email_method_enabled' => $this->has_tfa_email_method_enabled,
+            'default_tfa_method' => optional($this->default_tfa_method)->type,
 
             'profile_image' => $this->profile_image,
             'email' => $this->email,

@@ -21,13 +21,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])->middleware(['throttle:6,1'])->name('verification.send');
     
     Route::prefix('two-factor')->group(function () {
-        Route::put('/default/{method}', [TwoFactorController::class, 'setDefaultTwoFactorMethod'])->name('two-factor.default');
-        Route::delete('/destroy/{method}', [TwoFactorController::class, 'destroyTwoFactorMethod'])->name('two-factor.destroy');
+        Route::put('/default/{method}', [TwoFactorController::class, 'setDefaultTfaMethod'])->name('two-factor.default');
+        Route::delete('/destroy/{method}', [TwoFactorController::class, 'destroyTfaMethod'])->name('two-factor.destroy');
         
+        Route::prefix('backup')->group(function () {
+            Route::get('/show', [TwoFactorController::class, 'showTfaBackupCodes'])->name('two-factor.backup.show');
+            Route::post('/generate', [TwoFactorController::class, 'generateTfaBackupCodes'])->name('two-factor.backup.regenerate');
+            Route::post('/verify', [TwoFactorController::class, 'verifyTfaBackupCode'])->name('two-factor.backup.verify');
+        });
+
         Route::prefix('totp')->group(function () {
-            Route::put('/setup', [TwoFactorController::class, 'setupTotp'])->name('two-factor.totp.setup');
-            Route::put('/enable', [TwoFactorController::class, 'enableTotp'])->name('two-factor.totp.enable');
-            Route::post('/verify', [TwoFactorController::class, 'verifyTotp'])->name('two-factor.totp.verify');
+            Route::put('/setup', [TwoFactorController::class, 'setupTfaTotp'])->name('two-factor.totp.setup');
+            Route::put('/enable', [TwoFactorController::class, 'enableTfaTotp'])->name('two-factor.totp.enable');
+            Route::post('/verify', [TwoFactorController::class, 'verifyTfaTotp'])->name('two-factor.totp.verify');
         });
     });
     
