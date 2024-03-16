@@ -11,18 +11,27 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    public function index(Request $request)
+    public function getUser()
     {
-        return PrivateUserResource::make($request->user());
+        return PrivateUserResource::make(Auth::user());
     }
 
 
 
-    public function session(Request $request)
+    public function getSession()
     {
+        $user = Auth::user();
+        $authenticated = Auth::check();
+        $tfa_enabled = $user->has_tfa_enabled;
+        $tfa_verified = session('two_factor_verified', false);
+
         return response()->json([
-            'authenticated' => Auth::check(),
-            'two_factor_verified' => session('two_factor_verified', false),
+            'user' => PrivateUserResource::make($user),
+            'session' => [
+                'authenticated' => $authenticated,
+                'tfa_enabled' => $tfa_enabled,
+                'tfa_verified' => $tfa_verified,
+            ],
         ]);
     }
 
@@ -32,7 +41,7 @@ class UserController extends Controller
     {
         $request->user()->updatePassword($request->new_password);
 
-        return response(200);
+        return response()->json(['message' => __('Password updated successfully')]);
     }
 
 
@@ -41,6 +50,6 @@ class UserController extends Controller
     {
         $request->user()->delete();
 
-        return response(200);
+        return response()->json(['message' => __('User deleted successfully')]);
     }
 }

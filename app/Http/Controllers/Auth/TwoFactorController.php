@@ -13,14 +13,14 @@ class TwoFactorController extends Controller
     {
         $request->user()->setDefaultTfaMethod($request->method);
 
-        return response()->json(['message' => __('Default two factor method set')], 204);
+        return response()->json(['message' => __('Default two factor method set')]);
     }
 
     public function destroyTfaMethod(Request $request)
     {
         $request->user()->destroyTfaMethod($request->method);
 
-        return response()->json(['message' => __('Two factor method removed')], 204);
+        return response()->json(['message' => __('Two factor method removed')]);
     }
     // END: General Methods
 
@@ -53,7 +53,7 @@ class TwoFactorController extends Controller
 
         event(new TwoFactorMethodEnabled($method, $request->user()));
 
-        return response()->json(['message' => __('TOTP enabled')], 204);
+        return response()->json(['message' => __('TOTP enabled')]);
     }
 
     public function verifyTfaTotp(Request $request)
@@ -70,7 +70,7 @@ class TwoFactorController extends Controller
         // Set two factor verified session
         session([ 'two_factor_verified' => true ]);
 
-        return response()->json(['message' => __('Two factor verified')], 204);
+        return response()->json(['message' => __('Two factor verified')]);
     }
     // END: TOTP Methods
 
@@ -92,16 +92,11 @@ class TwoFactorController extends Controller
             'codes' => $request->user()->twoFactorBackupCodes()->pluck('code'),
         ]);
     }
-    // END: Backup Codes Methods
-
-
-
-    // START: Verify Methods
 
     public function verifyTfaBackupCode(Request $request)
     {
         $request->validate([
-            'code' => 'required|digits:8',
+            'code' => 'required|size:8',
         ]);
 
         // Check if code is valid
@@ -112,7 +107,7 @@ class TwoFactorController extends Controller
         // Set two factor verified session
         session([ 'two_factor_verified' => true ]);
 
-        return response()->json(['message' => __('Two factor verified')], 204);
+        return response()->json(['message' => __('Two factor verified')]);
     }
-    // END: Verify Methods
+    // END: Backup Codes Methods
 }

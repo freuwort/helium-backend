@@ -34,8 +34,8 @@ Route::prefix('domain')->group(function () {
 
 // Routes needing: authentication
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/user', [AuthUserController::class, 'index']);
-    Route::get('/session', [AuthUserController::class, 'session']);
+    Route::get('/user', [AuthUserController::class, 'getUser']);
+    Route::get('/session', [AuthUserController::class, 'getSession']);
 
     // Routes needing: authentication, two factor authentication
     Route::middleware(['verified', 'verified.tfa'])->group(function () {

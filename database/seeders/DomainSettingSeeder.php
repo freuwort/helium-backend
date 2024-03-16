@@ -29,6 +29,11 @@ class DomainSettingSeeder extends Seeder
         ]);
 
         Setting::create([
+            'key' => 'company_logo',
+            'value' => 'https://img.logoipsum.com/225.svg',
+        ]);
+
+        Setting::create([
             'key' => 'default_currency',
             'value' => 'EUR',
         ]);
