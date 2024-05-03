@@ -90,6 +90,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->morphMany(Link::class, 'linkable');
     }
+
+
+    public function media()
+    {
+        return $this->belongsToMany(Media::class, 'model_has_users', 'model_id', 'user_id');
+    }
     // END: Relationships
 
 

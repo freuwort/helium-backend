@@ -22,7 +22,6 @@ class EditorUserResource extends JsonResource
                 'email' => $this->email,
                 'name' => $this->name,
                 'username' => $this->username,
-                'ident_number' => $this->ident_number,
                 'email_verified_at' => $this->email_verified_at,
                 'enabled_at' => $this->enabled_at,
                 'deleted_at' => $this->deleted_at,

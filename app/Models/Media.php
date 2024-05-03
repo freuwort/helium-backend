@@ -61,6 +61,11 @@ class Media extends Model
     {
         return $this->hasMany(Media::class, 'parent_id')->orderByRaw("FIELD(mime_type , 'folder') DESC")->orderBy('src_path', 'asc');
     }
+
+    public function users()
+    {
+        return $this->morphedByMany(User::class, 'model', 'model_has_users', 'user_id', 'model_id')->withPivot('role');
+    }
     // END: Relationships
 
 
@@ -266,6 +271,9 @@ class Media extends Model
                 'size' => $size,
             ],
         ]);
+
+        // Add or update user with owner role
+        $media->users()->syncWithoutDetaching([auth()->user()->id => ['role' => 'owner']]);
 
 
 
