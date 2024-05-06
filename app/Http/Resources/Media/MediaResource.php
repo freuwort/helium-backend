@@ -4,7 +4,7 @@ namespace App\Http\Resources\Media;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\User\PublicUserResource;
+use App\Http\Resources\User\BasicUserResource;
 
 class MediaResource extends JsonResource
 {
@@ -25,7 +25,7 @@ class MediaResource extends JsonResource
             'mime_type' => $this->mime_type,
             'name' => $this->name,
             'access' => $this->access,
-            'users' => PublicUserResource::collection($this->users),
+            'users' => BasicUserResource::collection($this->users),
             'meta' => $this->meta,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

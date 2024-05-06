@@ -7,6 +7,7 @@ use App\Http\Requests\User\DestroyManyUserRequest;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\User\EditorUserResource;
+use App\Http\Resources\User\BasicUserResource;
 use App\Http\Resources\User\UserResource;
 use App\Models\Address;
 use App\Models\BankConnection;
@@ -22,6 +23,43 @@ class UserController extends Controller
     public function __construct()
     {
         $this->authorizeResource(User::class, 'user');
+    }
+
+
+
+    public function indexBasic(Request $request)
+    {
+        // Check if user can view models
+        $this->authorize('basicViewAny', User::class);
+
+        // Base query
+        $query = User::query();
+
+        // Search
+        if ($request->filter_search)
+        {
+            $query->whereFuzzy(function ($query) use ($request) {
+                $query
+                    ->orWhereFuzzy('name', $request->filter_search)
+                    ->orWhereFuzzy('username', $request->filter_search)
+                    ->orWhereFuzzy('email', $request->filter_search);
+            });
+        }
+
+        // Filter
+        if ($request->exclude)
+        {
+            $query->whereNotIn('id', $request->exclude);
+        }
+
+        // Sort
+        $field = $request->sort_field ?? 'created_at';
+        $order = $request->sort_order ?? 'desc';
+
+        $query->orderBy($field, $order);
+
+        // Return collection + pagination
+        return BasicUserResource::collection($query->paginate($request->size ?? 20));
     }
 
 

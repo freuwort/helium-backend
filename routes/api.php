@@ -34,11 +34,14 @@ Route::prefix('domain')->group(function () {
 
 // Routes needing: authentication
 Route::middleware(['auth:sanctum'])->group(function () {
+    // Auth-info of current user
     Route::get('/user', [AuthUserController::class, 'getUser']);
     Route::get('/session', [AuthUserController::class, 'getSession']);
 
     // Routes needing: authentication, two factor authentication
     Route::middleware(['verified', 'verified.tfa'])->group(function () {
+
+        // Personal User Routes
         Route::prefix('user')->group(function () {
             Route::patch('/settings', [UserSettingController::class, 'update']);
             Route::patch('/password', [AuthUserController::class, 'updatePassword']);
@@ -71,6 +74,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/roles', [RoleController::class, 'destroyMany']);
     
         // Users
+        Route::get('/users/basic', [UserController::class, 'indexBasic']);
         Route::resource('/users', UserController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/users', [UserController::class, 'destroyMany']);
     
@@ -87,6 +91,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Media
         Route::get('/media/{path}', [MediaController::class, 'index'])->where('path', '(.*)');
         Route::post('/media/copy', [MediaController::class, 'copy']);
+        Route::patch('/media/share', [MediaController::class, 'share']);
         Route::patch('/media/move', [MediaController::class, 'move']);
         Route::patch('/media/rename', [MediaController::class, 'rename']);
         Route::patch('/media/discovery', [MediaController::class, 'discovery']);

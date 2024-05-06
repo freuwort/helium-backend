@@ -49,6 +49,16 @@ class MediaController extends Controller
 
 
 
+    public function share(Request $request)
+    {
+        $media = Media::findPathOrFail($request->path);
+        
+        $media->users()->sync($request->users);
+        // $media->roles()->sync($request->roles);
+    }
+
+
+
     public function move(MoveMediaRequest $request)
     {
         Media::moveMany($request->paths, $request->destination);
