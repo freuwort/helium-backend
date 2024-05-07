@@ -53,8 +53,9 @@ class MediaController extends Controller
     {
         $media = Media::findPathOrFail($request->path);
         
+        $media->update([ 'access' => $request->access ]);
         $media->users()->sync($request->users);
-        // $media->roles()->sync($request->roles);
+        $media->roles()->sync($request->roles);
     }
 
 

@@ -70,6 +70,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/permissions', [PermissionController::class, 'index']);
     
         // Roles
+        Route::get('/roles/basic', [RoleController::class, 'indexBasic']);
         Route::resource('/roles', RoleController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/roles', [RoleController::class, 'destroyMany']);
     

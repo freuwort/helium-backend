@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Role\CreateRoleRequest;
 use App\Http\Requests\Role\DestroyManyRoleRequest;
 use App\Http\Requests\Role\UpdateRoleRequest;
+use App\Http\Resources\Role\BasicRoleResource;
 use App\Http\Resources\Role\RoleResource;
 use App\Models\Role;
 use Illuminate\Http\Request;
@@ -15,6 +16,41 @@ class RoleController extends Controller
     public function __construct()
     {
         $this->authorizeResource(Role::class, 'role');
+    }
+
+
+
+    public function indexBasic(Request $request)
+    {
+        // Check if user can view models
+        $this->authorize('basicViewAny', Role::class);
+        
+        // Base query
+        $query = Role::query();
+
+        // Search
+        if ($request->filter_search)
+        {
+            $query->whereFuzzy(function ($query) use ($request) {
+                $query
+                    ->orWhereFuzzy('name', $request->filter_search);
+            });
+        }
+
+        // Filter
+        if ($request->exclude)
+        {
+            $query->whereNotIn('id', $request->exclude);
+        }
+
+        // Sort
+        $field = $request->sort_field ?? 'created_at';
+        $order = $request->sort_order ?? 'desc';
+
+        $query->orderBy($field, $order);
+
+        // Return collection + pagination
+        return BasicRoleResource::collection($query->paginate($request->size ?? 20));
     }
 
 

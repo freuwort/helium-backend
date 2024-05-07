@@ -9,6 +9,22 @@ use Illuminate\Auth\Access\Response;
 
 class RolePolicy
 {
+    // TODO: Check if additional permission checks are needed
+    public function basicViewAny(User $user): bool
+    {
+        return true;
+    }
+
+
+
+    // TODO: Check if additional permission checks are needed
+    public function basicView(User $user, Role $model): bool
+    {
+        return true;
+    }
+
+
+
     public function viewAny(User $user): bool
     {
         return $user->can(Permissions::SYSTEM_VIEW_ROLES);

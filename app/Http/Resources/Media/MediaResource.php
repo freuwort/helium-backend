@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Media;
 
+use App\Http\Resources\Role\BasicRoleResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\User\BasicUserResource;
@@ -26,6 +27,7 @@ class MediaResource extends JsonResource
             'name' => $this->name,
             'access' => $this->access,
             'users' => BasicUserResource::collection($this->users),
+            'roles' => BasicRoleResource::collection($this->roles),
             'meta' => $this->meta,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

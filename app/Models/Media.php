@@ -330,6 +330,9 @@ class Media extends Model
             ],
         ]);
 
+        // Add or update user with owner role
+        $media->users()->syncWithoutDetaching([auth()->user()->id => ['role' => 'owner']]);
+
 
 
         // Return the media model
