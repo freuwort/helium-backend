@@ -37,25 +37,36 @@ return [
             'use_for_media' => false,
         ],
 
-        'public' => [
+        // 'public' => [
+        //     'driver' => 'local',
+        //     'root' => storage_path('app/public'),
+        //     'url' => env('APP_URL').'/storage',
+        //     'visibility' => 'public',
+        //     'throw' => false,
+        //     'allow_subfolder_creation' => true,
+        //     'allow_custom_filename' => true,
+        //     'use_for_media' => true,
+        // ],
+
+        'domain' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
-            'visibility' => 'public',
+            'root' => storage_path('app/domain'),
+            'url' => env('APP_URL').'/domain',
+            'visibility' => 'private',
             'throw' => false,
             'allow_subfolder_creation' => true,
             'allow_custom_filename' => true,
             'use_for_media' => true,
         ],
 
-        'private' => [
+        'profiles' => [
             'driver' => 'local',
-            'root' => storage_path('app/private'),
-            'url' => env('APP_URL').'/private',
+            'root' => storage_path('app/profiles'),
+            'url' => env('APP_URL').'/profiles',
             'visibility' => 'private',
             'throw' => false,
-            'allow_subfolder_creation' => true,
-            'allow_custom_filename' => true,
+            'allow_subfolder_creation' => false,
+            'allow_custom_filename' => false,
             'use_for_media' => true,
         ],
 
@@ -68,28 +79,6 @@ return [
             'allow_subfolder_creation' => false,
             'allow_custom_filename' => false,
             'use_for_media' => false,
-        ],
-
-        'profile_pictures' => [
-            'driver' => 'local',
-            'root' => storage_path('app/profile_pictures'),
-            'url' => env('APP_URL').'/profile_pictures',
-            'visibility' => 'private',
-            'throw' => false,
-            'allow_subfolder_creation' => false,
-            'allow_custom_filename' => false,
-            'use_for_media' => true,
-        ],
-
-        'profile_banners' => [
-            'driver' => 'local',
-            'root' => storage_path('app/profile_banners'),
-            'url' => env('APP_URL').'/profile_banners',
-            'visibility' => 'private',
-            'throw' => false,
-            'allow_subfolder_creation' => false,
-            'allow_custom_filename' => false,
-            'use_for_media' => true,
         ],
 
         's3' => [

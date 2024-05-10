@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('thumbnail_path')->nullable();
             $table->string('mime_type')->nullable();
             $table->string('name')->nullable();
+            $table->nullableMorphs('owner');
             $table->string('access')->nullable();
             $table->json('meta')->nullable();
             $table->timestamps();

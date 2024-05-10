@@ -1,7 +1,5 @@
 *
-!public/
-!private/
+!domain/
+!profiles/
 !thumbnails/
-!profile_banners/
-!profile_pictures/
 !.gitignore

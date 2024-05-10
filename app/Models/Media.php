@@ -6,15 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Spatie\Permission\Traits\HasRoles;
 
 
 
 class Media extends Model
 {
-    use HasRoles, HasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'parent_id',
@@ -23,6 +21,8 @@ class Media extends Model
         'thumbnail_path',
         'mime_type',
         'name',
+        'owner_id',
+        'owner_type',
         'access',
         'meta',
     ];
@@ -62,9 +62,24 @@ class Media extends Model
         return $this->hasMany(Media::class, 'parent_id')->orderByRaw("FIELD(mime_type , 'folder') DESC")->orderBy('src_path', 'asc');
     }
 
+    public function owner()
+    {
+        return $this->morphTo();
+    }
+
+    public function shares()
+    {
+        return $this->hasMany(ModelHasMedia::class, 'media_id');
+    }
+
     public function users()
     {
-        return $this->morphedByMany(User::class, 'model', 'model_has_users', 'user_id', 'model_id')->withPivot('role');
+        return $this->morphedByMany(User::class, 'model', 'model_has_media', 'media_id', 'model_id')->withPivot(['type', 'permission']);
+    }
+
+    public function roles()
+    {
+        return $this->morphedByMany(Role::class, 'model', 'model_has_media', 'media_id', 'model_id')->withPivot(['type', 'permission']);
     }
     // END: Relationships
 
@@ -129,6 +144,15 @@ class Media extends Model
     public function getCdnPathAttribute(): string
     {
         return config('app.url') . '/media/' . $this->src_path;
+    }
+
+
+
+    public function setOwner($model)
+    {
+        $this->owner_id = optional($model)->id;
+        $this->owner_type = $model::class;
+        $this->save();
     }
 
 
@@ -272,8 +296,8 @@ class Media extends Model
             ],
         ]);
 
-        // Add or update user with owner role
-        $media->users()->syncWithoutDetaching([auth()->user()->id => ['role' => 'owner']]);
+        // Set user as media owner
+        if (auth()->user()) $media->setOwner(auth()->user());
 
 
 
@@ -330,8 +354,8 @@ class Media extends Model
             ],
         ]);
 
-        // Add or update user with owner role
-        $media->users()->syncWithoutDetaching([auth()->user()->id => ['role' => 'owner']]);
+        // Set user as media owner
+        if (auth()->user()) $media->setOwner(auth()->user());
 
 
 
