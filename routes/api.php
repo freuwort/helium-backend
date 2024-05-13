@@ -7,7 +7,7 @@ use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Domain\DomainController;
 use App\Http\Controllers\Domain\DomainSettingController;
 use App\Http\Controllers\Media\FileController;
-use App\Http\Controllers\Media\FolderController;
+use App\Http\Controllers\Media\DirectoryController;
 use App\Http\Controllers\Media\MediaController;
 use App\Http\Controllers\Permission\PermissionController;
 use App\Http\Controllers\Permission\RoleController;
@@ -86,8 +86,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Media Upload
         Route::post('/upload', [FileController::class, 'upload']);
     
-        // Media Folder
-        Route::post('/folder', [FolderController::class, 'store']);
+        // Media directory
+        Route::post('/directory', [DirectoryController::class, 'store']);
     
         // Media
         Route::get('/media/{path}', [MediaController::class, 'index'])->where('path', '(.*)');

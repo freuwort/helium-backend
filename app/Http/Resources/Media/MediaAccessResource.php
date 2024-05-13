@@ -8,28 +8,19 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\User\BasicUserResource;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
-class MediaResource extends JsonResource
+class MediaAccessResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'parent_id' => $this->parent_id,
-            'drive' => $this->drive,
-            'src_path' => $this->src_path,
-            'cdn_path' => $this->cdn_path,
-            'thumbnail_path' => $this->thumbnail_path,
-            'mime_type' => $this->mime_type,
-            'name' => $this->name,
-            'owner_id' => $this->owner_id,
-            'owner_type' => $this->typeDict($this->owner_type),
-            'owner' => $this->modelDict($this->owner),
-            'inherit_access' => $this->inherit_access,
-            'access' => MediaAccessResource::collection($this->access),
-            'meta' => $this->meta,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'media_id' => $this->media_id,
+            'model_id' => $this->model_id,
+            'model_type' => $this->typeDict($this->model_type),
+            'model' => $this->modelDict($this->model),
+            'type' => $this->type,
+            'permission' => $this->permission,
         ];
     }
 

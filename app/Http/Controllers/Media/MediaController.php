@@ -7,6 +7,7 @@ use App\Http\Requests\Media\CopyMediaRequest;
 use App\Http\Requests\Media\DestroyMediaRequest;
 use App\Http\Requests\Media\MoveMediaRequest;
 use App\Http\Requests\Media\RenameMediaRequest;
+use App\Http\Requests\Media\ShareMediaRequest;
 use App\Http\Resources\Media\MediaResource;
 use App\Models\Media;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ class MediaController extends Controller
     {
         $path = Media::dissectPath($request->path);
         
-        if ($path->hasSubfolder)
+        if ($path->hasSubdirectory)
         {
             $media = Media::findPathOrFail($path->path)->children()->get();
         }
@@ -25,7 +26,7 @@ class MediaController extends Controller
         {
             $media = Media::where('drive', $path->diskname)
                 ->where('parent_id', null)
-                ->orderByRaw("FIELD(mime_type , 'folder') DESC")
+                ->orderByRaw("FIELD(mime_type , 'directory') DESC")
                 ->orderBy('src_path', 'asc')
                 ->get();
         }
@@ -49,13 +50,23 @@ class MediaController extends Controller
 
 
 
-    public function share(Request $request)
+    public function share(ShareMediaRequest $request)
     {
         $media = Media::findPathOrFail($request->path);
         
-        $media->update([ 'access' => $request->access ]);
-        $media->users()->sync($request->users);
-        $media->roles()->sync($request->roles);
+        $media->update([ 'inherit_access' => $request->inherit_access ]);
+        
+        $media->access()->delete();
+
+        foreach ($request->access as $access)
+        {
+            $media->access()->create([
+                'model_id' => $access['model_id'],
+                'model_type' => $access['model_type'],
+                'type' => 'share',
+                'permission' => $access['permission'],
+            ]);
+        }
     }
 
 

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Media;
 use Illuminate\Http\Request;
 
-class FolderController extends Controller
+class DirectoryController extends Controller
 {
     public function store(Request $request)
     {
@@ -15,10 +15,10 @@ class FolderController extends Controller
             'path' => ['required', 'string', 'max:255'],
         ]);
 
-        $folder = Media::createFolder($request->path, $request->name);
+        $directory = Media::createDirectory($request->path, $request->name);
 
         return response()->json([
-            'folder' => $folder
+            'directory' => $directory
         ]);
     }
 }

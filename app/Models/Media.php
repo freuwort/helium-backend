@@ -23,12 +23,13 @@ class Media extends Model
         'name',
         'owner_id',
         'owner_type',
-        'access',
+        'inherit_access',
         'meta',
     ];
 
     protected $casts = [
         'meta' => 'array',
+        'inherit_access' => 'boolean',
     ];
 
 
@@ -42,7 +43,7 @@ class Media extends Model
         });
 
         self::deleting(function ($model) {
-            // Check if the model is a folder
+            // Check if the model is a directory
             if (!Storage::mimeType($model->src_path)) Storage::deleteDirectory($model->src_path);
             // Otherwise, delete the file from disk
             else Storage::delete($model->src_path);
@@ -59,7 +60,7 @@ class Media extends Model
 
     public function children()
     {
-        return $this->hasMany(Media::class, 'parent_id')->orderByRaw("FIELD(mime_type , 'folder') DESC")->orderBy('src_path', 'asc');
+        return $this->hasMany(Media::class, 'parent_id')->orderByRaw("FIELD(mime_type , 'directory') DESC")->orderBy('src_path', 'asc');
     }
 
     public function owner()
@@ -67,19 +68,9 @@ class Media extends Model
         return $this->morphTo();
     }
 
-    public function shares()
+    public function access()
     {
-        return $this->hasMany(ModelHasMedia::class, 'media_id');
-    }
-
-    public function users()
-    {
-        return $this->morphedByMany(User::class, 'model', 'model_has_media', 'media_id', 'model_id')->withPivot(['type', 'permission']);
-    }
-
-    public function roles()
-    {
-        return $this->morphedByMany(Role::class, 'model', 'model_has_media', 'media_id', 'model_id')->withPivot(['type', 'permission']);
+        return $this->hasMany(MediaAccess::class, 'media_id');
     }
     // END: Relationships
 
@@ -99,8 +90,8 @@ class Media extends Model
         return (object) [
             'path' => $path,
             'diskname' => Str::before($path, '/'),
-            'hasSubfolder' => count(explode('/', $path)) > 1,
-            'subfolder' => Str::after($path, '/'),
+            'hasSubdirectory' => count(explode('/', $path)) > 1,
+            'subdirectory' => Str::after($path, '/'),
             'filename' => Str::afterLast($path, '/'),
             'filepath' => Str::beforeLast($path, '/'),
         ];
@@ -134,9 +125,9 @@ class Media extends Model
 
 
 
-    public static function getFolder(string $path): ?Media
+    public static function getDirectory(string $path): ?Media
     {
-        return self::where('src_path', $path)->where('mime_type', 'folder')->first();
+        return self::where('src_path', $path)->where('mime_type', 'directory')->first();
     }
 
 
@@ -162,7 +153,7 @@ class Media extends Model
         // Parse path
         $path = self::dissectPath($path);
         $disk = self::getMediaDisk($path->diskname);
-        $parent = self::getFolder($path->path);
+        $parent = self::getDirectory($path->path);
 
         // Check if the disk exists and is allowed for media
         if (!$disk)
@@ -170,17 +161,17 @@ class Media extends Model
             throw new \Exception('The disk "' . $path->diskname . '" does not exist or is not allowed for media.');
         }
 
-        // When subfolder exists: check if the parent media model exists
-        if ($path->hasSubfolder && !$parent)
+        // When subdirectory exists: check if the parent media model exists
+        if ($path->hasSubdirectory && !$parent)
         {
-            throw new \Exception('The parent folder does not exist.');
+            throw new \Exception('The parent directory does not exist.');
         }
 
 
 
-        // Get all files and folders in the path
+        // Get all files and directories in the path
         $files = Storage::files($path->path);
-        $folders = Storage::directories($path->path);
+        $directories = Storage::directories($path->path);
 
         // Loop through all files
         foreach ($files as $file)
@@ -205,11 +196,11 @@ class Media extends Model
             }
         }
 
-        // Loop through all folders
-        foreach ($folders as $folder)
+        // Loop through all directories
+        foreach ($directories as $directory)
         {
-            // Check if the folder already exists in the database
-            $media = self::where('src_path', $folder)->first();
+            // Check if the directory already exists in the database
+            $media = self::where('src_path', $directory)->first();
 
             // If it doesn't exist, create it
             if (!$media)
@@ -217,9 +208,9 @@ class Media extends Model
                 $media = self::create([
                     'parent_id' => optional($parent)->id,
                     'drive' => $path->diskname,
-                    'src_path' => $folder,
-                    'name' => Str::afterLast($folder, '/'),
-                    'mime_type' => 'folder',
+                    'src_path' => $directory,
+                    'name' => Str::afterLast($directory, '/'),
+                    'mime_type' => 'directory',
                     'meta' => [
                         'extension' => null,
                         'size' => null,
@@ -227,8 +218,8 @@ class Media extends Model
                 ]);
             }
 
-            // Recursively discover the folder
-            self::discovery($folder);
+            // Recursively discover the directory
+            self::discovery($directory);
         }
     }
 
@@ -245,7 +236,7 @@ class Media extends Model
         // Parse path
         $path = self::dissectPath($path);
         $disk = self::getMediaDisk($path->diskname);
-        $parent = self::getFolder($path->path);
+        $parent = self::getDirectory($path->path);
 
         // Check if the disk exists and is allowed for media
         if (!$disk)
@@ -253,16 +244,16 @@ class Media extends Model
             throw new \Exception('The disk "' . $path->diskname . '" does not exist or is not allowed for media.');
         }
 
-        // When subfolder exists: check if the disk allows subfolder creation
-        if ($path->hasSubfolder && !$disk->allow_subfolder_creation)
+        // When subdirectory exists: check if the disk allows subdirectory creation
+        if ($path->hasSubdirectory && !$disk->allow_subdirectory_creation)
         {
-            throw new \Exception('The disk "' . $path->diskname . '" does not allow subfolder creation.');
+            throw new \Exception('The disk "' . $path->diskname . '" does not allow subdirectory creation.');
         }
 
-        // When subfolder exists: check if the parent media model exists
-        if ($path->hasSubfolder && !$parent)
+        // When subdirectory exists: check if the parent media model exists
+        if ($path->hasSubdirectory && !$parent)
         {
-            throw new \Exception('The parent folder does not exist.');
+            throw new \Exception('The parent directory does not exist.');
         }
 
 
@@ -307,12 +298,12 @@ class Media extends Model
 
 
 
-    public static function createFolder(string $path, string $name): Media
+    public static function createDirectory(string $path, string $name): Media
     {
         // Parse path
         $path = self::dissectPath($path);
         $disk = self::getMediaDisk($path->diskname);
-        $parent = self::getFolder($path->path);
+        $parent = self::getDirectory($path->path);
 
         // Check if the disk exists and is allowed for media
         if (!$disk)
@@ -320,16 +311,16 @@ class Media extends Model
             throw new \Exception('The disk "' . $path->diskname . '" does not exist or is not allowed for media.');
         }
 
-        // Check if the disk allows subfolder creation
-        if (!$disk->allow_subfolder_creation)
+        // Check if the disk allows subdirectory creation
+        if (!$disk->allow_subdirectory_creation)
         {
-            throw new \Exception('The disk "' . $path->diskname . '" does not allow subfolder creation.');
+            throw new \Exception('The disk "' . $path->diskname . '" does not allow subdirectory creation.');
         }
 
-        // When subfolder exists: check if the parent media model exists
-        if ($path->hasSubfolder && !$parent)
+        // When subdirectory exists: check if the parent media model exists
+        if ($path->hasSubdirectory && !$parent)
         {
-            throw new \Exception('The parent folder does not exist.');
+            throw new \Exception('The parent directory does not exist.');
         }
 
         
@@ -337,7 +328,7 @@ class Media extends Model
         // Create the storage path
         $storagePath = $path->path . '/' . $name;
 
-        // Create the folder on disk
+        // Create the directory on disk
         Storage::makeDirectory($storagePath);
 
         // Create or update the media model
@@ -346,7 +337,7 @@ class Media extends Model
         ],[
             'parent_id' => optional($parent)->id,
             'drive' => $path->diskname,
-            'mime_type' => 'folder',
+            'mime_type' => 'directory',
             'name' => $name,
             'meta' => [
                 'extension' => null,
@@ -387,7 +378,7 @@ class Media extends Model
 
         // Get disk and parent
         $disk = self::getMediaDisk($destinationPath->diskname);
-        $parent = self::getFolder($destinationPath->path);
+        $parent = self::getDirectory($destinationPath->path);
 
         // Check if the disk exists and is allowed for media
         if (!$disk)
@@ -395,10 +386,10 @@ class Media extends Model
             throw new \Exception('The disk "' . $destinationPath->diskname . '" does not exist or is not allowed for media.');
         }
 
-        // When subfolder exists: check if the parent media model exists
-        if ($destinationPath->hasSubfolder && !$parent)
+        // When subdirectory exists: check if the parent media model exists
+        if ($destinationPath->hasSubdirectory && !$parent)
         {
-            throw new \Exception('The parent folder does not exist.');
+            throw new \Exception('The parent directory does not exist.');
         }
 
         // Loop through all items
@@ -437,7 +428,7 @@ class Media extends Model
             ]);
 
             // Update the path of all children
-            if ($media->mime_type == 'folder')
+            if ($media->mime_type == 'directory')
             {
                 $media->recursivePathUpdate($oldPath->path, $newPath->path);
             }
@@ -475,7 +466,7 @@ class Media extends Model
 
         // Get disk and parent
         $disk = self::getMediaDisk($destinationPath->diskname);
-        $parent = self::getFolder($destinationPath->path);
+        $parent = self::getDirectory($destinationPath->path);
 
         // Check if the disk exists and is allowed for media
         if (!$disk)
@@ -483,10 +474,10 @@ class Media extends Model
             throw new \Exception('The disk "' . $destinationPath->diskname . '" does not exist or is not allowed for media.');
         }
 
-        // When subfolder exists: check if the parent media model exists
-        if ($destinationPath->hasSubfolder && !$parent)
+        // When subdirectory exists: check if the parent media model exists
+        if ($destinationPath->hasSubdirectory && !$parent)
         {
-            throw new \Exception('The parent folder does not exist.');
+            throw new \Exception('The parent directory does not exist.');
         }
 
         // Loop through all items

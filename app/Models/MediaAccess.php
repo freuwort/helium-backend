@@ -2,18 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
-use Spatie\Permission\Traits\HasRoles;
 
 
 
-class ModelHasMedia extends Model
+class MediaAccess extends Model
 {
+    public $timestamps = false;
+    
     protected $fillable = [
         'media_id',
         'model_id',

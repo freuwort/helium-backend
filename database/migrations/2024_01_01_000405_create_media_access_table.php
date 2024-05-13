@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('model_has_media', function (Blueprint $table) {
+        Schema::create('media_accesses', function (Blueprint $table) {
             $table->foreignId('media_id')->constrained('media')->cascadeOnDelete()->cascadeOnUpdate();
             $table->nullableMorphs('model');
             $table->string('type')->nullable();
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('model_has_media');
+        Schema::dropIfExists('media_accesses');
     }
 };

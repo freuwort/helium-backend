@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('mime_type')->nullable();
             $table->string('name')->nullable();
             $table->nullableMorphs('owner');
-            $table->string('access')->nullable();
+            $table->boolean('inherit_access')->default(true);
             $table->json('meta')->nullable();
             $table->timestamps();
         });

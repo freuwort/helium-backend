@@ -14,9 +14,6 @@ class BasicUserResource extends JsonResource
             'profile_image' => $this->profile_image,
             'name' => $this->user_name->fullname ?? $this->name ?? '',
             'username' => $this->username,
-
-            // If data includes pivot
-            'pivot' => $this->pivot ? $this->pivot->toArray() : null,
         ];
     }
 }
