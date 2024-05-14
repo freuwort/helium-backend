@@ -37,6 +37,8 @@ class MediaAccessResource extends JsonResource
 
     private function modelDict($model)
     {
+        if (!$model) return null;
+        
         return match (get_class($model)) {
             User::class => BasicUserResource::make($model),
             Role::class => BasicRoleResource::make($model),
