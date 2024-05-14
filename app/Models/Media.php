@@ -125,6 +125,13 @@ class Media extends Model
 
 
 
+    public static function getDefaultAccess(string $diskname)
+    {
+        return optional(self::getMediaDisk($diskname))->default_access ?? config('filesystems.disk_default_access');
+    }
+
+
+
     public static function getDirectory(string $path): ?Media
     {
         return self::where('src_path', $path)->where('mime_type', 'directory')->first();
@@ -141,9 +148,85 @@ class Media extends Model
 
     public function setOwner($model)
     {
-        $this->owner_id = optional($model)->id;
-        $this->owner_type = $model::class;
-        $this->save();
+        if (!$model || !$model->getKey()) return;
+
+        $this->update([
+            'owner_id' => $model->getKey(),
+            'owner_type' => $model::class,
+        ]);
+    }
+
+
+
+    public function computeAccess()
+    {
+        $defaultAccess = collect(self::getDefaultAccess($this->drive));
+
+        // Recursively compute access if access is inherited
+        if ($this->inherit_access === true)
+        {
+            return $this->parent
+                ? $this->parent->computeAccess()
+                : $defaultAccess;
+        }
+
+        $publicAccess = collect(['any' => ['guest' => $this
+            ->access()
+            ->where('type', 'share')
+            ->whereNull('model_id')
+            ->whereNull('model_type')
+            ->first()
+            ->permission ?? null
+        ]]);
+
+        $specificAccess = $this
+            ->access()
+            ->select('type', 'model_id', 'model_type', 'permission')
+            ->where('type', 'share')
+            ->whereNotNull('model_id')
+            ->whereNotNull('model_type')
+            ->get()
+            ->groupBy('model_type')
+            ->map(fn ($group) => $group->pluck('permission', 'model_id'));
+
+        return $defaultAccess
+            ->merge($publicAccess)
+            ->merge($specificAccess);
+    }
+
+
+
+    // TODO: this isnt as nice as it could be; should be refactored
+    private function canModel($permissions, $model = null)
+    {
+        $group = (string) $model::class;
+        $id = (string) $model->getKey();
+
+        $access = $this->computeAccess();
+
+        // If public access is granted, return true
+        if (isset($access['any']['guest']) && in_array($access['any']['guest'], $permissions)) return true;
+        
+        // If specific access is granted, return true
+        if (isset($access[$group][$id]) && in_array($access[$group][$id], $permissions)) return true;
+        
+        // Otherwise the model has no access
+        return false;
+    }
+
+    public function canModelRead($model = null)
+    {
+        return $this->canModel(['read', 'write', 'admin'], $model);
+    }
+
+    public function canModelWrite($model = null)
+    {
+        return $this->canModel(['write', 'admin'], $model);
+    }
+
+    public function canModelAdmin($model = null)
+    {
+        return $this->canModel(['admin'], $model);
     }
 
 

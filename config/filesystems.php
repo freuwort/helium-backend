@@ -28,6 +28,12 @@ return [
     |
     */
 
+    'disk_default_access' => [
+        'any' => [
+            'guest' => null,
+        ],
+    ],
+
     'disks' => [
 
         'local' => [
@@ -46,6 +52,7 @@ return [
         //     'allow_subdirectory_creation' => true,
         //     'allow_custom_filename' => true,
         //     'use_for_media' => true,
+        //     'default_access' => null,
         // ],
 
         'domain' => [
@@ -57,6 +64,7 @@ return [
             'allow_subdirectory_creation' => true,
             'allow_custom_filename' => true,
             'use_for_media' => true,
+            'default_access' => null,
         ],
 
         'profiles' => [
@@ -68,6 +76,7 @@ return [
             'allow_subdirectory_creation' => false,
             'allow_custom_filename' => false,
             'use_for_media' => true,
+            'default_access' => null,
         ],
 
         'thumbnails' => [
@@ -79,6 +88,7 @@ return [
             'allow_subdirectory_creation' => false,
             'allow_custom_filename' => false,
             'use_for_media' => false,
+            'default_access' => null,
         ],
 
         's3' => [
