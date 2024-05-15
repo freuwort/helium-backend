@@ -27,13 +27,15 @@ class MediaResource extends JsonResource
             'owner' => $this->modelDict($this->owner),
             'inherit_access' => $this->inherit_access,
             'access' => MediaAccessResource::collection($this->access),
-            'DEBUG__computed_access' => $this->computeAccess(),
-            'DEBUG__can_read' => $this->canModelRead(auth()->user()),
-            'DEBUG__can_write' => $this->canModelWrite(auth()->user()),
-            'DEBUG__can_admin' => $this->canModelAdmin(auth()->user()),
             'meta' => $this->meta,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'DEBUG' => [
+                'computed_access' => $this->computeAccess(),
+                'can_read' => $this->canModelRead(auth()->user()),
+                'can_write' => $this->canModelWrite(auth()->user()),
+                'can_admin' => $this->canModelAdmin(auth()->user()),
+            ],
         ];
     }
 

@@ -76,6 +76,34 @@ class Media extends Model
 
 
 
+    // START: Scopes
+    public function scopeWhereChildOfPath($query, string $path)
+    {
+        $path = $this->dissectPath($path);
+        
+        if ($path->hasSubdirectory)
+        {
+            return $query
+                ->where('src_path', $path->path)
+                ->firstOrFail()
+                ->children();
+        }
+        
+        return $query
+            ->where('drive', $path->diskname)
+            ->where('parent_id', null);
+    }
+    
+    public function scopeOrderByDefault($query)
+    {
+        return $query
+            ->orderByRaw("FIELD(mime_type , 'directory') DESC")
+            ->orderBy('src_path', 'asc');
+    }
+    // END: Scopes
+
+
+
     // START: Selectors
     public static function findPathOrFail(string $path): ?Media
     {

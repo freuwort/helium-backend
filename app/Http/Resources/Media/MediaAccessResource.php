@@ -8,7 +8,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\User\BasicUserResource;
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
 
 class MediaAccessResource extends JsonResource
 {

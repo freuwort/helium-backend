@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Media;
 
+use App\Classes\Permissions\Permissions;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Media\CopyMediaRequest;
 use App\Http\Requests\Media\DestroyMediaRequest;
@@ -16,20 +17,12 @@ class MediaController extends Controller
 {
     public function index(Request $request)
     {
-        $path = Media::dissectPath($request->path);
-        
-        if ($path->hasSubdirectory)
-        {
-            $media = Media::findPathOrFail($path->path)->children()->get();
-        }
-        else
-        {
-            $media = Media::where('drive', $path->diskname)
-                ->where('parent_id', null)
-                ->orderByRaw("FIELD(mime_type , 'directory') DESC")
-                ->orderBy('src_path', 'asc')
-                ->get();
-        }
+        $query = Media::query()
+            ->whereChildOfPath($request->path)
+            ->orderByDefault();
+
+        $media = $query->get()
+            ->filter(fn ($media) => $media->canModelRead($request->user()) || $request->user()->can(Permissions::SYSTEM_ADMIN));
 
         return MediaResource::collection($media);
     }

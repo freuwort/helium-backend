@@ -41,11 +41,7 @@ class Permissions
     public const SYSTEM_DISABLE_APPS = 'system.disable.apps';
 
     // Media
-    public const SYSTEM_VIEW_MEDIA = 'system.view.media';
-    public const SYSTEM_UPLOAD_MEDIA = 'system.upload.media';
-    public const SYSTEM_EDIT_MEDIA = 'system.edit.media';
-    public const SYSTEM_SHARE_MEDIA = 'system.share.media';
-    public const SYSTEM_DELETE_MEDIA = 'system.delete.media';
+    public const SYSTEM_ACCESS_MEDIA = 'system.access.media';
 
 
 
@@ -88,11 +84,7 @@ class Permissions
                     ['name' => self::SYSTEM_EDIT_SETTINGS, 'label' => 'Einstellungen bearbeiten', 'description' => 'Der Benutzer kann die Einstellungen bearbeiten.'],
                 ],
                 [
-                    ['name' => self::SYSTEM_VIEW_MEDIA, 'label' => 'Medien anzeigen', 'description' => 'Der Benutzer kann die Medien ansehen.'],
-                    ['name' => self::SYSTEM_UPLOAD_MEDIA, 'label' => 'Medien hochladen', 'description' => 'Der Benutzer kann Medien hochladen.'],
-                    ['name' => self::SYSTEM_EDIT_MEDIA, 'label' => 'Medien bearbeiten', 'description' => 'Der Benutzer kann Medien bearbeiten.'],
-                    ['name' => self::SYSTEM_SHARE_MEDIA, 'label' => 'Medien teilen', 'description' => 'Der Benutzer kann Medien teilen.'],
-                    ['name' => self::SYSTEM_DELETE_MEDIA, 'label' => 'Medien löschen', 'description' => 'Der Benutzer kann Medien löschen.'],
+                    ['name' => self::SYSTEM_ACCESS_MEDIA, 'label' => 'Medien-App Zugriff', 'description' => 'Der Benutzer kann auf die Medien-App zugreifen.'],
                 ],
             ],
         ],
