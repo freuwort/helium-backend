@@ -22,6 +22,14 @@ class DomainController extends Controller
             'default_unit_volume' => Setting::getSetting('default_unit_volume'),
             'default_unit_temperature' => Setting::getSetting('default_unit_temperature'),
             'default_unit_speed' => Setting::getSetting('default_unit_speed'),
+            'policy_allow_registration' => Setting::getSetting('policy_allow_registration'),
+            'policy_allow_password_reset' => Setting::getSetting('policy_allow_password_reset'),
+            'policy_allow_password_change' => Setting::getSetting('policy_allow_password_change'),
+            'policy_allow_email_change' => Setting::getSetting('policy_allow_email_change'),
+            'policy_allow_username_change' => Setting::getSetting('policy_allow_username_change'),
+            'policy_allow_profile_image_upload' => Setting::getSetting('policy_allow_profile_image_upload'),
+            'policy_allow_profile_banner_upload' => Setting::getSetting('policy_allow_profile_banner_upload'),
+            'policy_require_tfa' => Setting::getSetting('policy_require_tfa'),
         ]);
     }
 }

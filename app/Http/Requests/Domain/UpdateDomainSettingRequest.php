@@ -33,6 +33,14 @@ class UpdateDomainSettingRequest extends FormRequest
             'default_unit_volume' => 'nullable|string|in:l,gal',
             'default_unit_temperature' => 'nullable|string|in:c,f',
             'default_unit_speed' => 'nullable|string|in:kmh,mph',
+            'policy_allow_registration' => 'nullable|boolean',
+            'policy_allow_password_reset' => 'nullable|boolean',
+            'policy_allow_password_change' => 'nullable|boolean',
+            'policy_allow_email_change' => 'nullable|boolean',
+            'policy_allow_username_change' => 'nullable|boolean',
+            'policy_allow_profile_image_upload' => 'nullable|boolean',
+            'policy_allow_profile_banner_upload' => 'nullable|boolean',
+            'policy_require_tfa' => 'nullable|boolean',
         ];
     }
 }
