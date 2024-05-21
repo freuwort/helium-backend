@@ -18,7 +18,8 @@ class ShareMediaRequest extends FormRequest
         return [
             'path' => ['required', 'exists:media,src_path'],
             'inherit_access' => ['required', 'boolean'],
-            'access' => ['required', 'array'],
+            'public_access' => ['nullable', 'string', 'in:read,write,admin'],
+            'access' => ['nullable', 'array'],
             'access.*.model_id' => ['required', 'integer'],
             'access.*.model_type' => ['required', 'string', 'in:user,role'],
             'access.*.permission' => ['required', 'string', 'in:read,write,admin'],

@@ -51,6 +51,14 @@ class MediaController extends Controller
         
         $media->access()->delete();
 
+        $media->access()->updateOrCreate([
+            'media_id' => null,
+            'model_type' => null,
+            'type' => 'share',
+        ], [
+            'permission' => $request->public_access,
+        ]);
+
         foreach ($request->access as $access)
         {
             $media->access()->create([
