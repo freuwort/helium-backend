@@ -336,6 +336,7 @@ class Media extends Model
 
 
 
+    // TODO: split this function into upload and media creation
     public static function upload(string $path, UploadedFile $file, string $name = null): Media
     {
         // Check if a file was uploaded
@@ -369,12 +370,29 @@ class Media extends Model
 
 
 
-        // Get meta data
+        // Get basic meta data
         $mime = $file->getMimeType();
         $hashname = $file->hashName();
         $originalname = $file->getClientOriginalName();
         $extension = $file->extension();
         $size = $file->getSize();
+
+        // Mime types to check for cases where the extension shoud determine the mime type
+        if (in_array($mime, ['text/plain', 'text/x-c', 'application/x-empty']))
+        {
+            $filename = self::dissectFilename($originalname);
+
+            switch ($filename->extension)
+            {
+                case 'js': $extension = 'js'; $mime = 'text/javascript'; break;
+                case 'md': $extension = 'md'; $mime = 'text/markdown'; break;
+                case 'csv': $extension = 'csv'; $mime = 'text/csv'; break;
+                case 'css': $extension = 'css'; $mime = 'text/css'; break;
+                case 'xml': $extension = 'xml'; $mime = 'text/xml'; break;
+                case 'txt': $extension = 'txt'; $mime = 'text/plain'; break;
+                case 'html': $extension = 'html'; $mime = 'text/html'; break;
+            }
+        }
 
         // Make name depending on whether the disk allows custom names - fallback order: $name, $originalname, $hashname
         $name = $disk->allow_custom_filename ? $name ?? $originalname ?? $hashname : $hashname;
