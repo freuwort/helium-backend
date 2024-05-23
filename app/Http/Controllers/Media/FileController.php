@@ -10,9 +10,18 @@ class FileController extends Controller
 {
     public function upload(Request $request)
     {
+        $allowedMimetypes = [
+            'font/*',
+            'image/*',
+            'text/*',
+            'audio/*',
+            'video/*',
+            'application/*',
+        ];
+
         $request->validate([
             'files' => ['array', 'max:1000'],
-            'files.*' => ['file', 'mimetypes:font/*,image/*,text/*,audio/*,video/*,application/*'],
+            'files.*' => ['file', 'mimetypes:'.implode(',', $allowedMimetypes)],
             'path' => ['required', 'string', 'max:255'],
         ]);
 

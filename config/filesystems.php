@@ -53,6 +53,7 @@ return [
         //     'allow_custom_filename' => true,
         //     'use_for_media' => true,
         //     'default_access' => null,
+        //     'generate_thumbnails' => false,
         // ],
 
         'domain' => [
@@ -65,6 +66,7 @@ return [
             'allow_custom_filename' => true,
             'use_for_media' => true,
             'default_access' => null,
+            'generate_thumbnails' => true,
         ],
 
         'profiles' => [
@@ -77,6 +79,7 @@ return [
             'allow_custom_filename' => false,
             'use_for_media' => true,
             'default_access' => null,
+            'generate_thumbnails' => false,
         ],
 
         'thumbnails' => [
@@ -87,8 +90,9 @@ return [
             'throw' => false,
             'allow_subdirectory_creation' => false,
             'allow_custom_filename' => false,
-            'use_for_media' => false,
+            'use_for_media' => true,
             'default_access' => null,
+            'generate_thumbnails' => false,
         ],
 
         's3' => [

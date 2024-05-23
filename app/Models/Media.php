@@ -8,8 +8,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
 
-
-
 class Media extends Model
 {
     use HasFactory;
@@ -43,10 +41,7 @@ class Media extends Model
         });
 
         self::deleting(function ($model) {
-            // Check if the model is a directory
-            if (!Storage::mimeType($model->src_path)) Storage::deleteDirectory($model->src_path);
-            // Otherwise, delete the file from disk
-            else Storage::delete($model->src_path);
+            !Storage::mimeType($model->src_path) ? Storage::deleteDirectory($model->src_path) : Storage::delete($model->src_path);
         });
     }
 
@@ -419,7 +414,8 @@ class Media extends Model
         // Set user as media owner
         if (auth()->user()) $media->setOwner(auth()->user());
 
-
+        // Generate thumbnails
+        if ($disk->generate_thumbnails); // TODO: create queue job that generates thumbnails
 
         // Return the media model
         return $media->fresh();
@@ -673,6 +669,6 @@ class Media extends Model
 
     public static function deleteMany(array $paths): void
     {
-        Media::whereIn('src_path', $paths)->delete();
+        Media::whereIn('src_path', $paths)->get()->each(fn ($media) => $media->delete());
     }
 }
