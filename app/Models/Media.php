@@ -146,6 +146,11 @@ class Media extends Model
         return null;
     }
 
+    public static function getMediaDiskOrFail(string $diskname): object
+    {
+        return self::getMediaDisk($diskname) ?: throw new \Exception('The disk "' . $diskname . '" does not exist or is not allowed for media.');
+    }
+
 
 
     public static function getDefaultAccess(string $diskname)
@@ -171,11 +176,9 @@ class Media extends Model
 
     public function setOwner($model)
     {
-        if (!$model || !$model->getKey()) return;
-
         $this->update([
-            'owner_id' => $model->getKey(),
-            'owner_type' => $model::class,
+            'owner_id' => $model ? $model->getKey() : null,
+            'owner_type' => $model ? $model::class : null,
         ]);
     }
 
@@ -331,151 +334,108 @@ class Media extends Model
 
 
 
-    // TODO: split this function into upload and media creation
-    public static function upload(string $path, UploadedFile $file, string $name = null): Media
+    public static function createMediaFromPath(string $path): Media
     {
-        // Check if a file was uploaded
-        if (!$file)
-        {
-            throw new \Exception('No file was uploaded.');
-        }
-
-        // Parse path
         $path = self::dissectPath($path);
-        $disk = self::getMediaDisk($path->diskname);
-        $parent = self::getDirectory($path->path);
-
-        // Check if the disk exists and is allowed for media
-        if (!$disk)
-        {
-            throw new \Exception('The disk "' . $path->diskname . '" does not exist or is not allowed for media.');
-        }
-
-        // When subdirectory exists: check if the disk allows subdirectory creation
-        if ($path->hasSubdirectory && !$disk->allow_subdirectory_creation)
-        {
-            throw new \Exception('The disk "' . $path->diskname . '" does not allow subdirectory creation.');
-        }
-
-        // When subdirectory exists: check if the parent media model exists
-        if ($path->hasSubdirectory && !$parent)
-        {
-            throw new \Exception('The parent directory does not exist.');
-        }
-
-
-
-        // Get basic meta data
-        $mime = $file->getMimeType();
-        $hashname = $file->hashName();
-        $originalname = $file->getClientOriginalName();
-        $extension = $file->extension();
-        $size = $file->getSize();
+        $parent = self::getDirectory($path->filepath);
+        $filename = self::dissectFilename($path->filename);
+        
+        $mime = Storage::mimeType($path->path) ?: 'directory';
+        $isFile = $mime !== 'directory';
+        
+        $extension = $isFile ? $filename->extension : null;
+        $size = $isFile ? Storage::size($path->path) : null;
 
         // Mime types to check for cases where the extension shoud determine the mime type
         if (in_array($mime, ['text/plain', 'text/x-c', 'application/x-empty']))
         {
-            $filename = self::dissectFilename($originalname);
-
-            switch ($filename->extension)
+            switch ($extension)
             {
-                case 'js': $extension = 'js'; $mime = 'text/javascript'; break;
-                case 'md': $extension = 'md'; $mime = 'text/markdown'; break;
-                case 'csv': $extension = 'csv'; $mime = 'text/csv'; break;
-                case 'css': $extension = 'css'; $mime = 'text/css'; break;
-                case 'xml': $extension = 'xml'; $mime = 'text/xml'; break;
-                case 'txt': $extension = 'txt'; $mime = 'text/plain'; break;
-                case 'html': $extension = 'html'; $mime = 'text/html'; break;
+                case 'js': $mime = 'text/javascript'; break;
+                case 'md': $mime = 'text/markdown'; break;
+                case 'csv': $mime = 'text/csv'; break;
+                case 'css': $mime = 'text/css'; break;
+                case 'xml': $mime = 'text/xml'; break;
+                case 'txt': $mime = 'text/plain'; break;
+                case 'html': $mime = 'text/html'; break;
             }
         }
 
-        // Make name depending on whether the disk allows custom names - fallback order: $name, $originalname, $hashname
-        $name = $disk->allow_custom_filename ? $name ?? $originalname ?? $hashname : $hashname;
 
 
-
-        // Store the file on disk
-        $storagePath = Storage::putFileAs($path->path, $file, $name);
-
-        // Create or update the media model
-        $media = self::updateOrCreate([
-            'src_path' => $storagePath,
+        return self::updateOrCreate([
+            'src_path' => $path->path,
         ],[
             'parent_id' => optional($parent)->id,
             'drive' => $path->diskname,
             'mime_type' => $mime,
-            'name' => $name,
+            'name' => $path->filename,
             'meta' => [
                 'extension' => $extension,
                 'size' => $size,
             ],
         ]);
+    }
 
-        // Set user as media owner
-        if (auth()->user()) $media->setOwner(auth()->user());
 
-        // Generate thumbnails
-        if ($disk->generate_thumbnails); // TODO: create queue job that generates thumbnails
 
-        // Return the media model
+    public static function upload(string $path, UploadedFile $file, string $name = null): Media
+    {
+        $path = self::dissectPath($path);
+        $disk = self::getMediaDiskOrFail($path->diskname);
+        $parent = self::getDirectory($path->path);
+
+        if ($path->hasSubdirectory)
+        {
+            if (!$disk->allow_subdirectory_creation) throw new \Exception('The disk "' . $path->diskname . '" does not allow subdirectory creation.');
+            if (!$parent) throw new \Exception('The parent directory does not exist.');
+        }
+
+
+        // If disk doesn't allow for custom names, set $name to hashname
+        if (!$disk->allow_custom_filename) $name = $file->hashName();
+
+        // If no name is provided, set $name to original clientname or hashname
+        $name = $name ?? $file->getClientOriginalName() ?? $file->hashName();
+
+
+        $storagePath = Storage::putFileAs($path->path, $file, $name);
+        $media = self::createMediaFromPath($storagePath);
+        $user = auth()->user();
+        
+        if ($user) $media->setOwner($user);
+        if ($disk->generate_thumbnails) $media->generateThumbnail();
+        
         return $media->fresh();
+    }
+
+
+
+    public function generateThumbnail(): void
+    {
+        // TODO: create queue job that generates thumbnails
     }
 
 
 
     public static function createDirectory(string $path, string $name): Media
     {
-        // Parse path
         $path = self::dissectPath($path);
-        $disk = self::getMediaDisk($path->diskname);
+        $disk = self::getMediaDiskOrFail($path->diskname);
         $parent = self::getDirectory($path->path);
 
-        // Check if the disk exists and is allowed for media
-        if (!$disk)
-        {
-            throw new \Exception('The disk "' . $path->diskname . '" does not exist or is not allowed for media.');
-        }
+        if (!$disk->allow_subdirectory_creation) throw new \Exception('The disk "' . $path->diskname . '" does not allow subdirectory creation.');
+        if ($path->hasSubdirectory && !$parent) throw new \Exception('The parent directory does not exist.');
 
-        // Check if the disk allows subdirectory creation
-        if (!$disk->allow_subdirectory_creation)
-        {
-            throw new \Exception('The disk "' . $path->diskname . '" does not allow subdirectory creation.');
-        }
+        $storagePath = $path->path . '/' . $name;        
 
-        // When subdirectory exists: check if the parent media model exists
-        if ($path->hasSubdirectory && !$parent)
-        {
-            throw new \Exception('The parent directory does not exist.');
-        }
-
-        
-        
-        // Create the storage path
-        $storagePath = $path->path . '/' . $name;
-
-        // Create the directory on disk
         Storage::makeDirectory($storagePath);
+        $media = self::createMediaFromPath($storagePath);
+        $user = auth()->user();
+        
+        if ($user) $media->setOwner($user);
+        if ($disk->generate_thumbnails) $media->generateThumbnail();
 
-        // Create or update the media model
-        $media = self::updateOrCreate([
-            'src_path' => $storagePath,
-        ],[
-            'parent_id' => optional($parent)->id,
-            'drive' => $path->diskname,
-            'mime_type' => 'directory',
-            'name' => $name,
-            'meta' => [
-                'extension' => null,
-                'size' => null,
-            ],
-        ]);
-
-        // Set user as media owner
-        if (auth()->user()) $media->setOwner(auth()->user());
-
-
-
-        // Return the media model
         return $media->fresh();
     }
 
@@ -495,27 +455,13 @@ class Media extends Model
 
     public static function moveMany(array $items, string $destinationPath, string $filename = null): void
     {
-        // Parse path
         $destinationPath = self::dissectPath($destinationPath);
-
-        // Parse filename
         $filename = $filename ? self::dissectFilename($filename) : null;
 
-        // Get disk and parent
-        $disk = self::getMediaDisk($destinationPath->diskname);
+        $disk = self::getMediaDiskOrFail($destinationPath->diskname);
         $parent = self::getDirectory($destinationPath->path);
 
-        // Check if the disk exists and is allowed for media
-        if (!$disk)
-        {
-            throw new \Exception('The disk "' . $destinationPath->diskname . '" does not exist or is not allowed for media.');
-        }
-
-        // When subdirectory exists: check if the parent media model exists
-        if ($destinationPath->hasSubdirectory && !$parent)
-        {
-            throw new \Exception('The parent directory does not exist.');
-        }
+        if ($destinationPath->hasSubdirectory && !$parent) throw new \Exception('The parent directory does not exist.');
 
         // Loop through all items
         foreach ($items as $index => $item)
@@ -583,27 +529,13 @@ class Media extends Model
 
     public static function copyMany(array $items, string $destinationPath, string $filename = null): void
     {
-        // Parse path
         $destinationPath = self::dissectPath($destinationPath);
-
-        // Parse filename
         $filename = $filename ? self::dissectFilename($filename) : null;
 
-        // Get disk and parent
-        $disk = self::getMediaDisk($destinationPath->diskname);
+        $disk = self::getMediaDiskOrFail($destinationPath->diskname);
         $parent = self::getDirectory($destinationPath->path);
 
-        // Check if the disk exists and is allowed for media
-        if (!$disk)
-        {
-            throw new \Exception('The disk "' . $destinationPath->diskname . '" does not exist or is not allowed for media.');
-        }
-
-        // When subdirectory exists: check if the parent media model exists
-        if ($destinationPath->hasSubdirectory && !$parent)
-        {
-            throw new \Exception('The parent directory does not exist.');
-        }
+        if ($destinationPath->hasSubdirectory && !$parent) throw new \Exception('The parent directory does not exist.');
 
         // Loop through all items
         foreach ($items as $index => $item)
