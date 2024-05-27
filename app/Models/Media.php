@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
+use Intervention\Image\Laravel\Facades\Image;
 
 class Media extends Model
 {
@@ -16,7 +17,7 @@ class Media extends Model
         'parent_id',
         'drive',
         'src_path',
-        'thumbnail_path',
+        'thumbnail',
         'mime_type',
         'name',
         'owner_id',
@@ -411,10 +412,35 @@ class Media extends Model
 
 
 
+    // TODO: Add ImageMagick
+    // TODO: Add SVG support
+    // TODO: Add FFMPEG
+    // TODO: Add Video thumbnail support
+    // TODO: Add Audio thumbnail support
     public function generateThumbnail(): void
     {
-        // TODO: create queue job that generates thumbnails
+        $thumbnail = match ($this->mime_type)
+        {
+            'image/jpeg' => self::rasterImageToThumbnail($this->src_path),
+            'image/png' => self::rasterImageToThumbnail($this->src_path),
+            'image/gif' => self::rasterImageToThumbnail($this->src_path),
+            default => null,
+        };
+
+        $this->update([ 'thumbnail' => $thumbnail ]);
     }
+
+    // START: Media conversions
+    public static function rasterImageToThumbnail(string $path): ?string
+    {
+        return Image::read(Storage::get($path))
+        ->scaleDown(300, 300, function ($constraint) {
+            $constraint->aspectRatio();
+        })
+        ->toWebp(quality: 50)
+        ->toDataUri();
+    }
+    // END: Media conversions
 
 
 

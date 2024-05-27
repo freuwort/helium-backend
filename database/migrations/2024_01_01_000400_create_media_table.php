@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('parent_id')->nullable()->constrained('media')->onDelete('cascade')->onUpdate('cascade');
             $table->string('drive')->nullable();
             $table->string('src_path');
-            $table->string('thumbnail_path')->nullable();
+            $table->text('thumbnail')->nullable();
             $table->string('mime_type')->nullable();
             $table->string('name')->nullable();
             $table->nullableMorphs('owner');

@@ -9,7 +9,7 @@
         "caneara/quest": "^4.0",
         "endroid/qr-code": "^5.0",
         "guzzlehttp/guzzle": "^7.2",
-        "intervention/image": "^2",
+        "intervention/image-laravel": "*",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",

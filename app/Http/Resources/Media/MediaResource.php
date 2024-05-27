@@ -19,7 +19,7 @@ class MediaResource extends JsonResource
             'drive' => $this->drive,
             'src_path' => $this->src_path,
             'cdn_path' => $this->cdn_path,
-            'thumbnail_path' => $this->thumbnail_path,
+            'thumbnail' => $this->thumbnail,
             'mime_type' => $this->mime_type,
             'name' => $this->name,
             'owner_id' => $this->owner_id,
