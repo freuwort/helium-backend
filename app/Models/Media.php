@@ -412,6 +412,7 @@ class Media extends Model
 
 
 
+    // TODO: Make this async
     // TODO: Add ImageMagick
     // TODO: Add SVG support
     // TODO: Add FFMPEG
