@@ -28,6 +28,11 @@ class Company extends Model
 
 
     // START: Relationships
+    public function identifiers()
+    {
+        return $this->morphMany(Identifier::class, 'identifiable');
+    }
+
     public function addresses(): MorphMany
     {
         return $this->morphMany(Address::class, 'addressable');

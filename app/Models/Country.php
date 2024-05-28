@@ -15,14 +15,15 @@ class Country extends Model
 
     protected $fillable = [
         'code',
+        'alpha_3',
         'name',
     ];
 
 
 
-    public function product_prices()
+    public function prices()
     {
-        return $this->morphedByMany(ProductPrice::class, 'model', 'model_has_countries');
+        return $this->morphedByMany(Price::class, 'model', 'model_has_countries');
     }
 
     public function taxes()

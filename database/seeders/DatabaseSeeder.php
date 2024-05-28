@@ -16,6 +16,9 @@ class DatabaseSeeder extends Seeder
         $this->call(RolesSeeder::class);
         $this->call(SuperAdminSeeder::class);
         $this->call(DomainSettingSeeder::class);
+        $this->call(CountriesSeeder::class);
+        $this->call(CurrenciesSeeder::class);
+
 
 
         // Test Users

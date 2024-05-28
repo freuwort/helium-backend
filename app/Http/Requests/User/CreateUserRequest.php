@@ -19,7 +19,6 @@ class CreateUserRequest extends FormRequest
             // User Model
             'model.name' => ['nullable', 'string', 'max:255'],
             'model.username' => ['nullable', 'string', 'max:255', 'unique:users,username'],
-            'model.ident_number' => ['nullable', 'string', 'max:255'],
             'model.email' => ['nullable', 'string', 'email', 'max:255', 'unique:users,email'],
             'model.email_verified_at' => ['nullable', 'date'],
             'model.enabled_at' => ['nullable', 'date'],
@@ -50,7 +49,7 @@ class CreateUserRequest extends FormRequest
             'addresses.*.city' => ['nullable', 'string', 'max:255'],
             'addresses.*.state' => ['nullable', 'string', 'max:255'],
             'addresses.*.postal_code' => ['nullable', 'string', 'max:255'],
-            'addresses.*.country' => ['nullable', 'string', 'max:255'],
+            'addresses.*.country_code' => ['nullable', 'exists:countries,code'],
             'addresses.*.latitude' => ['nullable', 'numeric'],
             'addresses.*.longitude' => ['nullable', 'numeric'],
             'addresses.*.notes' => ['nullable', 'string', 'max:255'],

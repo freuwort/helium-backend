@@ -10,6 +10,7 @@ use App\Models\BankConnection;
 use App\Models\Company;
 use App\Models\Date;
 use App\Models\Email;
+use App\Models\Identifier;
 use App\Models\LegalDetail;
 use App\Models\Link;
 use App\Models\Phonenumber;
@@ -64,6 +65,7 @@ class CompanyController extends Controller
         $company = Company::create($request->model);
 
         $company->syncMany(LegalDetail::class, $request->legal_details, 'legal_details');
+        $company->syncMany(Identifier::class, $request->identifiers);
         $company->syncMany(Address::class, $request->addresses);
         $company->syncMany(BankConnection::class, $request->bank_connections, 'bank_connections');
         $company->syncMany(Email::class, $request->emails);
@@ -81,6 +83,7 @@ class CompanyController extends Controller
         $company->update($request->model);
 
         $company->syncMany(LegalDetail::class, $request->legal_details, 'legal_details');
+        $company->syncMany(Identifier::class, $request->identifiers);
         $company->syncMany(Address::class, $request->addresses);
         $company->syncMany(BankConnection::class, $request->bank_connections, 'bank_connections');
         $company->syncMany(Email::class, $request->emails);

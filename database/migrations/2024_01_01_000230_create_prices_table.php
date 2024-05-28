@@ -13,11 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('user_settings', function (Blueprint $table) {
+        Schema::create('prices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
-            $table->string('key')->nullable();
-            $table->text('value')->nullable();
+            $table->morphs('priceable');
+            $table->string('type');
+            $table->decimal('price', 15, 4);
+            $table->string('currency_code', 4);
+
+            $table->foreign('currency_code')->references('code')->on('currencies')->restrictOnDelete()->cascadeOnUpdate();
         });
     }
 
@@ -28,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_settings');
+        Schema::dropIfExists('prices');
     }
 };

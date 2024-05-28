@@ -27,9 +27,9 @@ class Product extends Model
         return $this->belongsTo(ProductGroup::class, 'product_group_id');
     }
 
-    public function product_prices()
+    public function prices()
     {
-        return $this->morphMany(ProductPrice::class, 'priceable');
+        return $this->morphMany(Price::class, 'priceable');
     }
 
     public function product_batches()

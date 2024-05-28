@@ -23,7 +23,6 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'username',
-        'ident_number',
         'email',
         'password',
         'email_verified_at',
@@ -59,6 +58,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function raw_settings()
     {
         return $this->hasMany(UserSetting::class);
+    }
+
+    public function identifiers()
+    {
+        return $this->morphMany(Identifier::class, 'identifiable');
     }
 
     public function addresses(): MorphMany

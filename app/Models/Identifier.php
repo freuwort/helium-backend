@@ -4,26 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class Currency extends Model
+class Identifier extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'code';
-
     public $timestamps = false;
-
+    
     protected $fillable = [
-        'code',
-        'name',
-        'symbol',
-        'decimal_places',
+        'type',
+        'label',
+        'value',
     ];
 
 
 
-    public function prices()
+    public function identifiable(): MorphTo
     {
-        return $this->hasMany(Price::class);
+        return $this->morphTo();
     }
 }

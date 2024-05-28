@@ -17,7 +17,6 @@ class SuperAdminSeeder extends Seeder
         $super_admin = \App\Models\User::create([
             'name' => 'Super Admin',
             'username' => 'admin',
-            'ident_number' => null,
             'email' => 'admin@example.com',
             'password' => Hash::make('password'),
             'remember_token' => null,

@@ -31,6 +31,7 @@ class EditorUserResource extends JsonResource
 
             'user_name' => $this->user_name,
             'user_company' => $this->user_company,
+            'identifiers' => $this->identifiers,
             'addresses' => $this->addresses,
             'bank_connections' => $this->bank_connections,
             'emails' => $this->emails,

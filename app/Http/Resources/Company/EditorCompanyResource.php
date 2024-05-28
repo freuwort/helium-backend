@@ -29,6 +29,7 @@ class EditorCompanyResource extends JsonResource
             ],
 
             'legal_details' => $this->legal_details,
+            'identifiers' => $this->identifiers,
             'addresses' => $this->addresses,
             'phonenumbers' => $this->phonenumbers,
             'emails' => $this->emails,

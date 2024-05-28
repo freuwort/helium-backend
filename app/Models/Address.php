@@ -17,7 +17,7 @@ class Address extends Model
         'city',
         'state',
         'postal_code',
-        'country',
+        'country_code',
         'latitude',
         'longitude',
         'notes',
@@ -28,6 +28,11 @@ class Address extends Model
     public function addressable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class, 'country_code', 'code');
     }
 
 

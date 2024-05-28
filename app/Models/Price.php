@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class ProductPrice extends Model
+class Price extends Model
 {
     use HasFactory;
 
@@ -22,8 +22,8 @@ class ProductPrice extends Model
 
     protected static function booted()
     {
-        static::deleting(function ($productPrice) {
-            $productPrice->countries()->detach();
+        static::deleting(function ($price) {
+            $price->countries()->detach();
         });
     }
 

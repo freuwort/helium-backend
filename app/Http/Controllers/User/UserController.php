@@ -13,6 +13,7 @@ use App\Models\Address;
 use App\Models\BankConnection;
 use App\Models\Date;
 use App\Models\Email;
+use App\Models\Identifier;
 use App\Models\Link;
 use App\Models\Phonenumber;
 use App\Models\User;
@@ -116,6 +117,7 @@ class UserController extends Controller
 
         $user->user_name()->updateOrCreate([], $request->user_name);
         $user->user_company()->updateOrCreate([], $request->user_company);
+        $user->syncMany(Identifier::class, $request->identifiers);
         $user->syncMany(Address::class, $request->addresses);
         $user->syncMany(BankConnection::class, $request->bank_connections, 'bank_connections');
         $user->syncMany(Email::class, $request->emails);
@@ -140,6 +142,7 @@ class UserController extends Controller
 
         $user->user_name()->updateOrCreate([], $request->user_name);
         $user->user_company()->updateOrCreate([], $request->user_company);
+        $user->syncMany(Identifier::class, $request->identifiers);
         $user->syncMany(Address::class, $request->addresses);
         $user->syncMany(BankConnection::class, $request->bank_connections, 'bank_connections');
         $user->syncMany(Email::class, $request->emails);
