@@ -27,6 +27,10 @@ class UpdateUserRequest extends FormRequest
             // User Password
             'password' => ['nullable', 'string', 'min:8'],
 
+            // User Roles
+            'roles' => ['nullable', 'array'],
+            'roles.*' => ['required', 'string', 'exists:roles,id'],
+
             // User Name
             'user_name.salutation' => ['nullable', 'string', 'max:255'],
             'user_name.prefix' => ['nullable', 'string', 'max:255'],
@@ -41,6 +45,12 @@ class UpdateUserRequest extends FormRequest
             'user_company.company' => ['nullable', 'string', 'max:255'],
             'user_company.department' => ['nullable', 'string', 'max:255'],
             'user_company.title' => ['nullable', 'string', 'max:255'],
+
+            // User Identifiers
+            'identifiers' => ['nullable', 'array'],
+            'identifiers.*.type' => ['required', 'string', 'max:255'],
+            'identifiers.*.label' => ['required', 'string', 'max:255'],
+            'identifiers.*.value' => ['required', 'string', 'max:255'],
 
             // User Addresses
             'addresses' => ['nullable', 'array'],

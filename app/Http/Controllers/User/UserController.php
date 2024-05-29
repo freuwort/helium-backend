@@ -126,7 +126,7 @@ class UserController extends Controller
         $user->syncMany(Link::class, $request->links);
 
         // Update roles
-        // $user->syncRoles($request->roles);
+        $user->syncRoles($request->roles);
 
         return EditorUserResource::make($user);
     }
@@ -151,7 +151,7 @@ class UserController extends Controller
         $user->syncMany(Link::class, $request->links);
 
         // Update roles
-        // $user->syncRoles($request->roles);
+        $user->syncRoles($request->roles);
 
         return EditorUserResource::make($user);
     }
