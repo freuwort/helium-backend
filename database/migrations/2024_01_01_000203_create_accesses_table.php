@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('media_accesses', function (Blueprint $table) {
-            $table->foreignId('media_id')->constrained('media')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->nullableMorphs('model');
+        Schema::create('accesses', function (Blueprint $table) {
+            $table->nullableMorphs('accessable');
+            $table->nullableMorphs('permissible');
             $table->string('type')->nullable();
             $table->string('permission')->nullable();
         });
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('media_accesses');
+        Schema::dropIfExists('accesses');
     }
 };

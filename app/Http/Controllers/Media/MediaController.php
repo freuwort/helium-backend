@@ -17,12 +17,9 @@ class MediaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Media::query()
-            ->whereChildOfPath($request->path)
-            ->orderByDefault();
-
-        $media = $query->get()
-            ->filter(fn ($media) => $media->canModelRead($request->user()) || $request->user()->can(Permissions::SYSTEM_ADMIN));
+        $user = $request->user();
+        $query = Media::query()->whereChildOfPath($request->path)->orderByDefault();
+        $media = $query->get()->filter(fn ($media) => $media->userCanAny($user, ['read', 'write', 'admin']));
 
         return MediaResource::collection($media);
     }
@@ -49,24 +46,16 @@ class MediaController extends Controller
         
         $media->update([ 'inherit_access' => $request->inherit_access ]);
         
-        $media->access()->delete();
+        $media->removeAllAccess();
 
-        $media->access()->updateOrCreate([
-            'media_id' => null,
-            'model_type' => null,
-            'type' => 'share',
-        ], [
-            'permission' => $request->public_access,
-        ]);
+        $media->addAccess(null, ['permission' => $request->public_access]);
 
         foreach ($request->access as $access)
         {
-            $media->access()->create([
-                'model_id' => $access['model_id'],
-                'model_type' => $access['model_type'],
-                'type' => 'share',
-                'permission' => $access['permission'],
-            ]);
+            $media->addAccess([
+                'id' => $access['permissible_id'],
+                'type' => $access['permissible_type'],
+            ], ['permission' => $access['permission']]);
         }
     }
 

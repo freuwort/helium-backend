@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Media;
 
+use App\Http\Resources\AccessResource;
 use App\Http\Resources\Role\BasicRoleResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -26,15 +27,12 @@ class MediaResource extends JsonResource
             'owner_type' => $this->typeDict($this->owner_type),
             'owner' => $this->modelDict($this->owner),
             'inherit_access' => $this->inherit_access,
-            'access' => MediaAccessResource::collection($this->access),
+            'access' => AccessResource::collection($this->accesses),
             'meta' => $this->meta,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'DEBUG' => [
                 'computed_access' => $this->computeAccess(),
-                'can_read' => $this->canModelRead(auth()->user()),
-                'can_write' => $this->canModelWrite(auth()->user()),
-                'can_admin' => $this->canModelAdmin(auth()->user()),
             ],
         ];
     }

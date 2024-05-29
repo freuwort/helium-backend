@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Classes\Permissions\Permissions;
+use App\Traits\HasAccessControl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -11,7 +13,7 @@ use Intervention\Image\Laravel\Facades\Image;
 
 class Media extends Model
 {
-    use HasFactory;
+    use HasFactory, HasAccessControl;
 
     protected $fillable = [
         'parent_id',
@@ -62,11 +64,6 @@ class Media extends Model
     public function owner()
     {
         return $this->morphTo();
-    }
-
-    public function access()
-    {
-        return $this->hasMany(MediaAccess::class, 'media_id');
     }
     // END: Relationships
 
@@ -154,9 +151,9 @@ class Media extends Model
 
 
 
-    public static function getDefaultAccess(string $diskname)
+    public function getDefaultAccess()
     {
-        return optional(self::getMediaDisk($diskname))->default_access ?? config('filesystems.disk_default_access');
+        return optional(self::getMediaDisk($this->drive))->default_access ?? config('filesystems.disk_default_access');
     }
 
 
@@ -185,75 +182,26 @@ class Media extends Model
 
 
 
-    public function computeAccess()
+    public function userCan(User $user, $permission)
     {
-        $defaultAccess = collect(self::getDefaultAccess($this->drive));
-
-        // Recursively compute access if access is inherited
-        if ($this->inherit_access === true)
-        {
-            return $this->parent
-                ? $this->parent->computeAccess()
-                : $defaultAccess;
-        }
-
-        $publicAccess = collect(['any' => ['guest' => $this
-            ->access()
-            ->where('type', 'share')
-            ->whereNull('model_id')
-            ->whereNull('model_type')
-            ->first()
-            ->permission ?? null
-        ]]);
-
-        $specificAccess = $this
-            ->access()
-            ->select('type', 'model_id', 'model_type', 'permission')
-            ->where('type', 'share')
-            ->whereNotNull('model_id')
-            ->whereNotNull('model_type')
-            ->get()
-            ->groupBy('model_type')
-            ->map(fn ($group) => $group->pluck('permission', 'model_id'));
-
-        return $defaultAccess
-            ->merge($publicAccess)
-            ->merge($specificAccess);
+        return $this->userCanAny($user, [$permission]);
     }
 
-
-
-    // TODO: this isnt as nice as it could be; should be refactored
-    private function canModel($permissions, $model = null)
+    public function userCanAny(User $user, $permissions)
     {
-        $group = (string) $model::class;
-        $id = (string) $model->getKey();
+        // Check for guest access first
+        if ($this->checkIfGuest()->canAny($permissions)) return true;
 
-        $access = $this->computeAccess();
+        // Then check if user access via any assigned role
+        if ($this->checkIfAny($user->roles->toArray())->canAny($permissions)) return true;
 
-        // If public access is granted, return true
-        if (isset($access['any']['guest']) && in_array($access['any']['guest'], $permissions)) return true;
-        
-        // If specific access is granted, return true
-        if (isset($access[$group][$id]) && in_array($access[$group][$id], $permissions)) return true;
-        
-        // Otherwise the model has no access
+        // Then check if user has direct access
+        if ($this->checkIf($user)->canAny($permissions)) return true;
+
+        // Finally check if user is system admin
+        if ($user->can(Permissions::SYSTEM_ADMIN)) return true;
+
         return false;
-    }
-
-    public function canModelRead($model = null)
-    {
-        return $this->canModel(['read', 'write', 'admin'], $model);
-    }
-
-    public function canModelWrite($model = null)
-    {
-        return $this->canModel(['write', 'admin'], $model);
-    }
-
-    public function canModelAdmin($model = null)
-    {
-        return $this->canModel(['admin'], $model);
     }
 
 

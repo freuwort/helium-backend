@@ -1,23 +1,27 @@
 <?php
 
-namespace App\Http\Resources\Media;
+namespace App\Http\Resources;
 
 use App\Http\Resources\Role\BasicRoleResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\User\BasicUserResource;
+use App\Models\Media;
 use App\Models\Role;
 use App\Models\User;
 
-class MediaAccessResource extends JsonResource
+class AccessResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
         return [
-            'media_id' => $this->media_id,
-            'model_id' => $this->model_id,
-            'model_type' => $this->typeDict($this->model_type),
-            'model' => $this->modelDict($this->model),
+            'accessable_id' => $this->accessable_id,
+            'accessable_type' => $this->typeDict($this->accessable_type),
+
+            'permissible_id' => $this->permissible_id,
+            'permissible_type' => $this->typeDict($this->permissible_type),
+            'permissible' => $this->modelDict($this->permissible),
+
             'type' => $this->type,
             'permission' => $this->permission,
         ];
@@ -28,6 +32,7 @@ class MediaAccessResource extends JsonResource
     private function typeDict($type)
     {
         return match ($type) {
+            Media::class => 'media',
             User::class => 'user',
             Role::class => 'role',
             default => null

@@ -20,19 +20,19 @@ class ShareMediaRequest extends FormRequest
             'inherit_access' => ['required', 'boolean'],
             'public_access' => ['nullable', 'string', 'in:read,write,admin'],
             'access' => ['nullable', 'array'],
-            'access.*.model_id' => ['required', 'integer'],
-            'access.*.model_type' => ['required', 'string', 'in:user,role'],
+            'access.*.permissible_id' => ['required', 'integer'],
+            'access.*.permissible_type' => ['required', 'string', 'in:user,role'],
             'access.*.permission' => ['required', 'string', 'in:read,write,admin'],
         ];
     }
 
-    // transform model_type from 'user' to User::class (and vice versa for role)
+    // transform permissible_type from 'user' to User::class (and vice versa for role)
     public function passedValidation(): void
     {
         $this->merge([
             'access' => collect($this->access)->map(fn ($access) => [
-                'model_id' => $access['model_id'],
-                'model_type' => self::typeDict($access['model_type']),
+                'permissible_id' => $access['permissible_id'],
+                'permissible_type' => self::typeDict($access['permissible_type']),
                 'permission' => $access['permission'],
             ]),
         ]);
