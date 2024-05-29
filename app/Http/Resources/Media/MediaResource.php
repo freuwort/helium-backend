@@ -50,7 +50,7 @@ class MediaResource extends JsonResource
 
     private function modelDict($model)
     {
-        return match (get_class($model)) {
+        return match ($model ? get_class($model) : null) {
             User::class => BasicUserResource::make($model),
             Role::class => BasicRoleResource::make($model),
             default => null

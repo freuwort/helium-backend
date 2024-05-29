@@ -39,10 +39,6 @@ class Media extends Model
     {
         parent::boot();
 
-        self::created(function ($model) {
-            // Queue thumbnail generation
-        });
-
         self::deleting(function ($model) {
             !Storage::mimeType($model->src_path) ? Storage::deleteDirectory($model->src_path) : Storage::delete($model->src_path);
         });
@@ -208,73 +204,25 @@ class Media extends Model
 
     public static function discovery(string $path)
     {
-        // Parse path
         $path = self::dissectPath($path);
-        $disk = self::getMediaDisk($path->diskname);
+        $disk = self::getMediaDiskOrFail($path->diskname);
         $parent = self::getDirectory($path->path);
 
-        // Check if the disk exists and is allowed for media
-        if (!$disk)
-        {
-            throw new \Exception('The disk "' . $path->diskname . '" does not exist or is not allowed for media.');
-        }
-
         // When subdirectory exists: check if the parent media model exists
-        if ($path->hasSubdirectory && !$parent)
-        {
-            throw new \Exception('The parent directory does not exist.');
-        }
-
+        if ($path->hasSubdirectory && !$parent) throw new \Exception('The parent directory does not exist.');
 
 
         // Get all files and directories in the path
-        $files = Storage::files($path->path);
-        $directories = Storage::directories($path->path);
-
-        // Loop through all files
-        foreach ($files as $file)
+        foreach (Storage::files($path->path) as $file)
         {
-            // Check if the file already exists in the database
-            $media = self::where('src_path', $file)->first();
-
-            // If it doesn't exist, create it
-            if (!$media)
-            {
-                $media = self::create([
-                    'parent_id' => optional($parent)->id,
-                    'drive' => $path->diskname,
-                    'src_path' => $file,
-                    'name' => Str::afterLast($file, '/'),
-                    'mime_type' => Storage::mimeType($file),
-                    'meta' => [
-                        'extension' => Str::afterLast($file, '.'),
-                        'size' => Storage::size($file),
-                    ],
-                ]);
-            }
+            // Check if the file already exists
+            if (!self::where('src_path', $file)->exists()) self::createMediaFromPath($file);
         }
 
-        // Loop through all directories
-        foreach ($directories as $directory)
+        foreach (Storage::directories($path->path) as $directory)
         {
-            // Check if the directory already exists in the database
-            $media = self::where('src_path', $directory)->first();
-
-            // If it doesn't exist, create it
-            if (!$media)
-            {
-                $media = self::create([
-                    'parent_id' => optional($parent)->id,
-                    'drive' => $path->diskname,
-                    'src_path' => $directory,
-                    'name' => Str::afterLast($directory, '/'),
-                    'mime_type' => 'directory',
-                    'meta' => [
-                        'extension' => null,
-                        'size' => null,
-                    ],
-                ]);
-            }
+            // Check if the directory already exists
+            if (!self::where('src_path', $directory)->exists()) self::createMediaFromPath($directory);
 
             // Recursively discover the directory
             self::discovery($directory);
@@ -312,7 +260,7 @@ class Media extends Model
 
 
 
-        return self::updateOrCreate([
+        $media = self::updateOrCreate([
             'src_path' => $path->path,
         ],[
             'parent_id' => optional($parent)->id,
@@ -324,6 +272,10 @@ class Media extends Model
                 'size' => $size,
             ],
         ]);
+
+        $media->generateThumbnail();
+
+        return $media;
     }
 
 
@@ -353,7 +305,6 @@ class Media extends Model
         $user = auth()->user();
         
         if ($user) $media->setOwner($user);
-        if ($disk->generate_thumbnails) $media->generateThumbnail();
         
         return $media->fresh();
     }
@@ -409,7 +360,6 @@ class Media extends Model
         $user = auth()->user();
         
         if ($user) $media->setOwner($user);
-        if ($disk->generate_thumbnails) $media->generateThumbnail();
 
         return $media->fresh();
     }
