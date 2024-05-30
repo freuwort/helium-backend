@@ -48,9 +48,9 @@ class UserController extends Controller
         }
 
         // Filter
-        if ($request->exclude)
+        if ($request->filter_exclude)
         {
-            $query->whereNotIn('id', $request->exclude);
+            $query->whereNotIn('id', $request->filter_exclude);
         }
 
         // Sort

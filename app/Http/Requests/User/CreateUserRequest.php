@@ -28,7 +28,7 @@ class CreateUserRequest extends FormRequest
 
             // User Roles
             'roles' => ['nullable', 'array'],
-            'roles.*' => ['required', 'string', 'exists:roles,id'],
+            'roles.*' => ['required', 'exists:roles,id'],
 
             // User Name
             'user_name.salutation' => ['nullable', 'string', 'max:255'],
