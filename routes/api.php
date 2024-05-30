@@ -28,15 +28,16 @@ use Illuminate\Support\Facades\Route;
 require __DIR__ . '/api/debug.php';
 
 // Routes needing: no authentication
-Route::prefix('domain')->group(function () {
-    Route::get('/settings', [DomainController::class, 'index']);
-});
+Route::get('/domain/settings', [DomainController::class, 'index']);
 
 // Routes needing: authentication
 Route::middleware(['auth:sanctum'])->group(function () {
     // Auth-info of current user
     Route::get('/user', [AuthUserController::class, 'getUser']);
     Route::get('/session', [AuthUserController::class, 'getSession']);
+
+    // Domain info base units
+    Route::get('/domain/units', [DomainController::class, 'indexUnits']);
 
     // Routes needing: authentication, two factor authentication
     Route::middleware(['verified', 'verified.tfa'])->group(function () {

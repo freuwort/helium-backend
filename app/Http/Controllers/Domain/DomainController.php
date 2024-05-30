@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Domain;
 
 use App\Http\Controllers\Controller;
+use App\Models\Country;
+use App\Models\Currency;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 
@@ -30,6 +32,17 @@ class DomainController extends Controller
             'policy_allow_profile_image_upload' => Setting::getSetting('policy_allow_profile_image_upload'),
             'policy_allow_profile_banner_upload' => Setting::getSetting('policy_allow_profile_banner_upload'),
             'policy_require_tfa' => Setting::getSetting('policy_require_tfa'),
+        ]);
+    }
+
+
+
+    public function indexUnits()
+    {
+        return response()->json([
+            'base_units' => [],
+            'countries' => Country::all(),
+            'currencies' => Currency::all(),
         ]);
     }
 }
