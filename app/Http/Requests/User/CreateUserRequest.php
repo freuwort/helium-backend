@@ -47,9 +47,9 @@ class CreateUserRequest extends FormRequest
 
             // User Identifiers
             'identifiers' => ['nullable', 'array'],
-            'identifiers.*.type' => ['required', 'string', 'max:255'],
-            'identifiers.*.label' => ['required', 'string', 'max:255'],
-            'identifiers.*.value' => ['required', 'string', 'max:255'],
+            'identifiers.*.type' => ['nullable', 'string', 'max:255'],
+            'identifiers.*.label' => ['nullable', 'string', 'max:255'],
+            'identifiers.*.value' => ['nullable', 'string', 'max:255'],
 
             // User Addresses
             'addresses' => ['nullable', 'array'],
