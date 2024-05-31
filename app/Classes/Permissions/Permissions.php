@@ -7,6 +7,8 @@ class Permissions
     /**
      * System permissions:
      */
+
+    // Admin
     public const SYSTEM_SUPER_ADMIN = 'system.super-admin';
     public const SYSTEM_ADMIN = 'system.admin';
 
@@ -44,11 +46,22 @@ class Permissions
     public const SYSTEM_ACCESS_MEDIA = 'system.access.media';
 
 
+    /**
+     * App permissions:
+     */
+
+    // Event
+    public const APP_VIEW_EVENTS = 'app.view.events';
+    public const APP_CREATE_EVENTS = 'app.create.events';
+    public const APP_EDIT_EVENTS = 'app.edit.events';
+    public const APP_DELETE_EVENTS = 'app.delete.events';
+
+
+
 
     /**
      * Permissions setup:
      */
-
     public const GROUPED_PERMISSIONS = [
         'system' => [
             'title' => 'System Berechtigungen',
@@ -89,27 +102,17 @@ class Permissions
             ],
         ],
 
-        // 'app.pages' => [
-        //     'title' => 'Pages',
-        //     'permissions' => [
-        //         [
-        //             ['name' => self::APP_PAGES_ACCESS_FRONTEND, 'label' => 'Zutritt zu Pages', 'description' => 'Der Benutzer hat Zugriff auf das Pages Frontend.'],
-        //             ['name' => self::APP_PAGES_ACCESS_ADMIN_PANEL, 'label' => 'Zutritt zum Pages Admin Bereich', 'description' => 'Der Benutzer hat Zugriff auf den Pages Admin Bereich.'],
-        //         ],
-        //         [
-        //             ['name' => self::APP_PAGES_VIEW_PAGES, 'label' => 'Seiten anzeigen', 'description' => 'Der Benutzer kann Seiten ansehen.'],
-        //             ['name' => self::APP_PAGES_CREATE_PAGES, 'label' => 'Seiten erstellen', 'description' => 'Der Benutzer kann Seiten erstellen.'],
-        //             ['name' => self::APP_PAGES_EDIT_PAGES, 'label' => 'Seiten bearbeiten', 'description' => 'Der Benutzer kann Seiten bearbeiten.'],
-        //             ['name' => self::APP_PAGES_DELETE_PAGES, 'label' => 'Seiten löschen', 'description' => 'Der Benutzer kann Seiten löschen.'],
-        //         ],
-        //         [
-        //             ['name' => self::APP_PAGES_VIEW_MENUS, 'label' => 'Menüs anzeigen', 'description' => 'Der Benutzer kann Menüs ansehen.'],
-        //             ['name' => self::APP_PAGES_CREATE_MENUS, 'label' => 'Menüs erstellen', 'description' => 'Der Benutzer kann Menüs erstellen.'],
-        //             ['name' => self::APP_PAGES_EDIT_MENUS, 'label' => 'Menüs bearbeiten', 'description' => 'Der Benutzer kann Menüs bearbeiten.'],
-        //             ['name' => self::APP_PAGES_DELETE_MENUS, 'label' => 'Menüs löschen', 'description' => 'Der Benutzer kann Menüs löschen.'],
-        //         ],
-        //     ],
-        // ],
+        'app.events' => [
+            'title' => 'App Berechtigungen: Events',
+            'permissions' => [
+                [
+                    ['name' => self::APP_VIEW_EVENTS, 'label' => 'Events anzeigen', 'description' => 'Der Benutzer kann Events ansehen.'],
+                    ['name' => self::APP_CREATE_EVENTS, 'label' => 'Events erstellen', 'description' => 'Der Benutzer kann Events erstellen.'],
+                    ['name' => self::APP_EDIT_EVENTS, 'label' => 'Events bearbeiten', 'description' => 'Der Benutzer kann Events bearbeiten.'],
+                    ['name' => self::APP_DELETE_EVENTS, 'label' => 'Events löschen', 'description' => 'Der Benutzer kann Events löschen.'],
+                ],
+            ],
+        ],
     ];
 
 
