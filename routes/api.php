@@ -7,6 +7,7 @@ use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Domain\DomainController;
 use App\Http\Controllers\Domain\DomainSettingController;
 use App\Http\Controllers\Event\EventController;
+use App\Http\Controllers\Event\EventInviteController;
 use App\Http\Controllers\Media\FileController;
 use App\Http\Controllers\Media\DirectoryController;
 use App\Http\Controllers\Media\MediaController;
@@ -103,6 +104,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
         // Event
+        Route::resource('/events/{event}/invites', EventInviteController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+        Route::delete('/events/{event}/invites', [EventInviteController::class, 'destroyMany']);
+
         Route::resource('/events', EventController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/events', [EventController::class, 'destroyMany']);
     });

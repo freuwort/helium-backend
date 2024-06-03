@@ -32,5 +32,15 @@ class Event extends Model
     {
         return $this->belongsTo(Event::class, 'parent_id');
     }
+
+    public function children()
+    {
+        return $this->hasMany(Event::class, 'parent_id');
+    }
+
+    public function invites()
+    {
+        return $this->hasMany(EventInvite::class);
+    }
     // END: Relationships
 }
