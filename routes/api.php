@@ -105,6 +105,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Event
         Route::resource('/events/{event}/invites', EventInviteController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+        Route::post('/events/{event}/invites/import', [EventInviteController::class, 'import']);
         Route::delete('/events/{event}/invites', [EventInviteController::class, 'destroyMany']);
 
         Route::resource('/events', EventController::class)->only(['show', 'index', 'store', 'update', 'destroy']);

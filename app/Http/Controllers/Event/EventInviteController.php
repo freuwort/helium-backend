@@ -7,6 +7,7 @@ use App\Http\Requests\Event\CreateEventInviteRequest;
 use App\Http\Requests\Event\CreateEventRequest;
 use App\Http\Requests\Event\DestroyManyEventInviteRequest;
 use App\Http\Requests\Event\DestroyManyEventRequest;
+use App\Http\Requests\Event\ImportEventInvitesRequest;
 use App\Http\Requests\Event\UpdateEventInviteRequest;
 use App\Http\Requests\Event\UpdateEventRequest;
 use App\Http\Resources\Event\EditorEventInviteResource;
@@ -66,6 +67,18 @@ class EventInviteController extends Controller
         $invite = EventInvite::create($request->model);
 
         return EditorEventInviteResource::make($invite);
+    }
+
+
+
+    public function import(ImportEventInvitesRequest $request, Event $event)
+    {
+        $this->authorize('create');
+
+        foreach ($request->items as $item)
+        {
+            EventInvite::create([ ...$item, 'event_id' => $event->id ]);
+        }
     }
 
     
