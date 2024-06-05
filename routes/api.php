@@ -31,6 +31,7 @@ require __DIR__ . '/api/debug.php';
 
 // Routes needing: no authentication
 Route::get('/domain/settings', [DomainController::class, 'index']);
+Route::get('/event-invite/{code}', [EventController::class, 'assignInvite'])->name('event-invite.assign');
 
 // Routes needing: authentication
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -104,9 +105,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
         // Event
-        Route::resource('/events/{event}/invites', EventInviteController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::post('/events/{event}/invites/import', [EventInviteController::class, 'import']);
+        Route::patch('/events/{event}/invites/email', [EventInviteController::class, 'sendTemplatedEmail']);
         Route::delete('/events/{event}/invites', [EventInviteController::class, 'destroyMany']);
+        Route::resource('/events/{event}/invites', EventInviteController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
 
         Route::resource('/events', EventController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/events', [EventController::class, 'destroyMany']);
