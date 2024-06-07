@@ -17,6 +17,8 @@ class ImportEventInvitesRequest extends FormRequest
     {
         return [
             'items.*.user_id' => ['nullable', 'exists:users,id'],
+            'items.*.type' => ['nullable', 'string', 'max:255'],
+            'items.*.name' => ['nullable', 'string', 'max:255'],
             'items.*.email' => ['nullable', 'email'],
             'items.*.phone' => ['nullable', 'string', 'max:255'],
             'items.*.code' => ['nullable', 'string', 'max:127', 'unique:event_invites,code'],

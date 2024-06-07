@@ -33,6 +33,7 @@ class EventInviteController extends Controller
         {
             $query->whereFuzzy(function ($query) use ($request) {
                 $query
+                    ->orWhereFuzzy('name', $request->filter_search)
                     ->orWhereFuzzy('email', $request->filter_search)
                     ->orWhereFuzzy('phone', $request->filter_search)
                     ->orWhereFuzzy('code', $request->filter_search);
@@ -40,6 +41,19 @@ class EventInviteController extends Controller
         }
 
         // Filter
+        if ($request->filter_status)
+        {
+            $includesPending = in_array('pending', $request->filter_status);
+
+            $query->where(function ($query) use ($request, $includesPending) {
+                $query->whereIn('status', $request->filter_status);
+                if ($includesPending) $query->orWhereNull('status');
+            });
+        }
+        if ($request->filter_type)
+        {
+            $query->whereIn('type', $request->filter_type);
+        }
 
         // Sort
         $field = $request->sort_field ?? 'created_at';
@@ -49,7 +63,10 @@ class EventInviteController extends Controller
 
         // Return collection + pagination
         return EventInviteResource::collection($query->paginate($request->size ?? 20))
-            ->additional(['keys' => $query->pluck($query->getModel()->getKeyName())->toArray()]);
+            ->additional(['keys' => $query->pluck('id')->toArray()])
+            ->additional(['filter_values' => [
+                'type' => $event->invites()->distinct('type')->pluck('type')->toArray(),
+            ]]);
     }
 
     

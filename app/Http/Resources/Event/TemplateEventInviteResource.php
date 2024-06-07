@@ -23,6 +23,8 @@ class TemplateEventInviteResource extends JsonResource
             'event_end_at' => $event->end_at,
             'user_id' => $this->user_id,
             'user_name' => optional(optional($user)->user_name)->fullname ?? optional($user)->name,
+            'type' => $this->type,
+            'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
             'code' => $this->code,

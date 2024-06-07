@@ -18,6 +18,8 @@ class EditorEventInviteResource extends JsonResource
                 'event' => BasicEventResource::make($this->event),
                 'user_id' => $this->user_id,
                 'user' => BasicUserResource::make($this->user),
+                'type' => $this->type,
+                'name' => $this->name,
                 'email' => $this->email,
                 'phone' => $this->phone,
                 'code' => $this->code,
