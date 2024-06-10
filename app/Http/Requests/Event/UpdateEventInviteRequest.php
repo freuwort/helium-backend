@@ -19,6 +19,7 @@ class UpdateEventInviteRequest extends FormRequest
             // Model
             'model.event_id' => ['required', 'exists:events,id'],
             'model.user_id' => ['nullable', 'exists:users,id'],
+            'model.form_id' => ['nullable', 'exists:forms,id'],
             'model.type' => ['nullable', 'string', 'max:255'],
             'model.name' => ['nullable', 'string', 'max:255'],
             'model.email' => ['nullable', 'email'],
