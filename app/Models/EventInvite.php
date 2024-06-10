@@ -18,6 +18,7 @@ class EventInvite extends Model
     protected $fillable = [
         'event_id',
         'user_id',
+        'form_id',
         'type',
         'name',
         'email',
@@ -37,6 +38,11 @@ class EventInvite extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function form()
+    {
+        return $this->belongsTo(Form::class);
     }
     // END: Relationships
 

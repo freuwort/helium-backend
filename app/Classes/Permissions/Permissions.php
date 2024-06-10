@@ -50,6 +50,12 @@ class Permissions
      * App permissions:
      */
 
+    // Forms
+    public const APP_VIEW_FORMS = 'app.view.forms';
+    public const APP_CREATE_FORMS = 'app.create.forms';
+    public const APP_EDIT_FORMS = 'app.edit.forms';
+    public const APP_DELETE_FORMS = 'app.delete.forms';
+
     // Event
     public const APP_VIEW_EVENTS = 'app.view.events';
     public const APP_CREATE_EVENTS = 'app.create.events';
@@ -102,8 +108,20 @@ class Permissions
             ],
         ],
 
+        'app.forms' => [
+            'title' => 'App – Formulare',
+            'permissions' => [
+                [
+                    ['name' => self::APP_VIEW_FORMS, 'label' => 'Formulare anzeigen', 'description' => 'Der Benutzer kann Formulare ansehen.'],
+                    ['name' => self::APP_CREATE_FORMS, 'label' => 'Formulare erstellen', 'description' => 'Der Benutzer kann Formulare erstellen.'],
+                    ['name' => self::APP_EDIT_FORMS, 'label' => 'Formulare bearbeiten', 'description' => 'Der Benutzer kann Formulare bearbeiten.'],
+                    ['name' => self::APP_DELETE_FORMS, 'label' => 'Formulare löschen', 'description' => 'Der Benutzer kann Formulare löschen.'],
+                ],
+            ],
+        ],
+
         'app.events' => [
-            'title' => 'App Berechtigungen: Events',
+            'title' => 'App – Events',
             'permissions' => [
                 [
                     ['name' => self::APP_VIEW_EVENTS, 'label' => 'Events anzeigen', 'description' => 'Der Benutzer kann Events ansehen.'],

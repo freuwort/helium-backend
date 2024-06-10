@@ -8,6 +8,7 @@ use App\Http\Requests\Event\DestroyManyEventRequest;
 use App\Http\Requests\Event\UpdateEventRequest;
 use App\Http\Resources\Event\EditorEventResource;
 use App\Http\Resources\Event\EventResource;
+use App\Models\Address;
 use App\Models\Event;
 use Illuminate\Http\Request;
 
@@ -61,6 +62,8 @@ class EventController extends Controller
     {
         $event = Event::create($request->model);
 
+        $event->syncMany(Address::class, $request->addresses);
+
         return EditorEventResource::make($event);
     }
 
@@ -69,6 +72,8 @@ class EventController extends Controller
     public function update(UpdateEventRequest $request, Event $event)
     {
         $event->update($request->model);
+
+        $event->syncMany(Address::class, $request->addresses);
 
         return EditorEventResource::make($event);
     }

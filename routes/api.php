@@ -8,6 +8,7 @@ use App\Http\Controllers\Domain\DomainController;
 use App\Http\Controllers\Domain\DomainSettingController;
 use App\Http\Controllers\Event\EventController;
 use App\Http\Controllers\Event\EventInviteController;
+use App\Http\Controllers\Form\FormController;
 use App\Http\Controllers\Media\FileController;
 use App\Http\Controllers\Media\DirectoryController;
 use App\Http\Controllers\Media\MediaController;
@@ -101,6 +102,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/media/rename', [MediaController::class, 'rename']);
         Route::patch('/media/discovery', [MediaController::class, 'discovery']);
         Route::delete('/media', [MediaController::class, 'destroy']);
+
+
+
+        // Form
+        Route::resource('/forms', FormController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+        Route::delete('/forms', [FormController::class, 'destroyMany']);
 
 
 

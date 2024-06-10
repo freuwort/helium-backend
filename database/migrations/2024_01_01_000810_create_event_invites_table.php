@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('event_id')->constrained('events')->onDelete('cascade')->onUpdate('cascade');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null')->onUpdate('cascade');
+            $table->foreignId('form_id')->nullable()->constrained('forms')->onDelete('set null')->onUpdate('cascade');
             $table->string('type')->nullable();
             $table->string('name')->nullable();
             $table->string('email')->nullable();

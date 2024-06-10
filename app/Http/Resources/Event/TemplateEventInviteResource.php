@@ -2,8 +2,6 @@
 
 namespace App\Http\Resources\Event;
 
-use App\Http\Resources\User\BasicUserResource;
-use App\Http\Resources\User\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
