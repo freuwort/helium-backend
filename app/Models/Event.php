@@ -49,4 +49,38 @@ class Event extends Model
         return $this->morphMany(Address::class, 'addressable');
     }
     // END: Relationships
+
+
+
+    // START: Attributes
+    public function getMainAddressAttribute()
+    {
+        return $this->addresses()->where('type', 'main')->first();
+    }
+
+    public function getBillingAddressAttribute()
+    {
+        return $this->addresses()->where('type', 'billing')->first();
+    }
+
+    public function getShippingAddressAttribute()
+    {
+        return $this->addresses()->where('type', 'shipping')->first();
+    }
+
+    public function getIsLiveAttribute()
+    {
+        return $this->start_at <= now() && $this->end_at >= now();
+    }
+
+    public function getIsPastAttribute()
+    {
+        return $this->end_at < now();
+    }
+
+    public function getIsFutureAttribute()
+    {
+        return $this->start_at > now();
+    }
+    // END: Attributes
 }

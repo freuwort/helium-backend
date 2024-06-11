@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Event;
 
+use App\Http\Resources\Address\BasicAddressResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,6 +17,7 @@ class BasicEventResource extends JsonResource
             'description' => $this->description,
             'start_at' => $this->start_at,
             'end_at' => $this->end_at,
+            'main_address' => BasicAddressResource::make($this->main_address),
         ];
     }
 }

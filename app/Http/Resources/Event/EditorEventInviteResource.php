@@ -22,6 +22,7 @@ class EditorEventInviteResource extends JsonResource
                 'form_id' => $this->form_id,
                 'form' => BasicFormResource::make($this->form),
                 'type' => $this->type,
+                'needs_claim' => $this->needs_claim,
                 'name' => $this->name,
                 'email' => $this->email,
                 'phone' => $this->phone,

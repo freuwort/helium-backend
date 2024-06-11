@@ -8,6 +8,7 @@ use App\Http\Requests\Event\DestroyManyEventInviteRequest;
 use App\Http\Requests\Event\ImportEventInvitesRequest;
 use App\Http\Requests\Event\UpdateEventInviteRequest;
 use App\Http\Requests\SendTemplatedEmailRequest;
+use App\Http\Resources\Event\BasicEventInviteResource;
 use App\Http\Resources\Event\EditorEventInviteResource;
 use App\Http\Resources\Event\EventInviteResource;
 use App\Models\Event;
@@ -71,6 +72,13 @@ class EventInviteController extends Controller
 
     
     
+    public function showBasic(Request $request)
+    {
+        return BasicEventInviteResource::make(EventInvite::where('code', $request->code)->firstOrFail());
+    }
+
+
+    
     public function show(Event $event, EventInvite $invite)
     {
         return EditorEventInviteResource::make($event->invites()->find($invite->id));
@@ -106,6 +114,33 @@ class EventInviteController extends Controller
         $invite->update($request->model);
 
         return EditorEventInviteResource::make($invite);
+    }
+
+    public function claim(Request $request)
+    {
+        $invite = EventInvite::where('code', $request->code)->firstOrFail();
+
+        $invite->update(['user_id' => auth()->user()->id]);
+
+        return BasicEventInviteResource::make($invite);
+    }
+
+    public function updateStatus(Request $request)
+    {
+        $invite = EventInvite::where('code', $request->code)->firstOrFail();
+
+        $invite->update(['status' => $request->status]);
+
+        return BasicEventInviteResource::make($invite);
+    }
+
+    public function updateDetails(Request $request)
+    {
+        $invite = EventInvite::where('code', $request->code)->firstOrFail();
+
+        $invite->submitForm($request->all());
+
+        return BasicEventInviteResource::make($invite);
     }
 
 

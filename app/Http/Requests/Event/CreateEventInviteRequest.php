@@ -21,6 +21,7 @@ class CreateEventInviteRequest extends FormRequest
             'model.user_id' => ['nullable', 'exists:users,id'],
             'model.form_id' => ['nullable', 'exists:forms,id'],
             'model.type' => ['nullable', 'string', 'max:255'],
+            'model.needs_claim' => ['nullable', 'bool'],
             'model.name' => ['nullable', 'string', 'max:255'],
             'model.email' => ['nullable', 'email'],
             'model.phone' => ['nullable', 'string', 'max:255'],

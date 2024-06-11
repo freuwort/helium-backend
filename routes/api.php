@@ -4,11 +4,13 @@ use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\UserController as AuthUserController;
 use App\Http\Controllers\Auth\UserSettingController;
 use App\Http\Controllers\Company\CompanyController;
+use App\Http\Controllers\Debug\DebugController;
 use App\Http\Controllers\Domain\DomainController;
 use App\Http\Controllers\Domain\DomainSettingController;
 use App\Http\Controllers\Event\EventController;
 use App\Http\Controllers\Event\EventInviteController;
 use App\Http\Controllers\Form\FormController;
+use App\Http\Controllers\Media\DeliveryController;
 use App\Http\Controllers\Media\FileController;
 use App\Http\Controllers\Media\DirectoryController;
 use App\Http\Controllers\Media\MediaController;
@@ -28,20 +30,24 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-require __DIR__ . '/api/debug.php';
-
-// Routes needing: no authentication
+// General domain info
 Route::get('/domain/settings', [DomainController::class, 'index']);
-Route::get('/event-invite/{code}', [EventController::class, 'assignInvite'])->name('event-invite.assign');
+
+// Event invite info
+Route::get('/event-invite/{code}', [EventInviteController::class, 'showBasic']);
+
+// Media delivery
+Route::get('/media/{path}', DeliveryController::class)->where('path', '(.*)');
+
+
 
 // Routes needing: authentication
 Route::middleware(['auth:sanctum'])->group(function () {
+
     // Auth-info of current user
     Route::get('/user', [AuthUserController::class, 'getUser']);
+    // Session info
     Route::get('/session', [AuthUserController::class, 'getSession']);
-
-    // Domain info base units
-    Route::get('/domain/units', [DomainController::class, 'indexUnits']);
 
     // Routes needing: authentication, two factor authentication
     Route::middleware(['verified', 'verified.tfa'])->group(function () {
@@ -52,6 +58,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::patch('/password', [AuthUserController::class, 'updatePassword']);
             Route::delete('/', [AuthUserController::class, 'delete']);
     
+            // Two factor
             Route::prefix('two-factor')->group(function () {
                 Route::put('/default/{method}', [TwoFactorController::class, 'setDefaultTfaMethod']);
                 Route::delete('/destroy/{method}', [TwoFactorController::class, 'destroyTfaMethod']);
@@ -70,6 +77,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
         // Domain
         Route::patch('/settings', [DomainSettingController::class, 'update']);
+        
+        // Base units
+        Route::get('/domain/units', [DomainController::class, 'indexUnits']);
     
         // Permissions
         Route::get('/permissions', [PermissionController::class, 'index']);
@@ -88,13 +98,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::resource('/companies', CompanyController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/companies', [CompanyController::class, 'destroyMany']);
     
-        // Media Upload
-        Route::post('/upload', [FileController::class, 'upload']);
-    
-        // Media directory
-        Route::post('/directory', [DirectoryController::class, 'store']);
-    
         // Media
+        Route::post('/upload', [FileController::class, 'upload']);
+        Route::post('/directory', [DirectoryController::class, 'store']);
         Route::get('/media/{path}', [MediaController::class, 'index'])->where('path', '(.*)');
         Route::post('/media/copy', [MediaController::class, 'copy']);
         Route::patch('/media/share', [MediaController::class, 'share']);
@@ -113,11 +119,21 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Event
         Route::post('/events/{event}/invites/import', [EventInviteController::class, 'import']);
+        Route::post('/events/{event}/invites/export', [EventInviteController::class, 'export']);
         Route::patch('/events/{event}/invites/email', [EventInviteController::class, 'sendTemplatedEmail']);
         Route::delete('/events/{event}/invites', [EventInviteController::class, 'destroyMany']);
         Route::resource('/events/{event}/invites', EventInviteController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
-
         Route::resource('/events', EventController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/events', [EventController::class, 'destroyMany']);
+
+        // Event invite
+        Route::patch('/event-invite/{code}/claim', [EventInviteController::class, 'claim']);
+        Route::patch('/event-invite/{code}/status', [EventInviteController::class, 'updateStatus']);
+        Route::patch('/event-invite/{code}/details', [EventInviteController::class, 'updateDetails']);
+
+
+
+        // Debug
+        Route::get('/debug/status/{status}', [DebugController::class, 'status']);
     });
 });

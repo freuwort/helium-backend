@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null')->onUpdate('cascade');
             $table->foreignId('form_id')->nullable()->constrained('forms')->onDelete('set null')->onUpdate('cascade');
             $table->string('type')->nullable();
+            $table->boolean('needs_claim')->default(false);
             $table->string('name')->nullable();
             $table->string('email')->nullable();
             $table->string('phone')->nullable();

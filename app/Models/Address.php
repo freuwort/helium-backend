@@ -39,11 +39,19 @@ class Address extends Model
 
     public function getFullAddressAttribute(): string
     {
-        
         return implode(', ', array_filter([
             implode(' ', array_filter([$this->address_line_1, $this->address_line_2])),
             implode(' ', array_filter([$this->postal_code, $this->city])),
-            implode(' ', array_filter([$this->state, $this->country])),
+        ]));
+    }
+
+
+    public function getFullAddressWithCountryAttribute(): string
+    {
+        return implode(', ', array_filter([
+            implode(' ', array_filter([$this->address_line_1, $this->address_line_2])),
+            implode(' ', array_filter([$this->postal_code, $this->city])),
+            implode(' ', array_filter([$this->state, optional($this->country)->name])),
         ]));
     }
 }

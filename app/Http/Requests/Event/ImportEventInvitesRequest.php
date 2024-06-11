@@ -19,6 +19,7 @@ class ImportEventInvitesRequest extends FormRequest
             'items.*.user_id' => ['nullable', 'exists:users,id'],
             'items.*.form_id' => ['nullable', 'exists:forms,id'],
             'items.*.type' => ['nullable', 'string', 'max:255'],
+            'items.*.needs_claim' => ['nullable', 'bool'],
             'items.*.name' => ['nullable', 'string', 'max:255'],
             'items.*.email' => ['nullable', 'email'],
             'items.*.phone' => ['nullable', 'string', 'max:255'],
