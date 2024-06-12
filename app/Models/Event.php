@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Traits\HasAccessControl;
+use App\Traits\HasMedia;
 use App\Traits\SyncMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Event extends Model
 {
-    use HasFactory, HasAccessControl, SyncMany;
+    use HasFactory, HasAccessControl, SyncMany, HasMedia;
 
     protected $fillable = [
         'parent_id',

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('form_id')->nullable()->constrained()->onDelete('set null')->onUpdate('cascade');
             $table->nullableMorphs('model');
             $table->json('data')->nullable();
+            $table->json('files')->nullable();
             $table->timestamps();
         });
     }

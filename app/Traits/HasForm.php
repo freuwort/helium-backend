@@ -4,7 +4,9 @@ namespace App\Traits;
 
 use App\Models\Form;
 use App\Models\FormSubmission;
+use App\Models\Media;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 trait HasForm
@@ -23,52 +25,51 @@ trait HasForm
 
 
 
-    public function getSubmissionAttribute()
+    private function validateFormSubmissionViaRequest(Request $request, Form $form)
     {
-        return $this->submissions()->first()->data;
+        $request->validate($form->getValidationRules());
+
+        return $request->all();
+    }
+
+    private function uploadViaRequest(Request $request)
+    {
+        $files = [];
+
+        foreach ($request->files as $key => $fileList)
+        {
+            $files[$key] = [];
+
+            if (!is_array($fileList)) $fileList = [$fileList];
+
+            foreach ($fileList as $file)
+            {
+                $files[$key][] = Media::upload('forms', $file)->src_path;
+            }
+        }
+
+        return $files;
     }
 
 
 
-    private function validateFormSubmission($formId, $data)
+    public function submitFormViaRequest(Request $request, $formId = null)
     {
-        $form = Form::find($formId);
+        $form = Form::findOrFail($formId ?? $this->form->id);
 
-        if (!$form) return false;
+        $data = $this->validateFormSubmissionViaRequest($request, $form);
 
-        $validator = Validator::make($data, $form->validation_rules);
-
-        if ($validator->fails()) return false;
+        $files = $this->uploadViaRequest($request);
         
-        return $validator->validated();
-    }
-
-
-
-    public function submitForm($data, $formId = null)
-    {
-        $formId = $formId ?? $this->form->id;
-
-        if (!$data) return;
-
-        $validatedData = $this->validateFormSubmission($formId, $data);
-
-        if (!$validatedData) return;
-        
-        if ($this->multipleSubmissions)
+        if (!$this->multipleSubmissions)
         {
-            $this->submissions()->create([
-                'form_id' => $formId,
-                'data' => $validatedData,
-            ]);
+            $this->submissions()->get()->each->delete();
         }
-        else
-        {
-            $this->submissions()->updateOrCreate([
-                'form_id' => $formId,
-            ], [
-                'data' => $validatedData,
-            ]);
-        }
+
+        $this->submissions()->create([
+            'form_id' => $formId,
+            'data' => $data,
+            'files' => $files,
+        ]);
     }
 }

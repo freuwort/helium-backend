@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Event;
 
 use App\Http\Resources\Form\BasicFormResource;
+use App\Http\Resources\Form\BasicFormSubmissionResource;
 use App\Http\Resources\User\BasicUserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -20,7 +21,7 @@ class BasicEventInviteResource extends JsonResource
             'needs_claim' => $this->needs_claim,
             'name' => $this->name,
             'status' => $this->status,
-            'submission' => $this->submission,
+            'details' => BasicFormSubmissionResource::collection($this->submissions),
         ];
     }
 }

@@ -6,9 +6,11 @@ use App\Classes\Permissions\Permissions;
 use App\Traits\HasAccessControl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
+use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 use Intervention\Image\Laravel\Facades\Image;
 
 class Media extends Model
@@ -280,7 +282,7 @@ class Media extends Model
 
 
 
-    public static function upload(string $path, UploadedFile $file, string $name = null): Media
+    public static function upload(string $path, UploadedFile|SymfonyUploadedFile $file, string $name = null): Media
     {
         $path = self::dissectPath($path);
         $disk = self::getMediaDiskOrFail($path->diskname);
@@ -292,12 +294,14 @@ class Media extends Model
             if (!$parent) throw new \Exception('The parent directory does not exist.');
         }
 
+        // Generate hashname
+        $hashname = (new File($file))->hashName();
 
         // If disk doesn't allow for custom names, set $name to hashname
-        if (!$disk->allow_custom_filename) $name = $file->hashName();
+        if (!$disk->allow_custom_filename) $name = $hashname;
 
         // If no name is provided, set $name to original clientname or hashname
-        $name = $name ?? $file->getClientOriginalName() ?? $file->hashName();
+        $name = $name ?? $file->getClientOriginalName() ?? $hashname;
 
 
         $storagePath = Storage::putFileAs($path->path, $file, $name);

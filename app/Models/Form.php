@@ -31,8 +31,7 @@ class Form extends Model
 
 
 
-    // START: Attributes
-    public function getValidationRulesAttribute()
+    public function getValidationRules()
     {
         $rules = [];
         

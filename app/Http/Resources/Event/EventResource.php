@@ -23,6 +23,7 @@ class EventResource extends JsonResource
             'updated_at' => $this->updated_at,
             'invites_count' => $this->invites()->count(),
 
+            'addresses' => $this->addresses,
             'access' => AccessResource::collection($this->accesses),
         ];
     }

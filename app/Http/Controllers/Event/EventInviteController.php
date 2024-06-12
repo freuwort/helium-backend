@@ -138,7 +138,7 @@ class EventInviteController extends Controller
     {
         $invite = EventInvite::where('code', $request->code)->firstOrFail();
 
-        $invite->submitForm($request->all());
+        $invite->submitFormViaRequest($request);
 
         return BasicEventInviteResource::make($invite);
     }

@@ -14,10 +14,12 @@ class FormSubmission extends Model
         'model_id',
         'model_type',
         'data',
+        'files',
     ];
 
     protected $casts = [
         'data' => 'array',
+        'files' => 'array',
     ];
 
 
@@ -33,4 +35,18 @@ class FormSubmission extends Model
         return $this->morphTo();
     }
     // END: Relationships
+
+
+
+    public static function boot()
+    {
+        parent::boot();
+
+        self::deleting(function ($model) {
+            collect($model->files)->flatten()->each(function ($file) {
+                $media = Media::firstWhere('src_path', $file);
+                if ($media) $media->delete();
+            });
+        });
+    }
 }

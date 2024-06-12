@@ -129,7 +129,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Event invite
         Route::patch('/event-invite/{code}/claim', [EventInviteController::class, 'claim']);
         Route::patch('/event-invite/{code}/status', [EventInviteController::class, 'updateStatus']);
-        Route::patch('/event-invite/{code}/details', [EventInviteController::class, 'updateDetails']);
+        Route::post('/event-invite/{code}/details', [EventInviteController::class, 'updateDetails']);
 
 
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Event;
 
+use App\Models\Media;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateEventRequest extends FormRequest
@@ -35,6 +36,21 @@ class UpdateEventRequest extends FormRequest
             'addresses.*.latitude' => ['nullable', 'numeric'],
             'addresses.*.longitude' => ['nullable', 'numeric'],
             'addresses.*.notes' => ['nullable', 'string', 'max:255'],
+
+            // Media
+            'media' => ['nullable', 'array'],
+            'media.*.type' => ['required', 'string', 'max:255'],
+            'media.*.src_path' => ['required', 'string', 'max:255'],
         ];
+    }
+
+    public function passedValidation(): void
+    {
+        $this->merge([
+            'media' => collect($this->media)->map(fn ($media) => [
+                'media_id' => Media::firstWhere('src_path', $media['src_path'])->id,
+                'type' => $media['type'],
+            ]),
+        ]);
     }
 }

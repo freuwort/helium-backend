@@ -25,6 +25,8 @@ class EditorEventResource extends JsonResource
                 'updated_at' => $this->updated_at,
             ],
 
+            'addresses' => $this->addresses,
+            'media' => $this->media,
             'invites_count' => $this->invites()->count(),
             'access' => AccessResource::collection($this->accesses),
         ];

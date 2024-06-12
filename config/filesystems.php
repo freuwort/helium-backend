@@ -69,6 +69,19 @@ return [
             'generate_thumbnails' => true,
         ],
 
+        'forms' => [
+            'driver' => 'local',
+            'root' => storage_path('app/forms'),
+            'url' => env('APP_URL').'/forms',
+            'visibility' => 'private',
+            'throw' => false,
+            'allow_subdirectory_creation' => false,
+            'allow_custom_filename' => false,
+            'use_for_media' => true,
+            'default_access' => null,
+            'generate_thumbnails' => false,
+        ],
+
         'profiles' => [
             'driver' => 'local',
             'root' => storage_path('app/profiles'),
