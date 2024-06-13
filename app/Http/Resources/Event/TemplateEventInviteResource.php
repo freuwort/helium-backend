@@ -12,7 +12,7 @@ class TemplateEventInviteResource extends JsonResource
         $event = $this->event;
         $form = $this->form;
 
-        return [
+        return array_merge([
             'id' => $this->id,
             'type' => $this->type,
             'name' => $this->name,
@@ -23,16 +23,16 @@ class TemplateEventInviteResource extends JsonResource
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-
             'event_id' => $this->event_id,
+            'form_id' => $this->form_id,
+        ], !$event ? [] : [
             'event_name' => $event->name,
             'event_slug' => $event->slug,
             'event_start_at' => $event->start_at,
             'event_end_at' => $event->end_at,
-
-            'form_id' => $this->form_id,
+        ], !$form ? [] : [
             'form_name' => $form->name,
             'form_slug' => $form->slug,
-        ];
+        ]);
     }
 }

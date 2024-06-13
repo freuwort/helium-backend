@@ -9,14 +9,9 @@ use Illuminate\Support\Facades\Storage;
 
 class DeliveryController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
     public function __invoke(Request $request)
     {
-        $path = $request->path;
-        
-        $model = Media::where('src_path', $path)->firstOrFail();
+        $model = Media::where('src_path', $request->path)->firstOrFail();
         
         return response()->file(Storage::path($model->src_path));
     }

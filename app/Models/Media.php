@@ -165,7 +165,7 @@ class Media extends Model
 
     public function getCdnPathAttribute(): string
     {
-        return config('app.url') . '/media/' . $this->src_path;
+        return url(route('media', $this->src_path));
     }
 
 

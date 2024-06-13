@@ -74,7 +74,7 @@ class EventController extends Controller
         $event->update($request->model);
 
         $event->syncMany(Address::class, $request->addresses);
-        $event->syncMedia($request->media);
+        $event->media()->sync($request->media);
 
         return EditorEventResource::make($event);
     }

@@ -3,14 +3,13 @@
 namespace App\Models;
 
 use App\Traits\HasAccessControl;
-use App\Traits\HasMedia;
 use App\Traits\SyncMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Event extends Model
 {
-    use HasFactory, HasAccessControl, SyncMany, HasMedia;
+    use HasFactory, HasAccessControl, SyncMany;
 
     protected $fillable = [
         'parent_id',
@@ -49,6 +48,11 @@ class Event extends Model
     {
         return $this->morphMany(Address::class, 'addressable');
     }
+
+    public function media()
+    {
+        return $this->morphToMany(Media::class, 'model', 'model_has_media')->withPivot('type');
+    }
     // END: Relationships
 
 
@@ -68,6 +72,18 @@ class Event extends Model
     {
         return $this->addresses()->where('type', 'shipping')->first();
     }
+
+    
+    public function getHeaderMediaAttribute()
+    {
+        return $this->media()->where('type', 'header')->first();
+    }
+
+    public function getLogoMediaAttribute()
+    {
+        return $this->media()->where('type', 'logo')->first();
+    }
+
 
     public function getIsLiveAttribute()
     {

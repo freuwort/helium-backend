@@ -36,9 +36,6 @@ Route::get('/domain/settings', [DomainController::class, 'index']);
 // Event invite info
 Route::get('/event-invite/{code}', [EventInviteController::class, 'showBasic']);
 
-// Media delivery
-Route::get('/media/{path}', DeliveryController::class)->where('path', '(.*)');
-
 
 
 // Routes needing: authentication

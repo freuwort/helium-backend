@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Event;
 
 use App\Http\Resources\AccessResource;
+use App\Http\Resources\Media\PivotMediaResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -26,7 +27,7 @@ class EditorEventResource extends JsonResource
             ],
 
             'addresses' => $this->addresses,
-            'media' => $this->media,
+            'media' => PivotMediaResource::collection($this->media),
             'invites_count' => $this->invites()->count(),
             'access' => AccessResource::collection($this->accesses),
         ];

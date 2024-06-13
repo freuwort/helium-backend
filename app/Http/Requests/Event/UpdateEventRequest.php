@@ -39,18 +39,8 @@ class UpdateEventRequest extends FormRequest
 
             // Media
             'media' => ['nullable', 'array'],
+            'media.*.media_id' => ['required', 'exists:media,id'],
             'media.*.type' => ['required', 'string', 'max:255'],
-            'media.*.src_path' => ['required', 'string', 'max:255'],
         ];
-    }
-
-    public function passedValidation(): void
-    {
-        $this->merge([
-            'media' => collect($this->media)->map(fn ($media) => [
-                'media_id' => Media::firstWhere('src_path', $media['src_path'])->id,
-                'type' => $media['type'],
-            ]),
-        ]);
     }
 }
