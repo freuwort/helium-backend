@@ -88,6 +88,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
         // Users
         Route::get('/users/basic', [UserController::class, 'indexBasic']);
+        Route::post('/users/{user}/image', [UserController::class, 'uploadProfileImage']);
+        Route::post('/users/{user}/banner', [UserController::class, 'uploadProfileBanner']);
         Route::resource('/users', UserController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/users', [UserController::class, 'destroyMany']);
     

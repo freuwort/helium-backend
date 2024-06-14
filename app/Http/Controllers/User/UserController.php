@@ -131,6 +131,20 @@ class UserController extends Controller
         return EditorUserResource::make($user);
     }
 
+    public function uploadProfileImage(Request $request, User $user)
+    {
+        $user->uploadProfileMedia($request->file('file'), User::MEDIA_IMAGE);
+
+        return new EditorUserResource($user);
+    }
+
+    public function uploadProfileBanner(Request $request, User $user)
+    {
+        $user->uploadProfileMedia($request->file('file'), User::MEDIA_BANNER);
+
+        return new EditorUserResource($user);
+    }
+
     
     
     public function update(UpdateUserRequest $request, User $user)

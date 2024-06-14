@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
@@ -41,6 +42,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'deleted_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public const MEDIA_IMAGE = 'profile_image';
+    public const MEDIA_BANNER = 'profile_banner';
 
 
 
@@ -94,6 +98,11 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->morphMany(Link::class, 'linkable');
     }
+
+    public function media()
+    {
+        return $this->morphToMany(Media::class, 'model', 'model_has_media')->withPivot('type');
+    }
     // END: Relationships
 
 
@@ -101,8 +110,20 @@ class User extends Authenticatable implements MustVerifyEmail
     // START: Attributes
     public function getProfileImageAttribute()
     {
-        $seed = $this->username;
-        return "https://api.dicebear.com/7.x/identicon/svg?seed=$seed&scale=65&size=72&backgroundColor=eeeeee";
+        $media = $this->media()->where('type', 'profile_image')->first();
+
+        if ($media) return $media->cdn_path;
+        
+        return "https://api.dicebear.com/7.x/identicon/svg?seed=".$this->username."&scale=65&size=72&backgroundColor=eeeeee";
+    }
+
+    public function getProfileBannerAttribute()
+    {
+        $media = $this->media()->where('type', 'profile_banner')->first();
+
+        if ($media) return $media->cdn_path;
+        
+        return null;
     }
 
     public function getSettingsAttribute()
@@ -193,4 +214,27 @@ class User extends Authenticatable implements MustVerifyEmail
         return false;
     }
     // END: Permissions
+
+
+
+    // START: Profile media
+    public function uploadProfileMedia(UploadedFile $file, String $type)
+    {
+        if(!in_array($type, ['profile_image', 'profile_banner'])) return;
+
+        // Delete old profile media
+        $this->media()->where('type', $type)->get()->each(function ($media) {
+            $media->delete();
+        });        
+
+        // Upload new profile media
+        $media = Media::upload('profiles', $file);
+
+        // Set profile image
+        $this->media()->syncWithoutDetaching([[
+            'media_id' => $media->id,
+            'type' => $type,
+        ]]);
+    }
+    // END: Profile media
 }

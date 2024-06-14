@@ -24,6 +24,7 @@ class PrivateUserResource extends JsonResource
             'default_tfa_method' => optional($this->default_tfa_method)->type,
 
             'profile_image' => $this->profile_image,
+            'profile_banner' => $this->profile_banner,
             'email' => $this->email,
             'username' => $this->username,
 
