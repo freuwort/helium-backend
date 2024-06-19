@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Media;
 
-use App\Classes\Permissions\Permissions;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Media\CopyMediaRequest;
 use App\Http\Requests\Media\DestroyMediaRequest;
@@ -17,7 +16,7 @@ class MediaController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
+        $user = $request->user() ?? auth()->user() ?? null;
         $query = Media::query()->whereChildOfPath($request->path)->orderByDefault();
         $media = $query->get()->filter(fn ($media) => $media->userCanAny($user, ['read', 'write', 'admin']));
 

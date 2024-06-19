@@ -15,6 +15,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Media delivery
-Route::get('/media/{path}', DeliveryController::class)->where('path', '(.*)')->withoutMiddleware('web')->name('media');
+Route::get('/media/{path}', DeliveryController::class)->where('path', '(.*)')->name('media');
 
 require __DIR__.'/auth.php';

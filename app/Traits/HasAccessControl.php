@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\Models\Access;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 trait HasAccessControl
@@ -114,7 +115,7 @@ trait HasAccessControl
         return $this->checkIfAny([]);
     }
 
-    public function checkIfAny(array $models)
+    public function checkIfAny(array|Collection $models)
     {
         return new AccessCheck($this->computeAccess(), $models);
     }

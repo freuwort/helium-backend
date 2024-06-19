@@ -180,18 +180,21 @@ class Media extends Model
 
 
 
-    public function userCan(User $user, $permission)
+    public function userCan(User|null $user, $permission)
     {
         return $this->userCanAny($user, [$permission]);
     }
 
-    public function userCanAny(User $user, $permissions)
+    public function userCanAny(User|null $user, $permissions)
     {
         // Check for guest access first
         if ($this->checkIfGuest()->canAny($permissions)) return true;
 
+        // Early exit if user is not logged in
+        if (!$user) return false;
+
         // Then check if user access via any assigned role
-        if ($this->checkIfAny($user->roles->toArray())->canAny($permissions)) return true;
+        if ($this->checkIfAny($user->roles()->get())->canAny($permissions)) return true;
 
         // Then check if user has direct access
         if ($this->checkIf($user)->canAny($permissions)) return true;
@@ -402,7 +405,14 @@ class Media extends Model
             $oldPath = self::dissectPath($media->src_path);
 
             // Create the new filename (either enumerated custom filename or original filename)
-            $newFilename = $filename ? ($filename->name.($index ? "_$index" : '').'.'.$filename->extension) : $oldPath->filename;
+            $newFilename = $oldPath->filename;
+
+            if ($filename)
+            {
+                $extension = $media->mime_type !== 'directory' ? '.'.$filename->extension : '';
+                $index = $index ? "_$index" : '';
+                $newFilename = $filename->name.$index.$extension;
+            }
 
             // Parse new path
             $newPath = self::dissectPath($destinationPath->path . '/' . $newFilename);
