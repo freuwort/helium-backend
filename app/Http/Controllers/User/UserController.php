@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UploadProfileMediaRequest;
 use App\Http\Requests\User\DestroyManyUserRequest;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
@@ -131,18 +132,14 @@ class UserController extends Controller
         return EditorUserResource::make($user);
     }
 
-    public function uploadProfileImage(Request $request, User $user)
+    public function uploadProfileImage(UploadProfileMediaRequest $request, User $user)
     {
         $user->uploadProfileMedia($request->file('file'), User::MEDIA_IMAGE);
-
-        return new EditorUserResource($user);
     }
 
-    public function uploadProfileBanner(Request $request, User $user)
+    public function uploadProfileBanner(UploadProfileMediaRequest $request, User $user)
     {
         $user->uploadProfileMedia($request->file('file'), User::MEDIA_BANNER);
-
-        return new EditorUserResource($user);
     }
 
     
