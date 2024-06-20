@@ -32,6 +32,8 @@ class DomainController extends Controller
             'policy_allow_profile_image_upload' => Setting::getSetting('policy_allow_profile_image_upload'),
             'policy_allow_profile_banner_upload' => Setting::getSetting('policy_allow_profile_banner_upload'),
             'policy_require_tfa' => Setting::getSetting('policy_require_tfa'),
+            'legal_notice' => Setting::getSetting('legal_notice'),
+            'legal_privacy' => Setting::getSetting('legal_privacy'),
         ]);
     }
 
