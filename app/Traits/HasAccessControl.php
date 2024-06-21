@@ -25,15 +25,67 @@ trait HasAccessControl
 
 
 
-    private function getInheritAccess()
-    {
-        
-    }
+    private function getInheritAccess(){}
 
     public function getDefaultAccess()
     {
         return ['any' => ['guest' => null]];
     }
+
+
+
+    // START: Scopes
+    public function scopeWhereModelHasAccess($query, Model $model, Array $permissions)
+    {
+        // $inheritAccessColumn = $this->inherit_access_column;
+        $inheritAccessColumn = 'inherit_access';
+        // $defaultAccess = $this->getDefaultAccess();
+        $defaultAccess = config('filesystems.disk_default_access');
+
+        return $query->where(function ($query) use ($model, $permissions, $defaultAccess, $inheritAccessColumn) {
+            return $query
+            // Where inherit access and has parent > go deeper
+            ->where($inheritAccessColumn, true)
+            ->whereNotNull('parent_id')
+            ->where(function ($query) use ($model, $permissions) {
+                return $query
+                ->whereHas('parent', function ($query) use ($model, $permissions) {
+                    // return $query->whereModelHasAccess($model, $permissions);
+                    return $query->where('name', 'spezifikationen');
+                });
+            });
+
+            // Where inherit access and no parent > select default access
+            // ->orWhere(function ($query) use ($permissions, $defaultAccess, $inheritAccessColumn) {
+            //     return $query
+            //     ->where($inheritAccessColumn, true)
+            //     ->whereNull('parent_id')
+            //     ->where(function ($query) use ($permissions, $defaultAccess) {
+            //         // Return if public access
+            //         if (in_array($defaultAccess['any']['guest'], $permissions)) return $query;
+
+            //         return $query;
+                    
+            //     });
+            // });
+            // Where custom access > select
+            // ->orWhere(function ($query) use ($permissions, $inheritAccessColumn) {
+            //     $query
+            //     ->where($inheritAccessColumn, false)
+            //     ->where(function ($query) use ($permissions) {
+            //         $query
+            //         ->whereHas('accesses', function ($query) use ($permissions) {
+            //             return $query
+            //             ->whereNull('type')
+            //             ->whereNull('permissible_id')
+            //             ->whereNull('permissible_type')
+            //             ->whereIn('permission', [...$permissions, null]);
+            //         });
+            //     });
+            // });
+        });
+    }
+    // END: Scopes
     
 
 

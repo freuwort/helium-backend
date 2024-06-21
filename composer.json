@@ -12,6 +12,7 @@
         "intervention/image-laravel": "*",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
+        "laravel/telescope": "^5.1",
         "laravel/tinker": "^2.8",
         "spatie/laravel-permission": "^6.3",
         "spomky-labs/otphp": "^11.2"
