@@ -12,25 +12,70 @@ class DeliveryController extends Controller
 {
     public function __invoke(Request $request)
     {
-        $user = $request->user() ?? auth()->user() ?? null;
-        $permissions = ['read', 'write', 'admin'];
+        if ($request->expectsJson() && !$request->exact) return $this->index($request);
+        if ($request->expectsJson() && $request->exact) return $this->show($request);
+        
+        return $this->serve($request);
+    }
 
-        // If the request is a json request, return a collection of media
-        if ($request->expectsJson())
+
+
+    public function index(Request $request)
+    {
+        // Base query
+        $query = Media::whereChildOfPath($request->path)->with('accesses');
+
+        // Search
+        if ($request->filter_search)
         {
-            return MediaResource::collection(
-                Media::query()
-                    ->whereChildOfPath($request->path)
-                    ->orderByDefault()
-                    ->get()
-                    ->filter(fn ($media) => $media->userCanAny($user, $permissions))
-            );
+            $query
+            ->whereFuzzy(function ($query) use ($request) {
+                $query
+                ->orWhereFuzzy('src_path', $request->filter_search)
+                ->orWhereFuzzy('name', $request->filter_search);
+            });
         }
 
-        // Otherwise return the file itself
+        // Filter
+
+        // Sort
+        $query->orderByDefault();
+
+        // Access Management
+        $user = $request->user();
+        $permissions = ['read', 'write', 'admin'];
+        $parentAccess = Media::checkIfUser(['src_path', $request->path], $user, $permissions);
+
+        $query->whereModelHasAccess($user, $permissions, $parentAccess);
+
+        // Return collection + pagination
+        return MediaResource::collection($query->paginate($request->size ?? 20));
+    }
+
+
+
+    public function show(Request $request)
+    {
+        $user = $request->user();
+        $permissions = ['read', 'write', 'admin'];
+
         $media = Media::where('src_path', $request->path)->firstOrFail();
 
-        if ($media->userCanAny($user, $permissions) === false) abort(403);
+        if (!Media::checkIfUser($media, $user, $permissions)) abort(403);
+
+        return MediaResource::make($media);
+    }
+
+
+
+    public function serve(Request $request)
+    {
+        $user = $request->user();
+        $permissions = ['read', 'write', 'admin'];
+
+        $media = Media::where('src_path', $request->path)->firstOrFail();
+
+        if (!Media::checkIfUser($media, $user, $permissions)) abort(403);
         
         return response()->file(Storage::path($media->src_path));
     }

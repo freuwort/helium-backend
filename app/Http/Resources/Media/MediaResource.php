@@ -31,9 +31,6 @@ class MediaResource extends JsonResource
             'meta' => $this->meta,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'DEBUG' => [
-                'computed_access' => $this->computeAccess(),
-            ],
         ];
     }
 

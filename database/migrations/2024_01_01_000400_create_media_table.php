@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('parent_id')->nullable()->constrained('media')->onDelete('cascade')->onUpdate('cascade');
             $table->string('drive')->nullable();
-            $table->string('src_path');
+            $table->string('src_path')->unique();
             $table->text('thumbnail')->nullable();
             $table->string('mime_type')->nullable();
             $table->string('name')->nullable();
@@ -25,6 +25,8 @@ return new class extends Migration
             $table->boolean('inherit_access')->default(true);
             $table->json('meta')->nullable();
             $table->timestamps();
+
+            $table->index('src_path');
         });
     }
 

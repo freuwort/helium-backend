@@ -2,10 +2,11 @@
 
 namespace App\Traits;
 
+use App\Classes\Permissions\Permissions;
 use App\Models\Access;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 
 trait HasAccessControl
 {
@@ -35,54 +36,53 @@ trait HasAccessControl
 
 
     // START: Scopes
-    public function scopeWhereModelHasAccess($query, Model $model, Array $permissions)
+    public function scopeWhereModelHasAccess($query, Model $model, array $permissions, $access)
     {
         // $inheritAccessColumn = $this->inherit_access_column;
         $inheritAccessColumn = 'inherit_access';
-        // $defaultAccess = $this->getDefaultAccess();
-        $defaultAccess = config('filesystems.disk_default_access');
 
-        return $query->where(function ($query) use ($model, $permissions, $defaultAccess, $inheritAccessColumn) {
+        // Check for super admin
+        if ($model instanceof User && $model->can([Permissions::SYSTEM_ADMIN, Permissions::SYSTEM_SUPER_ADMIN])) return $query;
+
+        // TODO: Return all models of which the user is the owner
+
+        return $query->where(function ($query) use ($model, $permissions, $access, $inheritAccessColumn) {
             return $query
-            // Where inherit access and has parent > go deeper
+            // Where inherit access
             ->where($inheritAccessColumn, true)
-            ->whereNotNull('parent_id')
-            ->where(function ($query) use ($model, $permissions) {
-                return $query
-                ->whereHas('parent', function ($query) use ($model, $permissions) {
-                    // return $query->whereModelHasAccess($model, $permissions);
-                    return $query->where('name', 'spezifikationen');
+            ->when($access, function ($query) {
+                return $query;
+            }, function ($query) use ($inheritAccessColumn) {
+                return $query->where($inheritAccessColumn, false);
+            })
+
+            // Where custom access > select
+            ->orWhere(function ($query) use ($model, $permissions, $inheritAccessColumn) {
+                $query
+                ->where($inheritAccessColumn, false)
+                ->where(function ($query) use ($model, $permissions) {
+                    return $query
+                    // Public access
+                    ->whereHas('accesses', function ($query) use ($permissions) {
+                        return $query
+                        ->whereNull('type')
+                        ->whereNull('permissible_id')
+                        ->whereNull('permissible_type')
+                        ->whereIn('permission', [...$permissions, null]);
+                    })
+                    // Specific access
+                    ->orWhereHas('accesses', function ($query) use ($model, $permissions) {
+                        return $query
+                        ->when($model, function ($query) use ($model, $permissions) {
+                            return $query
+                            ->whereNull('type')
+                            ->where('permissible_id', $model->getKey())
+                            ->where('permissible_type', $model::class)
+                            ->whereIn('permission', [...$permissions, null]);
+                        });
+                    });
                 });
             });
-
-            // Where inherit access and no parent > select default access
-            // ->orWhere(function ($query) use ($permissions, $defaultAccess, $inheritAccessColumn) {
-            //     return $query
-            //     ->where($inheritAccessColumn, true)
-            //     ->whereNull('parent_id')
-            //     ->where(function ($query) use ($permissions, $defaultAccess) {
-            //         // Return if public access
-            //         if (in_array($defaultAccess['any']['guest'], $permissions)) return $query;
-
-            //         return $query;
-                    
-            //     });
-            // });
-            // Where custom access > select
-            // ->orWhere(function ($query) use ($permissions, $inheritAccessColumn) {
-            //     $query
-            //     ->where($inheritAccessColumn, false)
-            //     ->where(function ($query) use ($permissions) {
-            //         $query
-            //         ->whereHas('accesses', function ($query) use ($permissions) {
-            //             return $query
-            //             ->whereNull('type')
-            //             ->whereNull('permissible_id')
-            //             ->whereNull('permissible_type')
-            //             ->whereIn('permission', [...$permissions, null]);
-            //         });
-            //     });
-            // });
         });
     }
     // END: Scopes
@@ -157,46 +157,67 @@ trait HasAccessControl
             ->merge($specificAccess);
     }
 
-    public function checkIf(Model $model)
+
+
+    public static function checkIf(Model|array|string $model, Model|Collection|array $models, array|string $permissions): bool
     {
-        return $this->checkIfAny([$model]);
+        // Correct $model type
+        if (is_array($model)) $model = self::where(...$model)->firstOrFail();
+        if ($model instanceof string) $model = self::findOrFail($model);
+
+        // Correct $models type
+        if ($models instanceof Collection) $models = $models->all();
+        if ($models instanceof Model) $models = [$models];
+
+        // Correct $permissions type
+        if ($permissions instanceof string) $permissions = [$permissions];
+
+        // Create access check
+        $check = new AccessCheck($model->computeAccess(), $models);
+
+        // Check access
+        return $check->can($permissions);
     }
 
-    public function checkIfGuest()
+    public static function checkIfUser(Model|array|string $model, User|null $user, array|string $permissions): bool
     {
-        return $this->checkIfAny([]);
+        // Check for guest
+        if (!$user) return self::checkIfGuest($model, $permissions);
+
+        // Check for super admin
+        if ($user->can([Permissions::SYSTEM_ADMIN, Permissions::SYSTEM_SUPER_ADMIN])) return true;
+
+        // Check for user and their roles
+        return self::checkIf($model, [$user, ...$user->roles()->get()], $permissions);
+
     }
 
-    public function checkIfAny(array|Collection $models)
+    public static function checkIfGuest(Model|array|string $model, array|string $permissions): bool
     {
-        return new AccessCheck($this->computeAccess(), $models);
+        return self::checkIf($model, [], $permissions);
     }
 }
 
-class AccessCheck
-{
+
+
+class AccessCheck {
     private $access;
     private $models;
 
-    public function __construct($access, $models)
-    {
+    public function __construct($access, $models) {
         $this->access = $access;
         $this->models = $models;
 
         return $this;
     }
 
-    public function can($permission)
-    {
-        return $this->canAny([$permission]);
-    }
+    public function can(array|string $permissions) {
+        // Correct $permissions type
+        if ($permissions instanceof string) $permissions = [$permissions];
 
-    public function canAny(array $permissions)
-    {
         if (!count($this->models) && isset($this->access['any']['guest']) && in_array($this->access['any']['guest'], $permissions)) return true;
 
-        foreach ($this->models as $model)
-        {
+        foreach ($this->models as $model) {
             $group = (string) $model::class;
             $id = (string) $model->getKey();
 

@@ -69,7 +69,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         // Base query
-        $query = User::query();
+        $query = User::with('user_name', 'user_company', 'roles', 'permissions', 'media');
 
         // Search
         if ($request->filter_search)

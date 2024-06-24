@@ -17,15 +17,16 @@ class MediaController extends Controller
     public function index(Request $request)
     {
         // Base query
-        $query = Media::query()->whereChildOfPath($request->path);
+        $query = Media::whereChildOfPath($request->path)->with('accesses');
 
         // Search
         if ($request->filter_search)
         {
-            $query->whereFuzzy(function ($query) use ($request) {
+            $query
+            ->whereFuzzy(function ($query) use ($request) {
                 $query
-                    ->orWhereFuzzy('src_path', $request->filter_search)
-                    ->orWhereFuzzy('name', $request->filter_search);
+                ->orWhereFuzzy('src_path', $request->filter_search)
+                ->orWhereFuzzy('name', $request->filter_search);
             });
         }
 
@@ -35,10 +36,11 @@ class MediaController extends Controller
         $query->orderByDefault();
 
         // Access Management
-        $user = $request->user() ?? null;
-        $query->whereModelHasAccess($user, ['read', 'write', 'admin']);
+        $user = $request->user();
+        $permissions = ['read', 'write', 'admin'];
+        $parentAccess = Media::checkIfUser(['src_path', $request->path], $user, $permissions);
 
-        // $query = $query->get()->filter(fn ($media) => $media->userCanAny(($request->user() ?? null), ['read', 'write', 'admin']));
+        $query->whereModelHasAccess($user, $permissions, $parentAccess);
 
         // Return collection + pagination
         return MediaResource::collection($query->paginate($request->size ?? 20));

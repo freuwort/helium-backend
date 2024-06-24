@@ -43,5 +43,7 @@ class SuperAdminSeeder extends Seeder
 
         // Assign permissions (we expect these to be created in the PermissionsSeeder)
         $super_admin->givePermissionTo(\App\Classes\Permissions\Permissions::SYSTEM_SUPER_ADMIN);
+
+        $super_admin->assignRole(['Admin', 'Personal']);
     }
 }

@@ -112,18 +112,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $media = $this->media()->where('type', 'profile_image')->first();
 
-        if ($media) return $media->cdn_path;
-        
-        return "https://api.dicebear.com/7.x/identicon/svg?seed=".$this->username."&scale=65&size=72&backgroundColor=eeeeee";
+        return $media ? $media->cdn_path : url(route('default.image', ['profile_image', $this->username]));
     }
 
     public function getProfileBannerAttribute()
     {
         $media = $this->media()->where('type', 'profile_banner')->first();
-
-        if ($media) return $media->cdn_path;
         
-        return null;
+        return $media ? $media->cdn_path : url(route('default.image', ['profile_banner', $this->username]));
     }
 
     public function getSettingsAttribute()

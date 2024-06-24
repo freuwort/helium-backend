@@ -96,6 +96,11 @@ class Media extends Model
 
 
     // START: Selectors
+    public static function findPath(string $path): ?Media
+    {
+        return self::where('src_path', $path)->first();
+    }
+
     public static function findPathOrFail(string $path): ?Media
     {
         return self::where('src_path', $path)->firstOrFail();
@@ -176,33 +181,6 @@ class Media extends Model
             'owner_id' => $model ? $model->getKey() : null,
             'owner_type' => $model ? $model::class : null,
         ]);
-    }
-
-
-
-    public function userCan(User|null $user, $permission)
-    {
-        return $this->userCanAny($user, [$permission]);
-    }
-
-    public function userCanAny(User|null $user, $permissions)
-    {
-        // Check for guest access first
-        if ($this->checkIfGuest()->canAny($permissions)) return true;
-
-        // Early exit if user is not logged in
-        if (!$user) return false;
-
-        // Then check if user access via any assigned role
-        if ($this->checkIfAny($user->roles()->get())->canAny($permissions)) return true;
-
-        // Then check if user has direct access
-        if ($this->checkIf($user)->canAny($permissions)) return true;
-
-        // Finally check if user is system admin
-        if ($user->can(Permissions::SYSTEM_ADMIN)) return true;
-
-        return false;
     }
 
 

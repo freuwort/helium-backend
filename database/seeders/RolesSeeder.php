@@ -14,10 +14,17 @@ class RolesSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = Role::updateOrCreate(['name' => 'Admin']);
-        $admin->syncPermissions([Permissions::SYSTEM_ADMIN, Permissions::SYSTEM_ACCESS_ADMIN_PANEL]);
+        $roles = [
+            ['Admin',       'shield',           'rgb(244 63 94)',   [Permissions::SYSTEM_ADMIN, Permissions::SYSTEM_ACCESS_ADMIN_PANEL]],
+            ['Personal',    'person',           'rgb(99 102 241)',  [Permissions::SYSTEM_ACCESS_ADMIN_PANEL]],
+            ['Kunde',       'shopping_cart',    'rgb(251 146 60)',  []],
+            ['Logistik',    'local_shipping',   'rgb(168 85 247)',  []]
+        ];
 
-        $personal = Role::updateOrCreate(['name' => 'Personal']);
-        $personal->syncPermissions([Permissions::SYSTEM_ACCESS_ADMIN_PANEL]);
+        foreach ($roles as $role)
+        {
+            $r = Role::updateOrCreate(['name' => $role[0], 'icon' => $role[1], 'color' => $role[2]]);
+            $r->syncPermissions($role[3]);
+        }
     }
 }
