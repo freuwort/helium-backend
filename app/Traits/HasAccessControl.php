@@ -36,7 +36,7 @@ trait HasAccessControl
 
 
     // START: Scopes
-    public function scopeWhereModelHasAccess($query, Model $model, array $permissions, $access)
+    public function scopeWhereModelHasAccess($query, Model|null $model, array $permissions, $access)
     {
         // $inheritAccessColumn = $this->inherit_access_column;
         $inheritAccessColumn = 'inherit_access';
@@ -44,42 +44,57 @@ trait HasAccessControl
         // Check for super admin
         if ($model instanceof User && $model->can([Permissions::SYSTEM_ADMIN, Permissions::SYSTEM_SUPER_ADMIN])) return $query;
 
-        // TODO: Return all models of which the user is the owner
-
+        // Main query
         return $query->where(function ($query) use ($model, $permissions, $access, $inheritAccessColumn) {
             return $query
             // Where inherit access
-            ->where($inheritAccessColumn, true)
-            ->when($access, function ($query) {
-                return $query;
-            }, function ($query) use ($inheritAccessColumn) {
-                return $query->where($inheritAccessColumn, false);
+            ->where(function ($query) use ($model, $permissions, $access, $inheritAccessColumn) {
+                return $query
+                ->where($inheritAccessColumn, true)
+                ->when($access, function ($query) {
+                    return $query;
+                }, function ($query) use ($inheritAccessColumn) {
+                    return $query->where($inheritAccessColumn, false);
+                });
             })
 
-            // Where custom access > select
+            // Where owner
+            ->orWhere(function ($query) use ($model) {
+                return $query
+                ->when(!!$model, function ($query) use ($model) {
+                    return $query
+                    ->where('owner_id', $model->getKey())
+                    ->where('owner_type', $model::class);
+                });
+            })
+
+            // Where custom access
             ->orWhere(function ($query) use ($model, $permissions, $inheritAccessColumn) {
-                $query
+                return $query
                 ->where($inheritAccessColumn, false)
                 ->where(function ($query) use ($model, $permissions) {
-                    return $query
+                    
                     // Public access
+                    $query
                     ->whereHas('accesses', function ($query) use ($permissions) {
                         return $query
                         ->whereNull('type')
                         ->whereNull('permissible_id')
                         ->whereNull('permissible_type')
                         ->whereIn('permission', [...$permissions, null]);
-                    })
+                    });
+
+                    // Early return when no model
+                    if (!$model) return $query;
+
                     // Specific access
+                    $query
                     ->orWhereHas('accesses', function ($query) use ($model, $permissions) {
                         return $query
-                        ->when($model, function ($query) use ($model, $permissions) {
-                            return $query
-                            ->whereNull('type')
-                            ->where('permissible_id', $model->getKey())
-                            ->where('permissible_type', $model::class)
-                            ->whereIn('permission', [...$permissions, null]);
-                        });
+                        ->whereNull('type')
+                        ->where('permissible_id', $model->getKey())
+                        ->where('permissible_type', $model::class)
+                        ->whereIn('permission', [...$permissions, null]);
                     });
                 });
             });
