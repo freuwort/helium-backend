@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('content_posts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('group_id')->constrained()->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('group_id')->constrained('content_post_groups')->onDelete('cascade')->onUpdate('cascade');
             $table->foreignId('owner_id')->nullable()->constrained('users')->onDelete('set null')->onUpdate('cascade');
             $table->string('type')->default('draft');
             $table->string('name')->nullable();
