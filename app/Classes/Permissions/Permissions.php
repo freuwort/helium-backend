@@ -62,6 +62,16 @@ class Permissions
     public const APP_EDIT_EVENTS = 'app.edit.events';
     public const APP_DELETE_EVENTS = 'app.delete.events';
 
+    // Content
+    public const APP_VIEW_CONTENT = 'app.view.content';
+
+    public const APP_CREATE_CONTENTSPACES = 'app.create.content.spaces';
+    public const APP_EDIT_CONTENTSPACES = 'app.edit.content.spaces';
+    public const APP_DELETE_CONTENTSPACES = 'app.delete.content.spaces';
+
+    public const APP_CREATE_CONTENTCATEGORIES = 'app.create.content.categories';
+    public const APP_EDIT_CONTENTCATEGORIES = 'app.edit.content.categories';
+    public const APP_DELETE_CONTENTCATEGORIES = 'app.delete.content.categories';
 
 
 
@@ -128,6 +138,25 @@ class Permissions
                     ['name' => self::APP_CREATE_EVENTS, 'label' => 'Events erstellen', 'description' => 'Der Benutzer kann Events erstellen.'],
                     ['name' => self::APP_EDIT_EVENTS, 'label' => 'Events bearbeiten', 'description' => 'Der Benutzer kann Events bearbeiten.'],
                     ['name' => self::APP_DELETE_EVENTS, 'label' => 'Events löschen', 'description' => 'Der Benutzer kann Events löschen.'],
+                ],
+            ],
+        ],
+
+        'app.content' => [
+            'title' => 'App – Inhalte',
+            'permissions' => [
+                [
+                    ['name' => self::APP_VIEW_CONTENT, 'label' => 'Zugriff auf den Inhalte-Bereich', 'description' => 'Der Benutzer kann auf den Bereich "Inhalte" zugreifen.'],
+                ],
+                [
+                    ['name' => self::APP_CREATE_CONTENTSPACES, 'label' => 'Spaces erstellen', 'description' => 'Der Benutzer kann Spaces für Inhalte erstellen.'],
+                    ['name' => self::APP_EDIT_CONTENTSPACES, 'label' => 'Spaces bearbeiten', 'description' => 'Der Benutzer kann Spaces für Inhalte bearbeiten.'],
+                    ['name' => self::APP_DELETE_CONTENTSPACES, 'label' => 'Spaces löschen', 'description' => 'Der Benutzer kann Spaces für Inhalte löschen.'],
+                ],
+                [
+                    ['name' => self::APP_CREATE_CONTENTCATEGORIES, 'label' => 'Kategorien erstellen', 'description' => 'Der Benutzer kann Kategorien für Inhalte erstellen.'],
+                    ['name' => self::APP_EDIT_CONTENTCATEGORIES, 'label' => 'Kategorien bearbeiten', 'description' => 'Der Benutzer kann Kategorien für Inhalte bearbeiten.'],
+                    ['name' => self::APP_DELETE_CONTENTCATEGORIES, 'label' => 'Kategorien löschen', 'description' => 'Der Benutzer kann Kategorien für Inhalte löschen.'],
                 ],
             ],
         ],

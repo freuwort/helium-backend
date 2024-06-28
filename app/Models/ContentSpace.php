@@ -23,6 +23,17 @@ class ContentSpace extends Model
 
 
 
+    // On create set owner
+    public static function boot()
+    {
+        parent::boot();
+        self::created(function ($model) {
+            $model->setOwner(auth()->user());
+        });
+    }
+
+
+
     // START: Relationships
     public function parent()
     {
@@ -39,4 +50,11 @@ class ContentSpace extends Model
         return $this->belongsTo(User::class);
     }
     // END: Relationships
+
+
+
+    public function setOwner(User $user)
+    {
+        $this->owner()->associate($user)->save();
+    }
 }

@@ -7,6 +7,7 @@ use App\Http\Requests\UploadProfileMediaRequest;
 use App\Http\Requests\User\DestroyManyUserRequest;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Resources\Role\BasicRoleResource;
 use App\Http\Resources\User\EditorUserResource;
 use App\Http\Resources\User\BasicUserResource;
 use App\Http\Resources\User\UserResource;
@@ -17,6 +18,7 @@ use App\Models\Email;
 use App\Models\Identifier;
 use App\Models\Link;
 use App\Models\Phonenumber;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -83,10 +85,10 @@ class UserController extends Controller
         }
 
         // Filter
-        if ($request->roles)
+        if ($request->filter_roles)
         {
             $query->whereHas('roles', function ($query) use ($request) {
-                $query->whereIn('name', $request->roles);
+                $query->whereIn('name', $request->filter_roles);
             });
         }
 
@@ -97,7 +99,11 @@ class UserController extends Controller
         $query->orderBy($field, $order);
 
         // Return collection + pagination
-        return UserResource::collection($query->paginate($request->size ?? 20));
+        return UserResource::collection($query->paginate($request->size ?? 20))
+        ->additional(['keys' => $query->pluck('id')->toArray()])
+        ->additional(['filter_values' => [
+            'roles' => Role::all()->pluck('name')->toArray(),
+        ]]);
     }
 
     

@@ -64,10 +64,10 @@ class EventInviteController extends Controller
 
         // Return collection + pagination
         return EventInviteResource::collection($query->paginate($request->size ?? 20))
-            ->additional(['keys' => $query->pluck('id')->toArray()])
-            ->additional(['filter_values' => [
-                'type' => $event->invites()->distinct('type')->pluck('type')->toArray(),
-            ]]);
+        ->additional(['keys' => $query->pluck('id')->toArray()])
+        ->additional(['filter_values' => [
+            'type' => $event->invites()->distinct('type')->pluck('type')->toArray(),
+        ]]);
     }
 
     
