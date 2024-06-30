@@ -3,11 +3,11 @@
 namespace App\Policies;
 
 use App\Classes\Permissions\Permissions;
-use App\Models\ContentSpace;
+use App\Models\Category;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class ContentSpacePolicy
+class CategoryPolicy
 {
     // TODO: Check if additional permission checks are needed
     public function basicViewAny(User $user): bool
@@ -18,7 +18,7 @@ class ContentSpacePolicy
 
 
     // TODO: Check if additional permission checks are needed
-    public function basicView(User $user, ContentSpace $model): bool
+    public function basicView(User $user, Category $model): bool
     {
         return true;
     }
@@ -32,7 +32,7 @@ class ContentSpacePolicy
 
     
 
-    public function view(User $user, ContentSpace $model): bool
+    public function view(User $user, Category $model): bool
     {
         return $user->can(Permissions::APP_VIEW_CONTENT);
     }
@@ -41,22 +41,22 @@ class ContentSpacePolicy
 
     public function create(User $user): bool
     {
-        return $user->can([Permissions::APP_VIEW_CONTENT, Permissions::APP_CREATE_CONTENTSPACES]);
+        return $user->can([Permissions::APP_VIEW_CONTENT, Permissions::APP_CREATE_CONTENTCATEGORIES]);
     }
 
 
 
-    public function update(User $user, ContentSpace $model): bool
+    public function update(User $user, Category $model): bool
     {
-        return $user->can([Permissions::APP_VIEW_CONTENT, Permissions::APP_EDIT_CONTENTSPACES]);
+        return $user->can([Permissions::APP_VIEW_CONTENT, Permissions::APP_EDIT_CONTENTCATEGORIES]);
     }
 
 
 
-    public function delete(User $user, ContentSpace $model): bool
+    public function delete(User $user, Category $model): bool
     {
         // Permission check
-        if (!$user->can([Permissions::APP_VIEW_CONTENT, Permissions::APP_DELETE_CONTENTSPACES])) return false;
+        if (!$user->can([Permissions::APP_VIEW_CONTENT, Permissions::APP_DELETE_CONTENTCATEGORIES])) return false;
 
         return true;
     }
@@ -66,10 +66,10 @@ class ContentSpacePolicy
     public function deleteMany(User $user, $ids): bool
     {
         // Permission check
-        if (!$user->can([Permissions::APP_VIEW_CONTENT, Permissions::APP_DELETE_CONTENTSPACES])) return false;
+        if (!$user->can([Permissions::APP_VIEW_CONTENT, Permissions::APP_DELETE_CONTENTCATEGORIES])) return false;
         
         // Check every user
-        foreach (ContentSpace::whereIn('id', $ids)->get() as $db_event)
+        foreach (Category::whereIn('id', $ids)->get() as $db_event)
         {
         }
 
@@ -78,14 +78,14 @@ class ContentSpacePolicy
 
     
     
-    public function restore(User $user, ContentSpace $model): bool
+    public function restore(User $user, Category $model): bool
     {
         return false;
     }
 
     
     
-    public function forceDelete(User $user, ContentSpace $model): bool
+    public function forceDelete(User $user, Category $model): bool
     {
         return false;
     }

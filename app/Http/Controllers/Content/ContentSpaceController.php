@@ -8,9 +8,7 @@ use App\Http\Requests\ContentSpace\DestroyManyContentSpaceRequest;
 use App\Http\Requests\ContentSpace\UpdateContentSpaceRequest;
 use App\Http\Resources\ContentSpace\ContentSpaceResource;
 use App\Http\Resources\ContentSpace\EditorContentSpaceResource;
-use App\Http\Resources\User\BasicUserResource;
 use App\Models\ContentSpace;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class ContentSpaceController extends Controller
