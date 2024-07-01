@@ -3,11 +3,7 @@
 namespace App\Http\Controllers\Content;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ContentSpace\CreateContentSpaceRequest;
-use App\Http\Requests\ContentSpace\DestroyManyContentSpaceRequest;
-use App\Http\Requests\ContentSpace\UpdateContentSpaceRequest;
-use App\Http\Resources\ContentSpace\ContentSpaceResource;
-use App\Http\Resources\ContentSpace\EditorContentSpaceResource;
+use App\Http\Resources\ContentPost\ContentPostGroupResource;
 use App\Models\ContentPostGroup;
 use Illuminate\Http\Request;
 
@@ -38,13 +34,13 @@ class ContentPostController extends Controller
         // Filter
 
         // Sort
-        $field = $request->sort_field ?? 'post.created_at';
-        $order = $request->sort_order ?? 'desc';
+        // $field = $request->sort_field ?? 'post.created_at';
+        // $order = $request->sort_order ?? 'desc';
 
-        $query->orderBy($field, $order);
+        // $query->orderBy($field, $order);
 
         // Return collection + pagination
-        return ContentPostResource::collection($query->paginate($request->size ?? 20))
+        return ContentPostGroupResource::collection($query->paginate($request->size ?? 20))
         ->additional(['keys' => $query->pluck('id')->toArray()]);
     }
 

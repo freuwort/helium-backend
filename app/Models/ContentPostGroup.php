@@ -10,6 +10,8 @@ class ContentPostGroup extends Model
 {
     use HasFactory, HasAccessControl;
 
+    public $timestamps = false;
+
     protected $fillable = [
         'space_id',
         'post_id',

@@ -49,5 +49,10 @@ class ContentPost extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function media()
+    {
+        return $this->morphToMany(Media::class, 'model', 'model_has_media')->withPivot('type');
+    }
     // END: Relationships
 }
