@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\UserController as AuthUserController;
 use App\Http\Controllers\Auth\UserSettingController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Content\CategoryController;
+use App\Http\Controllers\Content\ContentPostController;
 use App\Http\Controllers\Content\ContentSpaceController;
 use App\Http\Controllers\Debug\DebugController;
 use App\Http\Controllers\Domain\DomainController;
@@ -133,6 +134,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 
+        Route::resource('/content/posts', ContentPostController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+        Route::delete('/content/posts', [ContentPostController::class, 'destroyMany']);
         Route::resource('/content/spaces', ContentSpaceController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/content/spaces', [ContentSpaceController::class, 'destroyMany']);
         Route::resource('/categories', CategoryController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
