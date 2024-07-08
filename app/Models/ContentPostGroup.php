@@ -47,6 +47,11 @@ class ContentPostGroup extends Model
         return $this->belongsTo(ContentPost::class, 'post_id');
     }
 
+    public function draft()
+    {
+        return $this->hasOne(ContentPost::class, 'group_id')->where('type', 'draft');
+    }
+
     public function posts()
     {
         return $this->hasMany(ContentPost::class, 'group_id');
@@ -57,4 +62,12 @@ class ContentPostGroup extends Model
         return $this->belongsTo(User::class);
     }
     // END: Relationships
+
+
+
+    // // START: Attributes
+    // public function getDraftAttribute()
+    // {
+    //     return $this->posts()->where('type', 'draft')->first();
+    // }
 }

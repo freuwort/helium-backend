@@ -8,16 +8,20 @@ use App\Http\Resources\User\BasicUserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ContentPostGroupResource extends JsonResource
+class EditorContentPostGroupResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
         return [
             'id' => $this->id,
-            'owner' => BasicUserResource::make($this->owner),
-            'space' => BasicContentSpaceResource::make($this->space),
-            'post' => ContentPostResource::make($this->post ?? $this->draft),
-            'hidden' => $this->hidden,
+            'model' => [
+                'owner' => BasicUserResource::make($this->owner),
+                'space' => BasicContentSpaceResource::make($this->space),
+                'post_id' => $this->post_id,
+                'hidden' => $this->hidden,
+            ],
+            'draft' => ContentPostResource::make($this->draft),
+            'posts' => ContentPostResource::collection($this->posts),
             'access' => AccessResource::collection($this->accesses),
         ];
     }

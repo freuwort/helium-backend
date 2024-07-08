@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Content;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ContentPost\CreateContentPostRequest;
+use App\Http\Requests\ContentPost\DestroyManyContentPostRequest;
+use App\Http\Requests\ContentPost\UpdateContentPostRequest;
 use App\Http\Resources\ContentPost\ContentPostGroupResource;
+use App\Http\Resources\ContentPost\EditorContentPostGroupResource;
 use App\Models\ContentPostGroup;
 use Illuminate\Http\Request;
 
@@ -48,7 +52,8 @@ class ContentPostController extends Controller
     
     public function show(ContentPostGroup $postGroup)
     {
-        return EditorContentPostResource::make($postGroup);
+        // return abort(500, json_encode($post));
+        return EditorContentPostGroupResource::make($postGroup);
     }
 
     
@@ -56,17 +61,18 @@ class ContentPostController extends Controller
     public function store(CreateContentPostRequest $request)
     {
         $postGroup = ContentPostGroup::create($request->validated('model'));
+        $postGroup->posts()->create($request->validated('draft'));
 
-        return EditorContentPostResource::make($postGroup);
+        return EditorContentPostGroupResource::make($postGroup);
     }
 
     
     
     public function update(UpdateContentPostRequest $request, ContentPostGroup $postGroup)
     {
-        $postGroup->update($request->validated('model'));
+        $postGroup->draft()->update($request->validated('draft'));
 
-        return EditorContentPostResource::make($postGroup);
+        return EditorContentPostGroupResource::make($postGroup);
     }
 
     

@@ -134,7 +134,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 
-        Route::resource('/content/posts', ContentPostController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+        Route::resource('/content/posts', ContentPostController::class)->only(['show', 'index', 'store', 'update', 'destroy'])->parameters(['posts' => 'postGroup']);
         Route::delete('/content/posts', [ContentPostController::class, 'destroyMany']);
         Route::resource('/content/spaces', ContentSpaceController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/content/spaces', [ContentSpaceController::class, 'destroyMany']);
