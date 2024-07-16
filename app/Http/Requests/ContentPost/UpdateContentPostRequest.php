@@ -21,7 +21,6 @@ class UpdateContentPostRequest extends FormRequest
             'draft.slug' => ['required', 'string', 'max:255'],
             'draft.excerpt' => ['nullable', 'string'],
             'draft.content' => ['nullable', 'string'],
-            'draft.review_ready' => ['nullable', 'boolean'],
         ];
     }
 }

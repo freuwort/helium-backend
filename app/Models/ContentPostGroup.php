@@ -65,9 +65,35 @@ class ContentPostGroup extends Model
 
 
 
-    // // START: Attributes
-    // public function getDraftAttribute()
-    // {
-    //     return $this->posts()->where('type', 'draft')->first();
-    // }
+    public function approveDraft()
+    {
+        $post = $this->postFromDraft();
+        $this->selectRevision($post);
+        $this->resetDraft();
+    }
+
+    public function postFromDraft()
+    {
+        $draft = $this->draft()->first()->replicate();
+        $draft->type = 'post';
+        $draft->approved_at = now();
+        $draft->save();
+
+        return $draft;
+    }
+
+    public function resetDraft()
+    {
+        $this->draft()->update([
+            'approved_at' => null,
+            'review_ready' => false,
+        ]);
+    }
+
+    public function selectRevision(ContentPost|int $post)
+    {
+        $this->update([
+            'post_id' => $post instanceof ContentPost ? $post->id : $post,
+        ]);
+    }
 }

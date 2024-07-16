@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ContentPost\CreateContentPostRequest;
 use App\Http\Requests\ContentPost\DestroyManyContentPostRequest;
 use App\Http\Requests\ContentPost\UpdateContentPostRequest;
+use App\Http\Requests\ContentPost\UpdateReviewStatusOnContentPostRequest;
 use App\Http\Resources\ContentPost\ContentPostGroupResource;
 use App\Http\Resources\ContentPost\EditorContentPostGroupResource;
 use App\Models\ContentPostGroup;
+use App\Models\ContentSpace;
 use Illuminate\Http\Request;
 
 class ContentPostController extends Controller
@@ -39,20 +41,22 @@ class ContentPostController extends Controller
 
         // Sort
         // $field = $request->sort_field ?? 'post.created_at';
-        // $order = $request->sort_order ?? 'desc';
+        $order = $request->sort_order ?? 'desc';
 
         // $query->orderBy($field, $order);
 
         // Return collection + pagination
         return ContentPostGroupResource::collection($query->paginate($request->size ?? 20))
-        ->additional(['keys' => $query->pluck('id')->toArray()]);
+        ->additional(['keys' => $query->pluck('id')->toArray()])
+        ->additional(['filter_values' => [
+            'space' => ContentSpace::select(['id', 'name'])->get()->toArray(),
+        ]]);
     }
 
     
     
     public function show(ContentPostGroup $postGroup)
     {
-        // return abort(500, json_encode($post));
         return EditorContentPostGroupResource::make($postGroup);
     }
 
@@ -71,6 +75,24 @@ class ContentPostController extends Controller
     public function update(UpdateContentPostRequest $request, ContentPostGroup $postGroup)
     {
         $postGroup->draft()->update($request->validated('draft'));
+
+        return EditorContentPostGroupResource::make($postGroup);
+    }
+
+
+
+    public function updateReviewStatus(UpdateReviewStatusOnContentPostRequest $request, ContentPostGroup $postGroup)
+    {
+        $postGroup->draft()->update($request->validated('draft'));
+
+        return EditorContentPostGroupResource::make($postGroup);
+    }
+
+
+
+    public function approveDraft(Request $request, ContentPostGroup $postGroup)
+    {
+        $postGroup->approveDraft();
 
         return EditorContentPostGroupResource::make($postGroup);
     }

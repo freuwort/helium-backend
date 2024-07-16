@@ -16,7 +16,8 @@ class ContentPostGroupResource extends JsonResource
             'id' => $this->id,
             'owner' => BasicUserResource::make($this->owner),
             'space' => BasicContentSpaceResource::make($this->space),
-            'post' => ContentPostResource::make($this->post ?? $this->draft),
+            'post' => ContentPostResource::make($this->post),
+            'draft' => ContentPostResource::make($this->draft),
             'hidden' => $this->hidden,
             'access' => AccessResource::collection($this->accesses),
         ];
