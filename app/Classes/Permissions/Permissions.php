@@ -9,7 +9,7 @@ class Permissions
      */
 
     // Admin
-    public const SYSTEM_SUPER_ADMIN = 'system.super-admin';
+    public const SYSTEM_SUPER_ADMIN = 'system.super-admin'; // Only assigned to root user
     public const SYSTEM_ADMIN = 'system.admin';
 
     // Access
@@ -17,10 +17,10 @@ class Permissions
 
     // Roles
     public const SYSTEM_VIEW_ROLES = 'system.view.roles';
-    public const SYSTEM_ASSIGN_ROLES = 'system.assign.roles';
     public const SYSTEM_CREATE_ROLES = 'system.create.roles';
     public const SYSTEM_EDIT_ROLES = 'system.edit.roles';
     public const SYSTEM_DELETE_ROLES = 'system.delete.roles';
+    public const SYSTEM_ASSIGN_ROLES = 'system.assign.roles';
 
     // Users
     public const SYSTEM_VIEW_USERS = 'system.view.users';
@@ -35,12 +35,6 @@ class Permissions
     public const SYSTEM_CREATE_COMPANIES = 'system.create.companies';
     public const SYSTEM_EDIT_COMPANIES = 'system.edit.companies';
     public const SYSTEM_DELETE_COMPANIES = 'system.delete.companies';
-
-    // Settings
-    public const SYSTEM_VIEW_SETTINGS = 'system.view.settings';
-    public const SYSTEM_EDIT_SETTINGS = 'system.edit.settings';
-    public const SYSTEM_ENABLE_APPS = 'system.enable.apps';
-    public const SYSTEM_DISABLE_APPS = 'system.disable.apps';
 
     // Media
     public const SYSTEM_ACCESS_MEDIA = 'system.access.media';
@@ -83,16 +77,17 @@ class Permissions
             'title' => 'System Berechtigungen',
             'permissions' => [
                 [
-                    ['name' => self::SYSTEM_SUPER_ADMIN, 'label' => 'Super Admin', 'description' => 'Der Super Admin hat Zugriff auf alle Bereiche des Systems und kann Benutzer und Rollen verwalten.'],
                     ['name' => self::SYSTEM_ADMIN, 'label' => 'Admin', 'description' => 'Der Admin hat Zugriff auf alle Bereiche des Systems und kann Benutzer und Rollen verwalten.'],
-                    ['name' => self::SYSTEM_ACCESS_ADMIN_PANEL, 'label' => 'Zutritt zum Admin Bereich', 'description' => 'Der Benutzer hat Zugriff auf den Admin Bereich.'],
                 ],
                 [
                     ['name' => self::SYSTEM_VIEW_ROLES, 'label' => 'Rollen anzeigen', 'description' => 'Der Benutzer kann die Rollen ansehen.'],
-                    ['name' => self::SYSTEM_ASSIGN_ROLES, 'label' => 'Rollen zuweisen', 'description' => 'Der Benutzer kann anderen Benutzern Rollen zuweisen.'],
                     ['name' => self::SYSTEM_CREATE_ROLES, 'label' => 'Rollen erstellen', 'description' => 'Der Benutzer kann anderen Benutzern Rollen erstellen.'],
                     ['name' => self::SYSTEM_EDIT_ROLES, 'label' => 'Rollen bearbeiten', 'description' => 'Der Benutzer kann anderen Benutzern Rollen bearbeiten.'],
                     ['name' => self::SYSTEM_DELETE_ROLES, 'label' => 'Rollen löschen', 'description' => 'Der Benutzer kann anderen Benutzern Rollen löschen.'],
+                    ['name' => self::SYSTEM_ASSIGN_ROLES, 'label' => 'Rollen zuweisen', 'description' => 'Der Benutzer kann anderen Benutzern Rollen zuweisen.'],
+                ],
+                [
+                    ['name' => self::SYSTEM_ACCESS_ADMIN_PANEL, 'label' => 'Zutritt zum Admin Bereich', 'description' => 'Der Benutzer hat Zugriff auf den Admin Bereich.'],
                 ],
                 [
                     ['name' => self::SYSTEM_VIEW_USERS, 'label' => 'Benutzer anzeigen', 'description' => 'Der Benutzer kann andere Benutzer ansehen.'],
@@ -109,11 +104,7 @@ class Permissions
                     ['name' => self::SYSTEM_DELETE_COMPANIES, 'label' => 'Firmen löschen', 'description' => 'Der Benutzer kann Firmen löschen.'],
                 ],
                 [
-                    ['name' => self::SYSTEM_VIEW_SETTINGS, 'label' => 'Einstellungen anzeigen', 'description' => 'Der Benutzer kann die Einstellungen ansehen.'],
-                    ['name' => self::SYSTEM_EDIT_SETTINGS, 'label' => 'Einstellungen bearbeiten', 'description' => 'Der Benutzer kann die Einstellungen bearbeiten.'],
-                ],
-                [
-                    ['name' => self::SYSTEM_ACCESS_MEDIA, 'label' => 'Medien-App Zugriff', 'description' => 'Der Benutzer kann auf die Medien-App zugreifen.'],
+                    ['name' => self::SYSTEM_ACCESS_MEDIA, 'label' => 'Medien Zugriff', 'description' => 'Der Benutzer kann auf die Medien zugreifen.'],
                 ],
             ],
         ],

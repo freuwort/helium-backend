@@ -10,6 +10,7 @@ use App\Http\Resources\Role\BasicRoleResource;
 use App\Http\Resources\Role\RoleResource;
 use App\Models\Role;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Permission;
 
 class RoleController extends Controller
 {
@@ -69,6 +70,24 @@ class RoleController extends Controller
             });
         }
 
+        // Filter
+        if ($request->filter_exclude)
+        {
+            $query->whereNotIn('id', $request->filter_exclude);
+        }
+
+        if ($request->filter_permissions)
+        {
+            $query->whereHas('permissions', function ($query) use ($request) {
+                $query->whereIn('name', $request->filter_permissions);
+            });
+        }
+
+        if ($request->filter_administrative)
+        {
+            $query->whereIsAdministrative();
+        }
+
         // Sort
         $field = $request->sort_field ?? 'created_at';
         $order = $request->sort_order ?? 'desc';
@@ -76,7 +95,11 @@ class RoleController extends Controller
         $query->orderBy($field, $order);
 
         // Return collection + pagination
-        return RoleResource::collection($query->paginate($request->size ?? 20));
+        return RoleResource::collection($query->paginate($request->size ?? 20))
+        ->additional(['keys' => $query->pluck('id')->toArray()])
+        ->additional(['filter_values' => [
+            'permission' => Permission::all()->pluck('name')->toArray(),
+        ]]);
     }
 
     

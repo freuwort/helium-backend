@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Classes\Permissions\Permissions;
 use Spatie\Permission\Models\Role as SpatieRole;
 
 class Role extends SpatieRole
@@ -13,34 +14,39 @@ class Role extends SpatieRole
         'guard_name',
     ];
 
+    const DEFAULT_COLOR = '#363E40';
+    const DEFAULT_ICON = 'category';
 
 
-    public function duplicate()
+
+    // START: Scopes
+    public function scopeWhereIsAdministrative($query)
     {
-        $item = $this->replicate()->fill([
-            'name' => $this->findAvailableName(),
-        ]);
+        return $query
+        ->whereHas('permissions', function ($query) {
+            return $query
+            ->where('name', Permissions::SYSTEM_ADMIN)
+            ->orWhere('name', Permissions::SYSTEM_SUPER_ADMIN);
+        });
+    }
+    // END: Scopes
 
-        $item->push();
 
-        $item->syncPermissions($this->permissions);
 
-        return $item;
+    // START: Attributes
+    public function getColorAttribute()
+    {
+        return $this->attributes['color'] ?? self::DEFAULT_COLOR;
     }
 
-    public function findAvailableName()
+    public function getIconAttribute()
     {
-        $name = $this->name;
-        $count = 1;
-
-        while (Role::where('name', $name)->exists())
-        {
-            $name = $this->name . '-' . $count;
-            $count++;
-
-            if ($count > 100) throw new \Exception('Too many duplicates');
-        }
-
-        return $name;
+        return $this->attributes['icon'] ?? self::DEFAULT_ICON;
     }
+
+    public function getIsAdministrativeAttribute()
+    {
+        return $this->hasPermissionTo(Permissions::SYSTEM_SUPER_ADMIN) || $this->hasPermissionTo(Permissions::SYSTEM_ADMIN);
+    }
+    // END: Attributes
 }
