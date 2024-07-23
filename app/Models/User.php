@@ -131,12 +131,17 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function getIsAdminAttribute()
     {
-        return $this->canAny([Permissions::SYSTEM_SUPER_ADMIN, Permissions::SYSTEM_ADMIN]);
+        return Permissions::partOfAdmin($this->getAllPermissions()->pluck('name')->toArray());
     }
 
-    public function getIsSuperAdminAttribute()
+    public function getHasForbiddenPermissionsAttribute()
     {
-        return $this->can(Permissions::SYSTEM_SUPER_ADMIN);
+        return Permissions::partOfForbidden($this->getAllPermissions()->pluck('name')->toArray());
+    }
+
+    public function getHasElevatedPermissionsAttribute()
+    {
+        return Permissions::partOfElevated($this->getAllPermissions()->pluck('name')->toArray());
     }
     // END: Attributes
 

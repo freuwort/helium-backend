@@ -14,19 +14,17 @@ class Role extends SpatieRole
         'guard_name',
     ];
 
-    const DEFAULT_COLOR = '#363E40';
-    const DEFAULT_ICON = 'category';
+    public static $defaultColor = '#363E40';
+    public static $defaultIcon = 'category';
 
 
 
     // START: Scopes
-    public function scopeWhereIsAdministrative($query)
+    public function scopeWhereIsAdmin($query)
     {
         return $query
         ->whereHas('permissions', function ($query) {
-            return $query
-            ->where('name', Permissions::SYSTEM_ADMIN)
-            ->orWhere('name', Permissions::SYSTEM_SUPER_ADMIN);
+            return $query->whereIn('name', Permissions::ADMIN_PERMISSIONS);
         });
     }
     // END: Scopes
@@ -36,17 +34,27 @@ class Role extends SpatieRole
     // START: Attributes
     public function getColorAttribute()
     {
-        return $this->attributes['color'] ?? self::DEFAULT_COLOR;
+        return $this->attributes['color'] ?? self::$defaultColor;
     }
 
     public function getIconAttribute()
     {
-        return $this->attributes['icon'] ?? self::DEFAULT_ICON;
+        return $this->attributes['icon'] ?? self::$defaultIcon;
     }
 
-    public function getIsAdministrativeAttribute()
+    public function getIsAdminAttribute()
     {
-        return $this->hasPermissionTo(Permissions::SYSTEM_SUPER_ADMIN) || $this->hasPermissionTo(Permissions::SYSTEM_ADMIN);
+        return Permissions::partOfAdmin($this->permissions()->pluck('name')->toArray());
+    }
+
+    public function getHasForbiddenPermissionsAttribute()
+    {
+        return Permissions::partOfForbidden($this->permissions()->pluck('name')->toArray());
+    }
+
+    public function getHasElevatedPermissionsAttribute()
+    {
+        return Permissions::partOfElevated($this->permissions()->pluck('name')->toArray());
     }
     // END: Attributes
 }

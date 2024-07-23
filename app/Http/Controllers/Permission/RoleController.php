@@ -14,16 +14,8 @@ use Spatie\Permission\Models\Permission;
 
 class RoleController extends Controller
 {
-    public function __construct()
-    {
-        $this->authorizeResource(Role::class, 'role');
-    }
-
-
-
     public function indexBasic(Request $request)
     {
-        // Check if user can view models
         $this->authorize('basicViewAny', Role::class);
         
         // Base query
@@ -58,6 +50,8 @@ class RoleController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Role::class);
+
         // Base query
         $query = Role::query();
 
@@ -83,9 +77,9 @@ class RoleController extends Controller
             });
         }
 
-        if ($request->filter_administrative)
+        if ($request->filter_admin)
         {
-            $query->whereIsAdministrative();
+            $query->whereIsAdmin();
         }
 
         // Sort
@@ -106,6 +100,8 @@ class RoleController extends Controller
     
     public function show(Role $role)
     {
+        $this->authorize('view', [Role::class, $role]);
+
         return RoleResource::make($role);
     }
 
@@ -113,6 +109,8 @@ class RoleController extends Controller
     
     public function store(CreateRoleRequest $request)
     {
+        $this->authorize('create', [Role::class, $request->permissions]);
+
         $role = Role::create([...$request->validated(), 'guard_name' => 'web']);
         $role->syncPermissions($request->permissions);
 
@@ -123,6 +121,8 @@ class RoleController extends Controller
     
     public function update(UpdateRoleRequest $request, Role $role)
     {
+        $this->authorize('update', [Role::class, $role, $request->permissions]);
+
         $role->update($request->validated());
         $role->syncPermissions($request->permissions);
 
@@ -133,6 +133,8 @@ class RoleController extends Controller
     
     public function destroy(Role $role)
     {
+        $this->authorize('delete', [Role::class, $role]);
+        
         $role->delete();
     }
 
@@ -140,8 +142,10 @@ class RoleController extends Controller
 
     public function destroyMany(DestroyManyRoleRequest $request)
     {
-        $this->authorize('deleteMany', Role::class);
+        $roles = Role::whereIn('id', $request->ids);
 
-        Role::whereIn('id', $request->ids)->delete();
+        $this->authorize('deleteMany', [Role::class, $roles->get()]);
+
+        $roles->delete();
     }
 }

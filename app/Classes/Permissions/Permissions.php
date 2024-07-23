@@ -153,9 +153,26 @@ class Permissions
         ],
     ];
 
+    public const ADMIN_PERMISSIONS = [
+        self::SYSTEM_SUPER_ADMIN,
+        self::SYSTEM_ADMIN,
+    ];
+
+    public const FORBIDDEN_PERMISSIONS = [
+        self::SYSTEM_SUPER_ADMIN,
+    ];
+
+    public const ELEVATED_PERMISSIONS = [
+        self::SYSTEM_ADMIN,
+        self::SYSTEM_CREATE_ROLES,
+        self::SYSTEM_EDIT_ROLES,
+        self::SYSTEM_DELETE_ROLES,
+        self::SYSTEM_ASSIGN_ROLES,
+    ];
 
 
-    public static function all($extendedInfo = false)
+
+    public static function all($extendedInfo = false): array
     {
         $groupedPermissions = self::GROUPED_PERMISSIONS;
         
@@ -174,5 +191,22 @@ class Permissions
         }
 
         return $permissions;
+    }
+
+
+
+    public static function partOfAdmin(array $permissions): bool
+    {
+        return collect($permissions)->intersect(self::ADMIN_PERMISSIONS)->isNotEmpty();
+    }
+
+    public static function partOfForbidden(array $permissions): bool
+    {
+        return collect($permissions)->intersect(self::FORBIDDEN_PERMISSIONS)->isNotEmpty();
+    }
+
+    public static function partOfElevated(array $permissions): bool
+    {
+        return collect($permissions)->intersect(self::ELEVATED_PERMISSIONS)->isNotEmpty();
     }
 }
