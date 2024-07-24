@@ -43,8 +43,14 @@ class UserResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 
+            'has_tfa_enabled' => $this->has_tfa_enabled,
+
             'roles' => BasicRoleResource::collection($this->roles),
             'permissions' => $this->permissions->pluck('name'),
+
+            'is_admin' => $this->is_admin,
+            'has_forbidden_permissions' => $this->has_forbidden_permissions,
+            'has_elevated_permissions' => $this->has_elevated_permissions,
         ];
     }
 }

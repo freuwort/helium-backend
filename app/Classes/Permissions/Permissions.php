@@ -2,6 +2,8 @@
 
 namespace App\Classes\Permissions;
 
+use Illuminate\Support\Collection;
+
 class Permissions
 {
     /**
@@ -195,17 +197,17 @@ class Permissions
 
 
 
-    public static function partOfAdmin(array $permissions): bool
+    public static function partOfAdmin(array|Collection $permissions): bool
     {
         return collect($permissions)->intersect(self::ADMIN_PERMISSIONS)->isNotEmpty();
     }
 
-    public static function partOfForbidden(array $permissions): bool
+    public static function partOfForbidden(array|Collection $permissions): bool
     {
         return collect($permissions)->intersect(self::FORBIDDEN_PERMISSIONS)->isNotEmpty();
     }
 
-    public static function partOfElevated(array $permissions): bool
+    public static function partOfElevated(array|Collection $permissions): bool
     {
         return collect($permissions)->intersect(self::ELEVATED_PERMISSIONS)->isNotEmpty();
     }

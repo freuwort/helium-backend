@@ -49,6 +49,11 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
     // START: Relationships
+    public function two_factor_methods()
+    {
+        return $this->morphMany(TwoFactorMethod::class, 'authenticatable');
+    }
+
     public function user_name()
     {
         return $this->hasOne(UserName::class);
@@ -107,6 +112,71 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
 
+    // START: Scopes
+    public function scopeWhereIsAdmin($query)
+    {
+        return $query
+        ->where(function ($query) {
+            return $query
+            ->whereHas('permissions', function ($query) {
+                return $query
+                ->whereIn('name', Permissions::ADMIN_PERMISSIONS);
+            })
+            ->orWhereHas('roles', function ($query) {
+                return $query
+                ->whereHas('permissions', function ($query) {
+                    return $query
+                    ->whereIn('name', Permissions::ADMIN_PERMISSIONS);
+                });
+            });
+        });
+    }
+
+    public function scopeWhereHasElevatedPermissions($query)
+    {
+        return $query
+        ->where(function ($query) {
+            return $query
+            ->whereHas('permissions', function ($query) {
+                return $query
+                ->whereIn('name', Permissions::ELEVATED_PERMISSIONS);
+            })
+            ->orWhereHas('roles', function ($query) {
+                return $query
+                ->whereHas('permissions', function ($query) {
+                    return $query
+                    ->whereIn('name', Permissions::ELEVATED_PERMISSIONS);
+                });
+            });
+        });
+    }
+
+    public function scopeWhereEmailVerified($query, $value = true)
+    {
+        if ($value) return $query->whereNotNull('email_verified_at');
+        return $query->whereNull('email_verified_at');
+    }
+
+    public function scopeWhereEnabled($query, $value = true)
+    {
+        if ($value) return $query->whereNotNull('enabled_at');
+        return $query->whereNull('enabled_at');
+    }
+
+    public function scopeWhereTfaEnabled($query, $value = true)
+    {
+        if ($value) return $query->whereHas('two_factor_methods', function ($query) {
+            return $query->where('enabled', true);
+        });
+
+        return $query->whereDoesntHave('two_factor_methods', function ($query) {
+            return $query->where('enabled', true);
+        });
+    }
+    // END: Scopes
+
+
+
     // START: Attributes
     public function getProfileImageAttribute()
     {
@@ -142,6 +212,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getHasElevatedPermissionsAttribute()
     {
         return Permissions::partOfElevated($this->getAllPermissions()->pluck('name')->toArray());
+    }
+
+    public function getHasTfaEnabledAttribute()
+    {
+        return $this->two_factor_methods()->where('enabled', true)->exists();
     }
     // END: Attributes
 
@@ -200,21 +275,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->raw_settings()->firstWhere('key', $key)->value;
     }
     // END: Settings
-
-
-
-    // START: Permissions
-    public function hasHigherPermissionsThan(User $user)
-    {
-        // If the user is a super admin and the other user is not
-        if ($this->can(Permissions::SYSTEM_SUPER_ADMIN) && !$user->can(Permissions::SYSTEM_SUPER_ADMIN)) return true;
-
-        // If the user is an admin and the other user is not
-        if ($this->can(Permissions::SYSTEM_ADMIN) && !$user->can(Permissions::SYSTEM_ADMIN)) return true;
-
-        return false;
-    }
-    // END: Permissions
 
 
 

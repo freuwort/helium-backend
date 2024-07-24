@@ -19,12 +19,29 @@ class Role extends SpatieRole
 
 
 
+    // START: Relationships
+    public function accesses()
+    {
+        return $this->morphMany(Access::class, 'permissible');
+    }
+    // END: Relationships
+
+
+
     // START: Scopes
     public function scopeWhereIsAdmin($query)
     {
         return $query
         ->whereHas('permissions', function ($query) {
             return $query->whereIn('name', Permissions::ADMIN_PERMISSIONS);
+        });
+    }
+
+    public function scopeWhereHasElevatedPermissions($query)
+    {
+        return $query
+        ->whereHas('permissions', function ($query) {
+            return $query->whereIn('name', Permissions::ELEVATED_PERMISSIONS);
         });
     }
     // END: Scopes

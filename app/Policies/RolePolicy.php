@@ -65,17 +65,16 @@ class RolePolicy
         // Permission check
         if (!$user->can([Permissions::SYSTEM_VIEW_ROLES, Permissions::SYSTEM_EDIT_ROLES])) return Response::deny('You are missing the required permission.');
 
-        $currentPermissions = $role->permissions()->pluck('name')->toArray();
+        $currentPermissions = $role->getPermissionNames()->toArray();
         $removedPermissions = array_diff($currentPermissions, $newPermissions);
         $addedPermissions = array_diff($newPermissions, $currentPermissions);
+        $changedPermissions = array_merge($removedPermissions, $addedPermissions);
 
         // If edit includes forbidden permissions
-        if (Permissions::partOfForbidden($removedPermissions)) return Response::deny('Some permissions are not allowed to be removed.');
-        if (Permissions::partOfForbidden($addedPermissions)) return Response::deny('Some permissions are not allowed to be added.');
+        if (Permissions::partOfForbidden($changedPermissions)) return Response::deny('Some permissions are not allowed to be added or removed.');
 
         // If edit includes elevated permissions
-        if (Permissions::partOfElevated($removedPermissions) && !$user->is_admin) return Response::deny('You are missing the required permission.');
-        if (Permissions::partOfElevated($addedPermissions) && !$user->is_admin) return Response::deny('You are missing the required permission.');
+        if (Permissions::partOfElevated($changedPermissions) && !$user->is_admin) return Response::deny('You are missing the required permission.');
         
         return Response::allow();
     }
@@ -87,8 +86,11 @@ class RolePolicy
         // Permission check
         if (!$user->can([Permissions::SYSTEM_VIEW_ROLES, Permissions::SYSTEM_DELETE_ROLES])) return Response::deny('You are missing the required permission.');
 
-        // If role is administrative user needs admin permission
-        if ($role->is_administrative && !$user->can(Permissions::SYSTEM_ADMIN)) return Response::deny('You are missing the required permission.');
+        // If deletion includes forbidden permissions
+        if (Permissions::partOfForbidden($role->getPermissionNames())) return Response::deny('This role is not allowed to be removed.');
+
+        // If deletion includes elevated permissions
+        if (Permissions::partOfElevated($role->getPermissionNames()) && !$user->is_admin) return Response::deny('You are missing the required permission.');
 
         return Response::allow();
     }
@@ -102,8 +104,11 @@ class RolePolicy
         
         foreach ($roles as $role)
         {
-            // If role is administrative user needs admin permission
-            if ($role->is_administrative && !$user->can(Permissions::SYSTEM_ADMIN)) return Response::deny('You are missing the required permission.');
+            // If deletion includes forbidden permissions
+            if (Permissions::partOfForbidden($role->getPermissionNames())) return Response::deny('Some roles are not allowed to be removed.');
+
+            // If deletion includes elevated permissions
+            if (Permissions::partOfElevated($role->getPermissionNames()) && !$user->is_admin) return Response::deny('You are missing the required permission.');
         }
 
         return Response::allow();

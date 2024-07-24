@@ -77,9 +77,12 @@ class RoleController extends Controller
             });
         }
 
-        if ($request->filter_admin)
+        if ($request->filter_permission_levels)
         {
-            $query->whereIsAdmin();
+            $query->where(function ($query) use ($request) {
+                if (in_array('admin', $request->filter_permission_levels)) $query->orWhere(fn ($query) => $query->whereIsAdmin());
+                if (in_array('elevated', $request->filter_permission_levels)) $query->orWhere(fn ($query) => $query->whereHasElevatedPermissions());
+            });
         }
 
         // Sort
@@ -100,7 +103,7 @@ class RoleController extends Controller
     
     public function show(Role $role)
     {
-        $this->authorize('view', [Role::class, $role]);
+        $this->authorize('view', $role);
 
         return RoleResource::make($role);
     }
@@ -121,7 +124,7 @@ class RoleController extends Controller
     
     public function update(UpdateRoleRequest $request, Role $role)
     {
-        $this->authorize('update', [Role::class, $role, $request->permissions]);
+        $this->authorize('update', [$role, $request->permissions]);
 
         $role->update($request->validated());
         $role->syncPermissions($request->permissions);
@@ -133,7 +136,7 @@ class RoleController extends Controller
     
     public function destroy(Role $role)
     {
-        $this->authorize('delete', [Role::class, $role]);
+        $this->authorize('delete', $role);
         
         $role->delete();
     }
