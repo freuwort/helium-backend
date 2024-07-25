@@ -237,6 +237,36 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
 
+    /**
+     * Verify the user's email.
+     *
+     * @param  bool  $verified
+     * @return void
+     */
+    public function verifyEmail(bool $verified = true): void
+    {
+        $this->update([
+            'email_verified_at' => $verified ? now() : null
+        ]);
+    }
+
+
+
+    /**
+     * Enable the user.
+     *
+     * @param  bool  $enabled
+     * @return void
+     */
+    public function enable(bool $enabled = true): void
+    {
+        $this->update([
+            'enabled_at' => $enabled ? now() : null
+        ]);
+    }
+
+
+
     // START: Settings
     public function hasSetting($key)
     {

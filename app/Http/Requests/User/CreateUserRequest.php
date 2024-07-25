@@ -17,14 +17,8 @@ class CreateUserRequest extends FormRequest
     {
         return [
             // User Model
-            'model.name' => ['nullable', 'string', 'max:255'],
             'model.username' => ['nullable', 'string', 'max:255', 'unique:users,username'],
             'model.email' => ['nullable', 'string', 'email', 'max:255', 'unique:users,email'],
-            'model.email_verified_at' => ['nullable', 'date'],
-            'model.enabled_at' => ['nullable', 'date'],
-
-            // User Password
-            'password' => ['nullable', 'string', 'min:8'],
 
             // User Roles
             'roles' => ['nullable', 'array'],

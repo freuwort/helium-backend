@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\UpdateUserPasswordRequest;
 use App\Http\Requests\UploadProfileMediaRequest;
 use App\Http\Requests\User\DestroyManyUserRequest;
 use App\Http\Requests\User\CreateUserRequest;
+use App\Http\Requests\User\EnableUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Requests\User\VerifyUserEmailRequest;
 use App\Http\Resources\Role\BasicRoleResource;
 use App\Http\Resources\User\EditorUserResource;
 use App\Http\Resources\User\BasicUserResource;
@@ -142,66 +145,87 @@ class UserController extends Controller
     
     public function store(CreateUserRequest $request)
     {
-        $this->authorize('create', [User::class, Role::whereIn('id', $request->roles)->get()]);
+        $this->authorize('create', [User::class, Role::whereIn('id', $request->validated('roles'))->get()]);
 
-        $user = User::create($request->model);
+        // Create model
+        $user = User::create($request->validated('model'));
 
-        // Update password if set
-        if ($request->password) $user->updatePassword($request->password);
+        // Sync model related data
+        $user->user_name()->updateOrCreate([],      $request->validated('user_name'));
+        $user->user_company()->updateOrCreate([],   $request->validated('user_company'));
+        $user->syncMany(Identifier::class,          $request->validated('identifiers'));
+        $user->syncMany(Address::class,             $request->validated('addresses'));
+        $user->syncMany(BankConnection::class,      $request->validated('bank_connections'), 'bank_connections');
+        $user->syncMany(Email::class,               $request->validated('emails'));
+        $user->syncMany(Phonenumber::class,         $request->validated('phonenumbers'));
+        $user->syncMany(Date::class,                $request->validated('dates'));
+        $user->syncMany(Link::class,                $request->validated('links'));
 
-        $user->user_name()->updateOrCreate([], $request->user_name);
-        $user->user_company()->updateOrCreate([], $request->user_company);
-        $user->syncMany(Identifier::class, $request->identifiers);
-        $user->syncMany(Address::class, $request->addresses);
-        $user->syncMany(BankConnection::class, $request->bank_connections, 'bank_connections');
-        $user->syncMany(Email::class, $request->emails);
-        $user->syncMany(Phonenumber::class, $request->phonenumbers);
-        $user->syncMany(Date::class, $request->dates);
-        $user->syncMany(Link::class, $request->links);
-
-        // Update roles
-        $user->syncRoles($request->roles);
+        // Sync roles
+        $user->syncRoles($request->validated('roles'));
 
         return EditorUserResource::make($user);
-    }
-
-    public function uploadProfileImage(UploadProfileMediaRequest $request, User $user)
-    {
-        // TODO: Add policy
-        $user->uploadProfileMedia($request->file('file'), User::MEDIA_IMAGE);
-    }
-
-    public function uploadProfileBanner(UploadProfileMediaRequest $request, User $user)
-    {
-        // TODO: Add policy
-        $user->uploadProfileMedia($request->file('file'), User::MEDIA_BANNER);
     }
 
     
     
     public function update(UpdateUserRequest $request, User $user)
     {
-        $this->authorize('update', [$user, Role::whereIn('id', $request->roles)->get()]);
+        $this->authorize('update', [$user, Role::whereIn('id', $request->validated('roles'))->get()]);
 
-        $user->update($request->model);
+        // Update model
+        $user->update($request->validated('model'));
 
-        // Update password if set
-        if ($request->password) $user->updatePassword($request->password);
+        // Sync model related data
+        $user->user_name()->updateOrCreate([],      $request->validated('user_name'));
+        $user->user_company()->updateOrCreate([],   $request->validated('user_company'));
+        $user->syncMany(Identifier::class,          $request->validated('identifiers'));
+        $user->syncMany(Address::class,             $request->validated('addresses'));
+        $user->syncMany(BankConnection::class,      $request->validated('bank_connections'), 'bank_connections');
+        $user->syncMany(Email::class,               $request->validated('emails'));
+        $user->syncMany(Phonenumber::class,         $request->validated('phonenumbers'));
+        $user->syncMany(Date::class,                $request->validated('dates'));
+        $user->syncMany(Link::class,                $request->validated('links'));
 
-        $user->user_name()->updateOrCreate([], $request->user_name);
-        $user->user_company()->updateOrCreate([], $request->user_company);
-        $user->syncMany(Identifier::class, $request->identifiers);
-        $user->syncMany(Address::class, $request->addresses);
-        $user->syncMany(BankConnection::class, $request->bank_connections, 'bank_connections');
-        $user->syncMany(Email::class, $request->emails);
-        $user->syncMany(Phonenumber::class, $request->phonenumbers);
-        $user->syncMany(Date::class, $request->dates);
-        $user->syncMany(Link::class, $request->links);
-
-        // Update roles
-        $user->syncRoles($request->roles);
+        // Sync roles
+        $user->syncRoles($request->validated('roles'));
 
         return EditorUserResource::make($user);
+    }
+
+    public function updatePassword(UpdateUserPasswordRequest $request, User $user)
+    {
+        $this->authorize('updatePassword', $user);
+
+        $user->updatePassword($request->validated('password'));
+    }
+
+    public function updateEmailVerified(VerifyUserEmailRequest $request, User $user)
+    {
+        $this->authorize('verifyEmail', $user);
+
+        $user->verifyEmail($request->validated('email_verified'));
+    }
+
+    public function updateEnabled(EnableUserRequest $request, User $user)
+    {
+        $this->authorize('enable', $user);
+
+        $user->enable($request->validated('enabled'));
+    }
+
+    public function uploadProfileImage(UploadProfileMediaRequest $request, User $user)
+    {
+        $this->authorize('uploadImage', $user);
+
+        $user->uploadProfileMedia($request->file('file'), User::MEDIA_IMAGE);
+    }
+
+    public function uploadProfileBanner(UploadProfileMediaRequest $request, User $user)
+    {
+        $this->authorize('uploadBanner', $user);
+
+        $user->uploadProfileMedia($request->file('file'), User::MEDIA_BANNER);
     }
 
     
@@ -217,7 +241,7 @@ class UserController extends Controller
     
     public function destroyMany(DestroyManyUserRequest $request)
     {
-        $users = User::whereIn('id', $request->ids);
+        $users = User::whereIn('id', $request->validated('ids'));
 
         $this->authorize('deleteMany', [User::class, $users->get()]);
 

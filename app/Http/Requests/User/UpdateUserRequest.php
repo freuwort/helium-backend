@@ -18,14 +18,8 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             // User Model
-            'model.name' => ['nullable', 'string', 'max:255'],
             'model.username' => ['nullable', 'string', 'max:255', 'unique:users,username,'.$this->user->id],
             'model.email' => ['nullable', 'string', 'email', 'max:255', 'unique:users,email,'.$this->user->id],
-            'model.email_verified_at' => ['nullable', 'date'],
-            'model.enabled_at' => ['nullable', 'date'],
-            
-            // User Password
-            'password' => ['nullable', 'string', 'min:8'],
 
             // User Roles
             'roles' => ['nullable', 'array'],

@@ -54,7 +54,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Personal User Routes
         Route::prefix('user')->group(function () {
             Route::patch('/settings', [UserSettingController::class, 'update']);
+            Route::patch('/username', [AuthUserController::class, 'updateUsername']);
             Route::patch('/password', [AuthUserController::class, 'updatePassword']);
+            Route::post('/image', [AuthUserController::class, 'uploadProfileImage']);
+            Route::post('/banner', [AuthUserController::class, 'uploadProfileBanner']);
             Route::delete('/', [AuthUserController::class, 'delete']);
     
             // Two factor

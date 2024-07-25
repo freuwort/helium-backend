@@ -30,7 +30,6 @@ class Permissions
     public const SYSTEM_EDIT_USERS = 'system.edit.users';
     public const SYSTEM_DELETE_USERS = 'system.delete.users';
     public const SYSTEM_ENABLE_USERS = 'system.enable.users';
-    public const SYSTEM_DISABLE_USERS = 'system.disable.users';
 
     // Companies
     public const SYSTEM_VIEW_COMPANIES = 'system.view.companies';
@@ -96,8 +95,7 @@ class Permissions
                     ['name' => self::SYSTEM_CREATE_USERS, 'label' => 'Benutzer erstellen', 'description' => 'Der Benutzer kann andere Benutzer erstellen.'],
                     ['name' => self::SYSTEM_EDIT_USERS, 'label' => 'Benutzer bearbeiten', 'description' => 'Der Benutzer kann andere Benutzer bearbeiten.'],
                     ['name' => self::SYSTEM_DELETE_USERS, 'label' => 'Benutzer löschen', 'description' => 'Der Benutzer kann andere Benutzer löschen.'],
-                    ['name' => self::SYSTEM_ENABLE_USERS, 'label' => 'Benutzer aktivieren', 'description' => 'Der Benutzer kann andere Benutzer aktivieren.'],
-                    ['name' => self::SYSTEM_DISABLE_USERS, 'label' => 'Benutzer deaktivieren', 'description' => 'Der Benutzer kann andere Benutzer deaktivieren.'],
+                    ['name' => self::SYSTEM_ENABLE_USERS, 'label' => 'Benutzer aktivieren', 'description' => 'Der Benutzer kann andere Benutzer aktivieren/deaktivieren.'],
                 ],
                 [
                     ['name' => self::SYSTEM_VIEW_COMPANIES, 'label' => 'Firmen anzeigen', 'description' => 'Der Benutzer kann die Firmen ansehen.'],

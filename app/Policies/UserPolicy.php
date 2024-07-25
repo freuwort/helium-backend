@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Classes\Permissions\Permissions;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Database\Eloquent\Collection;
@@ -102,6 +103,87 @@ class UserPolicy
 
 
 
+    public function updateUsername(User $user, User $model): Response
+    {
+        // Check if domain policy allows username change (only for the user themself)
+        if (Setting::getSetting('policy_allow_username_change', false) && $user->id == $model->id) return Response::allow();
+
+        // Permission check
+        if ($user->can([Permissions::SYSTEM_VIEW_USERS, Permissions::SYSTEM_EDIT_USERS])) return Response::allow();
+        
+        return Response::allow();
+    }
+
+
+
+    public function updatePassword(User $user, User $model): Response
+    {
+        // Permission check
+        if (!$user->canAny([Permissions::ADMIN_PERMISSIONS])) return Response::deny('You are missing the required permission.');
+
+        // Check if edit includes forbidden permissions
+        if ($model->has_forbidden_permissions) return Response::deny('User password cannot be manually changed.');
+        
+        return Response::allow();
+    }
+
+
+
+    public function verifyEmail(User $user, User $model): Response
+    {
+        // Permission check
+        if (!$user->canAny([Permissions::ADMIN_PERMISSIONS])) return Response::deny('You are missing the required permission.');
+
+        // Check if edit includes forbidden permissions
+        if ($model->has_forbidden_permissions) return Response::deny('User email cannot be manually verified.');
+        
+        return Response::allow();
+    }
+
+
+
+    public function enable(User $user, User $model): Response
+    {
+        // Permission check
+        if (!$user->can([Permissions::SYSTEM_ENABLE_USERS])) return Response::deny('You are missing the required permission.');
+
+        // Check if edit includes forbidden permissions
+        if ($model->has_forbidden_permissions) return Response::deny('User status cannot be manually changed.');
+
+        // Check if edit includes elevated permissions
+        if ($model->has_elevated_permissions && !$user->is_admin) return Response::deny('You are missing the required permission.');
+
+        return Response::allow();
+    }
+
+
+
+    public function uploadImage(User $user, User $model): Response
+    {
+        // Check if domain policy allows profile image upload (only for the user themself)
+        if (Setting::getSetting('policy_allow_profile_image_upload', false) && $user->id == $model->id) return Response::allow();
+
+        // Permission check
+        if ($user->can([Permissions::SYSTEM_VIEW_USERS, Permissions::SYSTEM_EDIT_USERS])) return Response::allow();
+        
+        return Response::deny('You are missing the required permission.');
+    }
+
+    
+
+    public function uploadBanner(User $user, User $model): Response
+    {
+        // Check if domain policy allows profile banner upload (only for the user themself)
+        if (Setting::getSetting('policy_allow_profile_banner_upload', false) && $user->id == $model->id) return Response::allow();
+
+        // Permission check
+        if ($user->can([Permissions::SYSTEM_VIEW_USERS, Permissions::SYSTEM_EDIT_USERS])) return Response::allow();
+        
+        return Response::deny('You are missing the required permission.');
+    }
+
+
+
     public function delete(User $user, User $model): Response
     {
         // Permission check
@@ -110,7 +192,7 @@ class UserPolicy
         // Check if user tries to delete themself
         if ($model->id == $user->id) return Response::deny('You cannot delete yourself.');
 
-        //  Check if deletion includes forbidden permissions
+        // Check if deletion includes forbidden permissions
         if ($model->has_forbidden_permissions) return Response::deny('User cannot be deleted.');
 
         // Check if deletion includes elevated permissions
