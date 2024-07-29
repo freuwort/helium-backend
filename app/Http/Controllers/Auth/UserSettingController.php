@@ -8,11 +8,15 @@ use Illuminate\Http\Request;
 
 class UserSettingController extends Controller
 {
-    // Set a setting for the authenticated User model.
     public function update(UpdateUserSettingRequest $request)
     {
         $request->user()->setSetting($request->validated());
 
         return response(200);
+    }
+
+    public function updateView(Request $request)
+    {
+        $request->user()->setSetting($request->key, $request->value);
     }
 }
