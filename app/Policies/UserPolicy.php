@@ -63,6 +63,9 @@ class UserPolicy
 
                 // If creation includes elevated permissions
                 if (Permissions::partOfElevated($role->getPermissionNames()) && !$user->is_admin) return Response::deny('You are missing the required permission.');
+
+                // Check if user tries to assign roles with permissions they don't have themselves
+                if (!$user->can($role->getPermissionNames())) return Response::deny('You can only assign permissions you have yourself.');
             }
         }
 
@@ -95,6 +98,9 @@ class UserPolicy
 
                 // If edit includes elevated permissions
                 if (Permissions::partOfElevated($role->getPermissionNames()) && !$user->is_admin) return Response::deny('You are missing the required permission.');
+
+                // Check if user tries to assign roles with permissions they don't have themselves
+                if (!$user->can($role->getPermissionNames())) return Response::deny('You can only assign permissions you have yourself.');
             }
         }
 

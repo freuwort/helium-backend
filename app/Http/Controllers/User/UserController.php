@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\UpdateUserPasswordRequest;
 use App\Http\Requests\UploadProfileMediaRequest;
 use App\Http\Requests\User\DestroyManyUserRequest;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\EnableUserRequest;
+use App\Http\Requests\User\UpdateUserPasswordRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Requests\User\VerifyUserEmailRequest;
-use App\Http\Resources\Role\BasicRoleResource;
 use App\Http\Resources\User\EditorUserResource;
 use App\Http\Resources\User\BasicUserResource;
 use App\Http\Resources\User\UserResource;
@@ -27,13 +26,6 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    // public function __construct()
-    // {
-    //     $this->authorizeResource(User::class, 'user');
-    // }
-
-
-
     public function indexBasic(Request $request)
     {
         $this->authorize('basicViewAny', User::class);
