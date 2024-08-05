@@ -26,9 +26,9 @@ trait HasAccessControl
 
 
 
-    private function getInheritAccess(){}
+    private function getInheritAccess() {}
 
-    public function getDefaultAccess()
+    public static function defaultAccess($model)
     {
         return ['any' => ['guest' => null]];
     }
@@ -138,17 +138,19 @@ trait HasAccessControl
 
 
 
-    public function computeAccess()
+    public static function computeAccess($model)
     {
-        $defaultAccess = collect($this->getDefaultAccess());
+        $defaultAccess = collect(self::defaultAccess($model));
+
+        if (!$model) return $defaultAccess;
 
         // Recursively compute access if access is inherited
-        if ($this->inherit_access === true)
+        if ($model->inherit_access === true)
         {
-            return $this->parent ? $this->parent->computeAccess() : $defaultAccess;
+            return $model->parent ? self::computeAccess($model->parent) : $defaultAccess;
         }
 
-        $publicAccess = collect(['any' => ['guest' => $this
+        $publicAccess = collect(['any' => ['guest' => $model
             ->accesses()
             ->whereNull('type')
             ->whereNull('permissible_id')
@@ -157,7 +159,7 @@ trait HasAccessControl
             ->permission ?? null
         ]]);
 
-        $specificAccess = $this
+        $specificAccess = $model
             ->accesses()
             ->select('type', 'permissible_id', 'permissible_type', 'permission')
             ->whereNull('type')
@@ -188,10 +190,15 @@ trait HasAccessControl
         if ($permissions instanceof string) $permissions = [$permissions];
 
         // Create access check
-        $check = new AccessCheck($model->computeAccess(), $models);
+        $check = new AccessCheck(self::computeAccess($model), $models);
 
         // Check access
         return $check->can($permissions);
+    }
+
+    public static function checkIfGuest(Model|array|string $model, array|string $permissions): bool
+    {
+        return self::checkIf($model, [], $permissions);
     }
 
     public static function checkIfUser(Model|array|string $model, User|null $user, array|string $permissions): bool
@@ -200,16 +207,11 @@ trait HasAccessControl
         if (!$user) return self::checkIfGuest($model, $permissions);
 
         // Check for super admin
-        if ($user->can([Permissions::SYSTEM_ADMIN, Permissions::SYSTEM_SUPER_ADMIN])) return true;
+        if ($user->can(Permissions::ADMIN_PERMISSIONS)) return true;
 
         // Check for user and their roles
         return self::checkIf($model, [$user, ...$user->roles()->get()], $permissions);
 
-    }
-
-    public static function checkIfGuest(Model|array|string $model, array|string $permissions): bool
-    {
-        return self::checkIf($model, [], $permissions);
     }
 }
 

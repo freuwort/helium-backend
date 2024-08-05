@@ -3,34 +3,22 @@
 namespace App\Http\Controllers\Media;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Media\UploadMediaRequest;
 use App\Models\Media;
 use Illuminate\Http\Request;
 
 class FileController extends Controller
 {
-    public function upload(Request $request)
+    public function upload(UploadMediaRequest $request)
     {
-        $allowedMimetypes = [
-            'font/*',
-            'image/*',
-            'text/*',
-            'audio/*',
-            'video/*',
-            'application/*',
-        ];
-
-        $request->validate([
-            'files' => ['array', 'max:1000'],
-            'files.*' => ['file', 'mimetypes:'.implode(',', $allowedMimetypes)],
-            'path' => ['required', 'string', 'max:255'],
-        ]);
+        $this->authorize('upload', Media::class);
 
         $files = $request->file('files');
         $uploadedFiles = [];
 
         foreach ($files as $file)
         {
-            $uploadedFiles[] = Media::upload($request->path, $file);
+            $uploadedFiles[] = Media::upload($request->validated('path'), $file);
         }
 
         return response()->json([

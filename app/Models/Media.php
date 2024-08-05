@@ -154,9 +154,9 @@ class Media extends Model
 
 
 
-    public function getDefaultAccess()
+    public static function defaultAccess($model)
     {
-        return optional(self::getMediaDisk($this->drive))->default_access ?? config('filesystems.disk_default_access');
+        return optional(self::getMediaDisk($model->drive))->default_access ?? config('filesystems.disk_default_access');
     }
 
 
@@ -177,10 +177,7 @@ class Media extends Model
 
     public function setOwner($model)
     {
-        $this->update([
-            'owner_id' => $model ? $model->getKey() : null,
-            'owner_type' => $model ? $model::class : null,
-        ]);
+        $this->owner()->associate($model);
     }
 
 
@@ -188,8 +185,8 @@ class Media extends Model
     public static function discovery(string $path)
     {
         $path = self::dissectPath($path);
-        $disk = self::getMediaDiskOrFail($path->diskname);
         $parent = self::getDirectory($path->path);
+        $disk = self::getMediaDiskOrFail($path->diskname);
 
         // When subdirectory exists: check if the parent media model exists
         if ($path->hasSubdirectory && !$parent) throw new \Exception('The parent directory does not exist.');
