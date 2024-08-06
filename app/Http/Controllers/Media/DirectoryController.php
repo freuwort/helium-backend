@@ -3,22 +3,17 @@
 namespace App\Http\Controllers\Media;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Media\CreateDirectoryRequest;
 use App\Models\Media;
-use Illuminate\Http\Request;
 
 class DirectoryController extends Controller
 {
-    public function store(Request $request)
+    public function store(CreateDirectoryRequest $request)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'path' => ['required', 'string', 'max:255'],
-        ]);
-
-        $directory = Media::createDirectory($request->path, $request->name);
+        $this->authorize('createDirectory', [Media::class, $request->validated('path')]);
 
         return response()->json([
-            'directory' => $directory
+            'directory' => Media::createDirectory($request->validated('path'), $request->validated('name')),
         ]);
     }
 }

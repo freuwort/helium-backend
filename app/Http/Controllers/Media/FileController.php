@@ -5,13 +5,12 @@ namespace App\Http\Controllers\Media;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Media\UploadMediaRequest;
 use App\Models\Media;
-use Illuminate\Http\Request;
 
 class FileController extends Controller
 {
     public function upload(UploadMediaRequest $request)
     {
-        $this->authorize('upload', Media::class);
+        $this->authorize('upload', [Media::class, $request->validated('path')]);
 
         $files = $request->file('files');
         $uploadedFiles = [];

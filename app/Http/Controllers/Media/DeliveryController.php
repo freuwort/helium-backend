@@ -12,15 +12,16 @@ class DeliveryController extends Controller
 {
     public function __invoke(Request $request)
     {
-        if ($request->expectsJson() && !$request->exact) return $this->index($request);
-        if ($request->expectsJson() && $request->exact) return $this->show($request);
-        
-        return $this->serve($request);
+        if (!Media::canUser(auth()->user(), ['read', 'write', 'admin'], $request->path)) return abort(403);
+
+        if (!$request->expectsJson())                       return $this->serve($request);
+        if ($request->expectsJson() && !$request->exact)    return $this->index($request);
+        if ($request->expectsJson() && $request->exact)     return $this->show($request);
     }
 
 
 
-    public function index(Request $request)
+    private function index(Request $request)
     {
         // Base query
         $query = Media::whereChildOfPath($request->path)->with('accesses');
@@ -44,9 +45,9 @@ class DeliveryController extends Controller
         // Access Management
         $user = $request->user();
         $permissions = ['read', 'write', 'admin'];
-        $parentAccess = Media::checkIfUser(['src_path', $request->path], $user, $permissions);
+        $hasParentAccess = Media::canUser($user, $permissions, $request->path);
 
-        $query->whereModelHasAccess($user, $permissions, $parentAccess);
+        $query->whereModelHasAccess($user, $permissions, $hasParentAccess);
 
         // Return collection + pagination
         return MediaResource::collection($query->paginate($request->size ?? 20));
@@ -54,29 +55,15 @@ class DeliveryController extends Controller
 
 
 
-    public function show(Request $request)
+    private function show(Request $request)
     {
-        $user = $request->user();
-        $permissions = ['read', 'write', 'admin'];
-
-        $media = Media::where('src_path', $request->path)->firstOrFail();
-
-        if (!Media::checkIfUser($media, $user, $permissions)) abort(403);
-
-        return MediaResource::make($media);
+        return MediaResource::make(Media::findPathOrFail($request->path));
     }
 
 
 
-    public function serve(Request $request)
+    private function serve(Request $request)
     {
-        $user = $request->user();
-        $permissions = ['read', 'write', 'admin'];
-
-        $media = Media::where('src_path', $request->path)->firstOrFail();
-
-        if (!Media::checkIfUser($media, $user, $permissions)) abort(403);
-        
-        return response()->file(Storage::path($media->src_path));
+        return response()->file(Storage::path(Media::findPathOrFail($request->path)->src_path));
     }
 }

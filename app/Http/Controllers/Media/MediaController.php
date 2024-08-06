@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Media;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Media\CopyMediaRequest;
 use App\Http\Requests\Media\DestroyMediaRequest;
+use App\Http\Requests\Media\DiscoverMediaRequest;
 use App\Http\Requests\Media\MoveMediaRequest;
 use App\Http\Requests\Media\RenameMediaRequest;
 use App\Http\Requests\Media\ShareMediaRequest;
@@ -16,6 +17,8 @@ class MediaController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('view', [Media::class, $request->path]);
+
         // Base query
         $query = Media::whereChildOfPath($request->path)->with('accesses');
 
@@ -38,9 +41,9 @@ class MediaController extends Controller
         // Access Management
         $user = $request->user();
         $permissions = ['read', 'write', 'admin'];
-        $parentAccess = Media::checkIfUser(['src_path', $request->path], $user, $permissions);
+        $hasParentAccess = Media::canUser($user, $permissions, $request->path);
 
-        $query->whereModelHasAccess($user, $permissions, $parentAccess);
+        $query->whereModelHasAccess($user, $permissions, $hasParentAccess);
 
         // Return collection + pagination
         return MediaResource::collection($query->paginate($request->size ?? 20));
@@ -48,32 +51,33 @@ class MediaController extends Controller
 
 
 
-    public function discovery(Request $request)
+    public function discover(DiscoverMediaRequest $request)
     {
-        Media::discovery($request->path);
+        $this->authorize('discover', [Media::class]);
+        Media::discover($request->validated('path'));
     }
 
 
 
     public function rename(RenameMediaRequest $request)
     {
-        Media::findPathOrFail($request->path)->rename($request->name);
+        $this->authorize('rename', [Media::class, $request->validated('path')]);
+        Media::findPathOrFail($request->validated('path'))->rename($request->validated('name'));
     }
 
 
 
     public function share(ShareMediaRequest $request)
     {
-        $media = Media::findPathOrFail($request->path);
-        
-        $media->update([ 'inherit_access' => $request->inherit_access ]);
+        $this->authorize('share', [Media::class, $request->validated('path')]);
+
+        $media = Media::findPathOrFail($request->validated('path'));
         
         $media->removeAllAccess();
+        $media->addAccess(null, ['permission' => $request->validated('public_access')]);
+        $media->update(['inherit_access' => $request->validated('inherit_access')]);
 
-        $media->addAccess(null, ['permission' => $request->public_access]);
-
-        foreach ($request->access as $access)
-        {
+        foreach ($request->validated('access') as $access) {
             $media->addAccess([
                 'id' => $access['permissible_id'],
                 'type' => $access['permissible_type'],
@@ -85,20 +89,23 @@ class MediaController extends Controller
 
     public function move(MoveMediaRequest $request)
     {
-        Media::moveMany($request->paths, $request->destination);
+        $this->authorize('moveMany', [Media::class, $request->validated('paths'), $request->validated('destination')]);
+        Media::moveMany($request->validated('paths'), $request->validated('destination'));
     }
 
 
 
     public function copy(CopyMediaRequest $request)
     {
-        Media::copyMany($request->paths, $request->destination);
+        $this->authorize('copyMany', [Media::class, $request->validated('paths'), $request->validated('destination')]);
+        Media::copyMany($request->validated('paths'), $request->validated('destination'));
     }
 
 
 
     public function destroy(DestroyMediaRequest $request)
     {
-        Media::deleteMany($request->paths);
+        $this->authorize('deleteMany', [Media::class, $request->validated('paths')]);
+        Media::deleteMany($request->validated('paths'));
     }
 }

@@ -11,35 +11,20 @@ use Illuminate\Database\Eloquent\Collection;
 
 class MediaPolicy
 {
-    // TODO: implement
-    public function basicViewAny(User $user): Response
+    public function view(User $user, string $path): Response
     {
+        // Check if user can view media
+        if (!Media::canUser($user, ['read', 'write', 'admin'], $path)) return Response::deny('You are missing the required permission.');
+
         return Response::allow();
     }
 
 
-    // TODO: implement
-    public function basicView(User $user, Media $model): Response
-    {
-        return Response::allow();
-    }
 
-
-    // TODO: implement
-    public function viewAny(User $user): Response
+    public function discover(User $user): Response
     {
         // Permission check
-        if (!$user->can(Permissions::SYSTEM_VIEW_USERS)) return Response::deny('You are missing the required permission.');
-
-        return Response::allow();
-    }
-
-    
-    // TODO: implement
-    public function view(User $user, User $model): Response
-    {
-        // Permission check
-        if (!$user->can(Permissions::SYSTEM_VIEW_USERS)) return Response::deny('You are missing the required permission.');
+        if (!$user->can(Permissions::ADMIN_PERMISSIONS)) return Response::deny('You are missing the required permission.');
 
         return Response::allow();
     }
@@ -51,100 +36,142 @@ class MediaPolicy
         // Permission check
         if (!$user->can(Permissions::SYSTEM_ACCESS_MEDIA)) return Response::deny('You are missing the required permission.');
 
-        // Check if user can upload files to this path
-        if (!Media::checkIfUser(['src_path', $path], $user, ['write', 'admin'])) return Response::deny('You are missing the required permission.');
+        // Check if user can upload to path
+        if (!Media::canUser($user, ['write', 'admin'], $path)) return Response::deny('You are missing the required permission.');
 
         return Response::allow();
     }
 
 
-    // TODO: implement
-    public function update(User $user, User $model, Collection $newRoles): Response
+
+    public function createDirectory(User $user, string $path): Response
     {
         // Permission check
-        if (!$user->can([Permissions::SYSTEM_VIEW_USERS, Permissions::SYSTEM_EDIT_USERS])) return Response::deny('You are missing the required permission.');
+        if (!$user->can(Permissions::SYSTEM_ACCESS_MEDIA)) return Response::deny('You are missing the required permission.');
 
-        $currentRoles = $model->roles;
-        $removedRoles = $currentRoles->diff($newRoles);
-        $addedRoles = $newRoles->diff($currentRoles);
-        $changedRoles = $removedRoles->merge($addedRoles);
+        // Check if user can create directory in path
+        if (!Media::canUser($user, ['write', 'admin'], $path)) return Response::deny('You are missing the required permission.');
 
-        // Check if user tries to assign roles
-        if ($changedRoles->isNotEmpty())
+        return Response::allow();
+    }
+
+
+
+    public function rename(User $user, string $path): Response
+    {
+        // Permission check
+        if (!$user->can(Permissions::SYSTEM_ACCESS_MEDIA)) return Response::deny('You are missing the required permission.');
+
+        // Check if user can rename media
+        if (!Media::canUser($user, ['write', 'admin'], $path)) return Response::deny('You are missing the required permission.');
+
+        return Response::allow();
+    }
+
+
+
+    public function share(User $user, string $path): Response
+    {
+        // Permission check
+        if (!$user->can(Permissions::SYSTEM_ACCESS_MEDIA)) return Response::deny('You are missing the required permission.');
+
+        // Check if user can share media
+        if (!Media::canUser($user, ['admin'], $path)) return Response::deny('You are missing the required permission.');
+
+        return Response::allow();
+    }
+
+
+
+    public function move(User $user, string $path, string $destination): Response
+    {
+        // Permission check
+        if (!$user->can(Permissions::SYSTEM_ACCESS_MEDIA)) return Response::deny('You are missing the required permission.');
+
+        // Check if user can move media
+        if (!Media::canUser($user, ['write', 'admin'], $destination)) return Response::deny('You are missing the required permission.');
+        if (!Media::canUser($user, ['admin'], $path)) return Response::deny('You are missing the required permission.');
+
+        return Response::allow();
+    }
+
+
+
+    public function moveMany(User $user, array $paths, string $destination): Response
+    {
+        // Permission check
+        if (!$user->can(Permissions::SYSTEM_ACCESS_MEDIA)) return Response::deny('You are missing the required permission.');
+
+        // Check if user can move media
+        if (!Media::canUser($user, ['write', 'admin'], $destination)) return Response::deny('You are missing the required permission.');
+
+        // Check specific paths
+        foreach ($paths as $path)
         {
-            // Check if user can generally assign roles
-            if (!$user->can(Permissions::SYSTEM_ASSIGN_ROLES)) return Response::deny('You are missing the required permission.');
-            
-            // Check if specific roles can be assigned
-            foreach ($changedRoles as $role)
-            {
-                // If edit includes forbidden permissions
-                if (Permissions::partOfForbidden($role->getPermissionNames())) return Response::deny('Some roles are not allowed to be assigned or removed.');
-
-                // If edit includes elevated permissions
-                if (Permissions::partOfElevated($role->getPermissionNames()) && !$user->is_admin) return Response::deny('You are missing the required permission.');
-
-                // Check if user tries to assign roles with permissions they don't have themselves
-                if (!$user->can($role->getPermissionNames())) return Response::deny('You can only assign permissions you have yourself.');
-            }
+            if (!Media::canUser($user, ['admin'], $path)) return Response::deny('You are missing the required permission.');
         }
 
         return Response::allow();
     }
 
 
-    // TODO: implement
-    public function delete(User $user, User $model): Response
+
+    public function copy(User $user, string $path, string $destination): Response
     {
         // Permission check
-        if (!$user->can([Permissions::SYSTEM_VIEW_USERS, Permissions::SYSTEM_DELETE_USERS])) return Response::deny('You are missing the required permission.');
+        if (!$user->can(Permissions::SYSTEM_ACCESS_MEDIA)) return Response::deny('You are missing the required permission.');
 
-        // Check if user tries to delete themself
-        if ($model->id == $user->id) return Response::deny('You cannot delete yourself.');
-
-        // Check if deletion includes forbidden permissions
-        if ($model->has_forbidden_permissions) return Response::deny('User cannot be deleted.');
-
-        // Check if deletion includes elevated permissions
-        if ($model->has_elevated_permissions && !$user->is_admin) return Response::deny('You are missing the required permission.');
-
-        return Response::allow();
+        // Check if user can copy media
+        if (!Media::canUser($user, ['write', 'admin'], $destination)) return Response::deny('You are missing the required permission.');
+        if (!Media::canUser($user, ['read', 'write', 'admin'], $path)) return Response::deny('You are missing the required permission.');
     }
 
-    
-    // TODO: implement
-    public function deleteMany(User $user, Collection $models): Response
+
+
+    public function copyMany(User $user, array $paths, string $destination): Response
     {
         // Permission check
-        if (!$user->can([Permissions::SYSTEM_VIEW_USERS, Permissions::SYSTEM_DELETE_USERS])) return Response::deny('You are missing the required permission.');
+        if (!$user->can(Permissions::SYSTEM_ACCESS_MEDIA)) return Response::deny('You are missing the required permission.');
+
+        // Check if user can copy media
+        if (!Media::canUser($user, ['write', 'admin'], $destination)) return Response::deny('You are missing the required permission.');
         
-        // Check specific users
-        foreach ($models as $model)
+        // Check specific paths
+        foreach ($paths as $path)
         {
-            // Check if user tries to delete themself
-            if ($model->id == $user->id) return Response::deny('You cannot delete yourself.');
-
-            //  Check if deletion includes forbidden permissions
-            if ($model->has_forbidden_permissions) return Response::deny('User cannot be deleted.');
-
-            // Check if deletion includes elevated permissions
-            if ($model->has_elevated_permissions && !$user->is_admin) return Response::deny('You are missing the required permission.');
+            if (!Media::canUser($user, ['read', 'write', 'admin'], $path)) return Response::deny('You are missing the required permission.');
         }
 
         return Response::allow();
     }
 
-    
-    
-    public function restore(User $user, User $model): Response
+
+
+    public function delete(User $user, string $path): Response
     {
-        return Response::deny();
+        // Permission check
+        if (!$user->can(Permissions::SYSTEM_ACCESS_MEDIA)) return Response::deny('You are missing the required permission.');
+        
+        // Check if user can delete media
+        if (!Media::canUser($user, ['admin'], $path)) return Response::deny('You are missing the required permission.');
+
+        return Response::allow();
     }
 
     
-    
-    public function forceDelete(User $user, User $model): Response
+
+    public function deleteMany(User $user, array $paths): Response
     {
-        return Response::deny();
+        // Permission check
+        if (!$user->can(Permissions::SYSTEM_ACCESS_MEDIA)) return Response::deny('You are missing the required permission.');
+        
+        // Check specific paths
+        foreach ($paths as $path)
+        {
+            // Check if user can delete media
+            if (!Media::canUser($user, ['admin'], $path)) return Response::deny('You are missing the required permission.');
+        }
+
+        return Response::allow();
     }
 }

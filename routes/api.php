@@ -114,7 +114,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/media/share', [MediaController::class, 'share']);
         Route::patch('/media/move', [MediaController::class, 'move']);
         Route::patch('/media/rename', [MediaController::class, 'rename']);
-        Route::patch('/media/discovery', [MediaController::class, 'discovery']);
+        Route::patch('/media/discover', [MediaController::class, 'discover']);
         Route::delete('/media', [MediaController::class, 'destroy']);
 
 

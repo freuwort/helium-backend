@@ -10,10 +10,7 @@ use Illuminate\Support\Collection;
 
 trait HasAccessControl
 {
-    protected $inherit_access_column = 'inherit_access';
-
-
-
+    // START: Relationships
     public function accesses()
     {
         return $this->morphMany(Access::class, 'accessable');
@@ -24,34 +21,31 @@ trait HasAccessControl
         return null;
     }
 
-
-
-    private function getInheritAccess() {}
-
-    public static function defaultAccess($model)
+    public function children()
     {
-        return ['any' => ['guest' => null]];
+        return null;
     }
+    // END: Relationships
 
 
 
     // START: Scopes
-    public function scopeWhereModelHasAccess($query, Model|null $model, array $permissions, $access)
+    public function scopeWhereModelHasAccess($query, Model|null $model, array $permissions, bool $hasParentAccess)
     {
-        // $inheritAccessColumn = $this->inherit_access_column;
+        // Check for admin
+        if ($model instanceof User && $model->can(Permissions::ADMIN_PERMISSIONS)) return $query;
+        
+        // Define columns
         $inheritAccessColumn = 'inherit_access';
 
-        // Check for super admin
-        if ($model instanceof User && $model->can([Permissions::SYSTEM_ADMIN, Permissions::SYSTEM_SUPER_ADMIN])) return $query;
-
         // Main query
-        return $query->where(function ($query) use ($model, $permissions, $access, $inheritAccessColumn) {
+        return $query->where(function ($query) use ($model, $permissions, $hasParentAccess, $inheritAccessColumn) {
             return $query
             // Where inherit access
-            ->where(function ($query) use ($model, $permissions, $access, $inheritAccessColumn) {
+            ->where(function ($query) use ($hasParentAccess, $inheritAccessColumn) {
                 return $query
                 ->where($inheritAccessColumn, true)
-                ->when($access, function ($query) {
+                ->when($hasParentAccess, function ($query) {
                     return $query;
                 }, function ($query) use ($inheritAccessColumn) {
                     return $query->where($inheritAccessColumn, false);
@@ -101,9 +95,106 @@ trait HasAccessControl
         });
     }
     // END: Scopes
+
+
+
+    // START: Access control
+    public static function defaultAccess(Model|null $accessable): Collection
+    {
+        return collect(['any' => ['guest' => null]]);
+    }
+
+    public static function computeAccessVia($accessable): Collection
+    {
+        // TODO: allow for custom find column
+        if (is_integer($accessable)) $accessable = self::find($accessable);
+        if (is_string($accessable)) $accessable = self::find($accessable);
+
+        return self::computeAccessViaModel($accessable);
+    }
+
+    public static function computeAccessViaModel(Model|null $accessable): Collection
+    {
+        $defaultAccess = self::defaultAccess($accessable);
+
+        if (!$accessable) return $defaultAccess;
+
+        // Recursively compute access if access is inherited
+        if ($accessable->inherit_access === true)
+        {
+            return $accessable->parent ? self::computeAccessViaModel($accessable->parent) : $defaultAccess;
+        }
+
+        $publicAccess = collect(['any' => ['guest' => $accessable
+            ->accesses()
+            ->whereNull('type')
+            ->whereNull('permissible_id')
+            ->whereNull('permissible_type')
+            ->first()
+            ->permission ?? null
+        ]]);
+
+        $specificAccess = $accessable
+            ->accesses()
+            ->select('type', 'permissible_id', 'permissible_type', 'permission')
+            ->whereNull('type')
+            ->whereNotNull('permissible_id')
+            ->whereNotNull('permissible_type')
+            ->get()
+            ->groupBy('permissible_type')
+            ->map(fn ($group) => $group->pluck('permission', 'permissible_id'));
+
+        return $defaultAccess
+            ->merge($publicAccess)
+            ->merge($specificAccess);
+    }
+
+    public static function can(Model|Collection|array $permissibles, array $permissions, $accessable): bool
+    {
+        // Correct $permissibles type
+        if ($permissibles instanceof Collection) $permissibles = $permissibles->all();
+        if ($permissibles instanceof Model) $permissibles = [$permissibles];
+        
+        // Get computed access
+        $access = self::computeAccessVia($accessable);
+
+
+        // Guest check
+        if (!count($permissibles) && isset($access['any']['guest']) && in_array($access['any']['guest'], $permissions)) return true;
+
+        // Check each model
+        foreach ($permissibles as $permissible)
+        {
+            // Get keys
+            $group = (string) $permissible::class;
+            $id = (string) $permissible->getKey();
+
+            // Check access
+            if (isset($access[$group][$id]) && in_array($access[$group][$id], $permissions)) return true;
+        }
+
+
+        // No match
+        return false;
+    }
+
+    public static function canUser(?User $user, array $permissions, $accessable): bool
+    {
+        // Check for guest
+        if (!$user) return self::can([], $permissions, $accessable);
+
+        // Check for admin
+        if ($user->can(Permissions::ADMIN_PERMISSIONS)) return true;
+
+        // Check for user + roles
+        return self::can([$user, ...$user->roles()->get()], $permissions, $accessable);
+
+    }
+    // END: Access control
     
 
 
+    // START: Access methods
     public function addAccess(Model|array|null $model, array $options = [])
     {
         $model_id = is_array($model) ? $model['id'] : null;
@@ -124,8 +215,6 @@ trait HasAccessControl
         ]);
     }
 
-
-
     public function removeAccess(Model $model)
     {
         $this->accesses()->where('permissible_id', $model->getKey())->where('permissible_type', $model::class)->delete();
@@ -135,112 +224,5 @@ trait HasAccessControl
     {
         $this->accesses()->where('type', $type)->delete();
     }
-
-
-
-    public static function computeAccess($model)
-    {
-        $defaultAccess = collect(self::defaultAccess($model));
-
-        if (!$model) return $defaultAccess;
-
-        // Recursively compute access if access is inherited
-        if ($model->inherit_access === true)
-        {
-            return $model->parent ? self::computeAccess($model->parent) : $defaultAccess;
-        }
-
-        $publicAccess = collect(['any' => ['guest' => $model
-            ->accesses()
-            ->whereNull('type')
-            ->whereNull('permissible_id')
-            ->whereNull('permissible_type')
-            ->first()
-            ->permission ?? null
-        ]]);
-
-        $specificAccess = $model
-            ->accesses()
-            ->select('type', 'permissible_id', 'permissible_type', 'permission')
-            ->whereNull('type')
-            ->whereNotNull('permissible_id')
-            ->whereNotNull('permissible_type')
-            ->get()
-            ->groupBy('permissible_type')
-            ->map(fn ($group) => $group->pluck('permission', 'permissible_id'));
-
-        return $defaultAccess
-            ->merge($publicAccess)
-            ->merge($specificAccess);
-    }
-
-
-
-    public static function checkIf(Model|array|string $model, Model|Collection|array $models, array|string $permissions): bool
-    {
-        // Correct $model type
-        if (is_array($model)) $model = self::where(...$model)->firstOrFail();
-        if ($model instanceof string) $model = self::findOrFail($model);
-
-        // Correct $models type
-        if ($models instanceof Collection) $models = $models->all();
-        if ($models instanceof Model) $models = [$models];
-
-        // Correct $permissions type
-        if ($permissions instanceof string) $permissions = [$permissions];
-
-        // Create access check
-        $check = new AccessCheck(self::computeAccess($model), $models);
-
-        // Check access
-        return $check->can($permissions);
-    }
-
-    public static function checkIfGuest(Model|array|string $model, array|string $permissions): bool
-    {
-        return self::checkIf($model, [], $permissions);
-    }
-
-    public static function checkIfUser(Model|array|string $model, User|null $user, array|string $permissions): bool
-    {
-        // Check for guest
-        if (!$user) return self::checkIfGuest($model, $permissions);
-
-        // Check for super admin
-        if ($user->can(Permissions::ADMIN_PERMISSIONS)) return true;
-
-        // Check for user and their roles
-        return self::checkIf($model, [$user, ...$user->roles()->get()], $permissions);
-
-    }
-}
-
-
-
-class AccessCheck {
-    private $access;
-    private $models;
-
-    public function __construct($access, $models) {
-        $this->access = $access;
-        $this->models = $models;
-
-        return $this;
-    }
-
-    public function can(array|string $permissions) {
-        // Correct $permissions type
-        if ($permissions instanceof string) $permissions = [$permissions];
-
-        if (!count($this->models) && isset($this->access['any']['guest']) && in_array($this->access['any']['guest'], $permissions)) return true;
-
-        foreach ($this->models as $model) {
-            $group = (string) $model::class;
-            $id = (string) $model->getKey();
-
-            if (isset($this->access[$group][$id]) && in_array($this->access[$group][$id], $permissions)) return true;
-        }
-
-        return false;
-    }
+    // END: Access methods
 }

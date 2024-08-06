@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Classes\Permissions\Permissions;
 use App\Traits\HasAccessControl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +9,7 @@ use Illuminate\Http\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 use Intervention\Image\Laravel\Facades\Image;
 
@@ -133,7 +133,7 @@ class Media extends Model
 
 
 
-    public static function getMediaDisk(string $diskname): ?object
+    public static function getMediaDisk(string|null $diskname): ?object
     {
         if (!$diskname) return null;
 
@@ -154,10 +154,33 @@ class Media extends Model
 
 
 
-    public static function defaultAccess($model)
+    // START: Access control
+    public static function defaultAccess($accessable): Collection
     {
-        return optional(self::getMediaDisk($model->drive))->default_access ?? config('filesystems.disk_default_access');
+        $diskname = null;
+        
+        if ($accessable instanceof Media) $diskname = $accessable->drive;
+        if (is_string($accessable)) $diskname = $accessable;
+        
+        $disk = self::getMediaDisk((string) $diskname);
+
+        return collect($disk ? $disk->default_access : config('filesystems.disk_default_access'));
     }
+
+    public static function computeAccessVia($accessable): Collection
+    {
+        
+        if ($accessable instanceof Media) return self::computeAccessViaModel($accessable);
+        
+        if (is_string($accessable))
+        {
+            $model = self::firstWhere('src_path', $accessable);
+            return $model ? self::computeAccessViaModel($model) : self::defaultAccess($accessable);
+        }
+        
+        return self::defaultAccess($accessable);
+    }
+    // END: Access control
 
 
 
@@ -182,11 +205,11 @@ class Media extends Model
 
 
 
-    public static function discovery(string $path)
+    public static function discover(string $path)
     {
         $path = self::dissectPath($path);
         $parent = self::getDirectory($path->path);
-        $disk = self::getMediaDiskOrFail($path->diskname);
+        $disk = self::getMediaDiskOrFail($path->diskname); // Keep in; the "OrFail" part is important
 
         // When subdirectory exists: check if the parent media model exists
         if ($path->hasSubdirectory && !$parent) throw new \Exception('The parent directory does not exist.');
@@ -205,7 +228,7 @@ class Media extends Model
             if (!self::where('src_path', $directory)->exists()) self::createMediaFromPath($directory);
 
             // Recursively discover the directory
-            self::discovery($directory);
+            self::discover($directory);
         }
     }
 
