@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\HasMedia;
 use App\Traits\SyncMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Permission\Traits\HasRoles;
 
 class Company extends Model
 {
-    use HasRoles, HasFactory, SyncMany, SoftDeletes;
+    use HasRoles, HasFactory, SyncMany, HasMedia;
 
     protected $fillable = [
         'name',
@@ -23,6 +23,11 @@ class Company extends Model
 
     protected $casts = [
         'deleted_at' => 'datetime',
+    ];
+
+    public $media_types = [
+        'logo',
+        'banner',
     ];
 
 
@@ -71,45 +76,24 @@ class Company extends Model
 
 
 
-    // START: Attributes
-    public function getProfileImageAttribute()
+    // START: Profile media
+    public function getDefaultProfileMedia($type)
     {
-        $seed = $this->name;
-        return "https://api.dicebear.com/7.x/identicon/svg?seed=$seed&scale=65&size=72&backgroundColor=eeeeee";
+        return url(route('default.image', [$type, $this->name ?? 'Unknown']));
     }
-    // END: Attributes
+    // END: Profile media
 
 
 
     // START: Specific Addresses
-    public function get_legal_address_attribute()
+    public function getLegalAddressAttribute()
     {
         return $this->addresses()->where('type', 'legal')->first();
     }
 
-    public function get_billing_address_attribute()
+    public function getBillingAddressAttribute()
     {
         return $this->addresses()->where('type', 'billing')->first();
     }
     // END: Specific Addresses
-
-
-
-    // START: Duplicate
-    public function duplicate()
-    {
-        $model = $this->replicate();
-        $model->push();
-
-        $model->addresses()->saveMany($this->addresses()->get()->map(function ($item) { return $item->replicate(); }));
-        $model->legal_details()->saveMany($this->legal_details()->get()->map(function ($item) { return $item->replicate(); }));
-        $model->bank_details()->saveMany($this->bank_details()->get()->map(function ($item) { return $item->replicate(); }));
-        $model->emails()->saveMany($this->emails()->get()->map(function ($item) { return $item->replicate(); }));
-        $model->phonenumbers()->saveMany($this->phonenumbers()->get()->map(function ($item) { return $item->replicate(); }));
-        $model->significant_dates()->saveMany($this->significant_dates()->get()->map(function ($item) { return $item->replicate(); }));
-        $model->website_links()->saveMany($this->website_links()->get()->map(function ($item) { return $item->replicate(); }));
-
-        return $model;
-    }
-    // END: Duplicate
 }

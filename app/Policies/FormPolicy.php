@@ -6,87 +6,93 @@ use App\Classes\Permissions\Permissions;
 use App\Models\Form;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Collection;
 
 class FormPolicy
 {
-    // TODO: Check if additional permission checks are needed
-    public function basicViewAny(User $user): bool
+    public function basicViewAny(User $user): Response
     {
-        return true;
+        return Response::allow();
     }
 
 
 
-    // TODO: Check if additional permission checks are needed
-    public function basicView(User $user, Form $model): bool
+    public function basicView(User $user, Form $form): Response
     {
-        return true;
+        return Response::allow();
     }
 
 
 
-    public function viewAny(User $user): bool
-    {
-        return $user->can(Permissions::APP_VIEW_FORMS);
-    }
-
-    
-
-    public function view(User $user, Form $model): bool
-    {
-        return $user->can(Permissions::APP_VIEW_FORMS);
-    }
-
-
-
-    public function create(User $user): bool
-    {
-        return $user->can([Permissions::APP_VIEW_FORMS, Permissions::APP_CREATE_FORMS]);
-    }
-
-
-
-    public function update(User $user, Form $model): bool
-    {
-        return $user->can([Permissions::APP_VIEW_FORMS, Permissions::APP_EDIT_FORMS]);
-    }
-
-
-
-    public function delete(User $user, Form $model): bool
+    public function viewAny(User $user): Response
     {
         // Permission check
-        if (!$user->can([Permissions::APP_VIEW_FORMS, Permissions::APP_DELETE_FORMS])) return false;
+        if (!$user->can(Permissions::APP_VIEW_FORMS)) return Response::deny('You are missing the required permission.');
 
-        return true;
+        return Response::allow();
     }
 
     
-    
-    public function deleteMany(User $user, $ids): bool
+
+    public function view(User $user, Form $form): Response
     {
         // Permission check
-        if (!$user->can([Permissions::APP_VIEW_FORMS, Permissions::APP_DELETE_FORMS])) return false;
+        if (!$user->can(Permissions::APP_VIEW_FORMS)) return Response::deny('You are missing the required permission.');
+
+        return Response::allow();
+    }
+
+
+
+    public function create(User $user): Response
+    {
+        // Permission check
+        if (!$user->can([Permissions::APP_VIEW_FORMS, Permissions::APP_CREATE_FORMS])) return Response::deny('You are missing the required permission.');
         
-        // Check every user
-        foreach (Form::whereIn('id', $ids)->get() as $db_form)
-        {
-        }
+        return Response::allow();
+    }
 
-        return true;
+
+
+    public function update(User $user, Form $form): Response
+    {
+        // Permission check
+        if (!$user->can([Permissions::APP_VIEW_FORMS, Permissions::APP_EDIT_FORMS])) return Response::deny('You are missing the required permission.');
+
+        return Response::allow();
+    }
+
+
+
+    public function delete(User $user, Form $form): Response
+    {
+        // Permission check
+        if (!$user->can([Permissions::APP_VIEW_FORMS, Permissions::APP_DELETE_FORMS])) return Response::deny('You are missing the required permission.');
+
+        return Response::allow();
     }
 
     
     
-    public function restore(User $user, Form $model): bool
+    public function deleteMany(User $user, Collection $forms): Response
     {
-        return false;
+        // Permission check
+        if (!$user->can([Permissions::APP_VIEW_FORMS, Permissions::APP_DELETE_FORMS])) return Response::deny('You are missing the required permission.');
+
+        return Response::allow();
     }
 
     
     
-    public function forceDelete(User $user, Form $model): bool
+    public function restore(User $user, Form $form): Response
     {
-        return false;
+        return Response::deny();
+    }
+
+    
+    
+    public function forceDelete(User $user, Form $form): Response
+    {
+        return Response::deny();
     }
 }

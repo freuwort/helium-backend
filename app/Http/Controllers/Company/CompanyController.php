@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UploadProfileMediaRequest;
 use App\Http\Resources\Company\CompanyResource;
 use App\Http\Resources\Company\EditorCompanyResource;
 use App\Models\Address;
@@ -18,15 +19,10 @@ use Illuminate\Http\Request;
 
 class CompanyController extends Controller
 {
-    public function __construct()
-    {
-        $this->authorizeResource(Company::class, 'company');
-    }
-
-
-    
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Company::class);
+
         // Base query
         $query = Company::query();
 
@@ -55,6 +51,8 @@ class CompanyController extends Controller
     
     public function show(Company $company)
     {
+        $this->authorize('view', $company);
+
         return EditorCompanyResource::make($company);
     }
 
@@ -62,6 +60,8 @@ class CompanyController extends Controller
     
     public function store(Request $request)
     {
+        $this->authorize('create', Company::class);
+
         $company = Company::create($request->model);
 
         $company->syncMany(LegalDetail::class, $request->legal_details, 'legal_details');
@@ -80,6 +80,8 @@ class CompanyController extends Controller
     
     public function update(Request $request, Company $company)
     {
+        $this->authorize('update', $company);
+
         $company->update($request->model);
 
         $company->syncMany(LegalDetail::class, $request->legal_details, 'legal_details');
@@ -94,10 +96,28 @@ class CompanyController extends Controller
         return EditorCompanyResource::make($company);
     }
 
+
+
+    public function uploadLogo(UploadProfileMediaRequest $request, Company $company)
+    {
+        // $this->authorize('uploadImage', $company);
+
+        $company->uploadProfileMedia($request->file('file'), 'logo');
+    }
+
+    public function uploadBanner(UploadProfileMediaRequest $request, Company $company)
+    {
+        // $this->authorize('uploadImage', $company);
+
+        $company->uploadProfileMedia($request->file('file'), 'banner');
+    }
+
     
     
     public function destroy(Company $company)
     {
+        $this->authorize('delete', $company);
+
         $company->delete();
     }
 
@@ -105,8 +125,10 @@ class CompanyController extends Controller
 
     public function destroyMany(Request $request)
     {
-        $this->authorize('deleteMany', Company::class);
+        $companies = Company::whereIn('id', $request->validated('ids'));
         
-        Company::whereIn('id', $request->ids)->delete();
+        $this->authorize('deleteMany', [Company::class, $companies->get()]);
+        
+        $companies->delete();
     }
 }

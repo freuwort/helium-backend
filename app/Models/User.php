@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
@@ -41,6 +42,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'enabled_at' => 'datetime',
         'deleted_at' => 'datetime',
         'password' => 'hashed',
+    ];
+
+    protected $with = [
+        'user_name',
+        'user_company',
+        'two_factor_methods',
     ];
 
     public const MEDIA_IMAGE = 'profile_image';
@@ -180,14 +187,14 @@ class User extends Authenticatable implements MustVerifyEmail
     // START: Attributes
     public function getProfileImageAttribute()
     {
-        $media = $this->media()->where('type', 'profile_image')->first();
+        $media = $this->media->filter(fn ($e) => $e->pivot->type == 'profile_image')->first();
 
         return $media ? $media->cdn_path : url(route('default.image', ['profile_image', $this->username]));
     }
 
     public function getProfileBannerAttribute()
     {
-        $media = $this->media()->where('type', 'profile_banner')->first();
+        $media = $this->media->filter(fn ($e) => $e->pivot->type == 'profile_banner')->first();
         
         return $media ? $media->cdn_path : url(route('default.image', ['profile_banner', $this->username]));
     }
@@ -199,24 +206,24 @@ class User extends Authenticatable implements MustVerifyEmail
         });
     }
 
-    public function getIsAdminAttribute()
+    public function getIsAdminAttribute(): bool
     {
-        return Permissions::partOfAdmin($this->getAllPermissions()->pluck('name')->toArray());
+        return Permissions::partOfAdmin($this->getAllPermissionNames());
     }
 
-    public function getHasForbiddenPermissionsAttribute()
+    public function getHasForbiddenPermissionsAttribute(): bool
     {
-        return Permissions::partOfForbidden($this->getAllPermissions()->pluck('name')->toArray());
+        return Permissions::partOfForbidden($this->getAllPermissionNames());
     }
 
-    public function getHasElevatedPermissionsAttribute()
+    public function getHasElevatedPermissionsAttribute(): bool
     {
-        return Permissions::partOfElevated($this->getAllPermissions()->pluck('name')->toArray());
+        return Permissions::partOfElevated($this->getAllPermissionNames());
     }
 
-    public function getHasTfaEnabledAttribute()
+    public function getHasTfaEnabledAttribute(): bool
     {
-        return $this->two_factor_methods()->where('enabled', true)->exists();
+        return $this->two_factor_methods->filter(fn ($e) => $e->enabled)->isNotEmpty();
     }
     // END: Attributes
 
@@ -328,4 +335,16 @@ class User extends Authenticatable implements MustVerifyEmail
         ]]);
     }
     // END: Profile media
+
+
+
+    // START: Misc methods
+    private function getAllPermissionNames()
+    {
+        $rolePermissions = $this->roles->pluck('permissions')->flatten()->pluck('name');
+        $directPermissions = $this->permissions->pluck('name');
+
+        return $rolePermissions->merge($directPermissions)->unique();
+    }
+    // END: Misc methods
 }

@@ -13,17 +13,12 @@ use Illuminate\Http\Request;
 
 class FormController extends Controller
 {
-    public function __construct()
-    {
-        $this->authorizeResource(Form::class, 'form');
-    }
-
-
-
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Form::class);
+
         // Base query
-        $query = Form::query();
+        $query = Form::with(['fields', 'submissions']);
 
         // Search
         if ($request->filter_search)
@@ -52,6 +47,8 @@ class FormController extends Controller
     
     public function show(Form $form)
     {
+        $this->authorize('view', $form);
+
         return EditorFormResource::make($form);
     }
 
@@ -59,6 +56,8 @@ class FormController extends Controller
     
     public function store(CreateFormRequest $request)
     {
+        $this->authorize('create', Form::class);
+
         $form = Form::create($request->model);
 
         $form->fields()->createMany($request->form_fields);
@@ -70,6 +69,8 @@ class FormController extends Controller
     
     public function update(UpdateFormRequest $request, Form $form)
     {
+        $this->authorize('update', $form);
+
         $form->update($request->model);
 
         $form->fields()->delete();
@@ -82,6 +83,8 @@ class FormController extends Controller
     
     public function destroy(Form $form)
     {
+        $this->authorize('delete', $form);
+
         $form->delete();
     }
 
@@ -89,8 +92,10 @@ class FormController extends Controller
     
     public function destroyMany(DestroyManyFormRequest $request)
     {
-        $this->authorize('deleteMany', [Form::class, $request->ids]);
+        $forms = Form::whereIn('id', $request->validated('ids'));
 
-        Form::whereIn('id', $request->ids)->delete();
+        $this->authorize('deleteMany', [Form::class, $forms->get()]);
+
+        $forms->delete();
     }
 }

@@ -17,7 +17,7 @@ class RolePolicy
 
 
 
-    public function basicView(User $user, Role $model): Response
+    public function basicView(User $user, Role $role): Response
     {
         return Response::allow();
     }

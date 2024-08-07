@@ -18,6 +18,8 @@ class UserResource extends JsonResource
         return [
             'id' => $this->id,
 
+            'media' => $this->media,
+
             'profile_image' => $this->profile_image,
             'profile_banner' => $this->profile_banner,
             'email' => $this->email,
@@ -44,6 +46,7 @@ class UserResource extends JsonResource
             'updated_at' => $this->updated_at,
 
             'has_tfa_enabled' => $this->has_tfa_enabled,
+            // 'has_tfa_enabled' => false,
 
             'roles' => BasicRoleResource::collection($this->roles),
             'permissions' => $this->permissions->pluck('name'),

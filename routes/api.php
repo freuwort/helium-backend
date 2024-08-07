@@ -103,6 +103,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/users', [UserController::class, 'destroyMany']);
     
         // Companies
+        Route::post('/companies/{company}/logo', [CompanyController::class, 'uploadLogo']);
+        Route::post('/companies/{company}/banner', [CompanyController::class, 'uploadBanner']);
         Route::resource('/companies', CompanyController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/companies', [CompanyController::class, 'destroyMany']);
     

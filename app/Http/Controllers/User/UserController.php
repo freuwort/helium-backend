@@ -67,7 +67,7 @@ class UserController extends Controller
         $this->authorize('viewAny', User::class);
 
         // Base query
-        $query = User::with('user_name', 'user_company', 'roles', 'permissions', 'media');
+        $query = User::with(['media', 'roles', 'permissions', 'roles.permissions']);
 
         // Search
         if ($request->filter_search)
