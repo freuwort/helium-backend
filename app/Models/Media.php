@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Traits\HasAccessControl;
-use FFMpeg\FFMpeg;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\File;
@@ -13,6 +12,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 use Intervention\Image\Laravel\Facades\Image;
+use Spatie\PdfToImage\Pdf;
 
 class Media extends Model
 {
@@ -320,7 +320,6 @@ class Media extends Model
     // TODO: Make this async
     // TODO: Add SVG support
     // TODO: Add PDF support
-    // TODO: Add Video thumbnail support
     public function generateThumbnail(): void
     {
         $thumbnail = match ($this->mime_type)
@@ -329,6 +328,11 @@ class Media extends Model
             'image/png' => self::rasterImageToThumbnail($this->src_path),
             'image/gif' => self::rasterImageToThumbnail($this->src_path),
             'audio/mpeg' => self::audioToThumbnail($this->src_path),
+            'video/mp4' => self::videoToThumbnail($this->src_path),
+            'video/webm' => self::videoToThumbnail($this->src_path),
+            'video/ogg' => self::videoToThumbnail($this->src_path),
+            'video/quicktime' => self::videoToThumbnail($this->src_path),
+            'application/pdf' => self::pdfToThumbnail($this->src_path),
             default => null,
         };
 
@@ -338,7 +342,7 @@ class Media extends Model
     // START: Media conversions
     public static function rasterImageToThumbnail(string $path): ?string
     {
-        $path = Storage::url($path);
+        $path = Storage::path($path);
 
         return Image::read($path)
         ->scaleDown(300, 300, function ($constraint) {
@@ -425,6 +429,54 @@ class Media extends Model
         return $image
         ->toWebp(quality: 50)
         ->toDataUri();
+    }
+
+    public static function videoToThumbnail(string $path): ?string
+    {
+        $input = storage_path("app/$path");
+        $shell_input = escapeshellarg($input);
+
+        $hash = hash_file('sha256', $input);
+
+        $output = storage_path("app/temp/$hash.jpg");
+        $shell_output = escapeshellarg($output);
+
+        $command = "ffmpeg -y -i $shell_input -ss 00:00:01.000 -vframes 1 $shell_output";
+        shell_exec($command);
+
+
+        $image = Image::read($output)
+        ->scaleDown(300, 300, function ($constraint) {
+            $constraint->aspectRatio();
+        })
+        ->toWebp(quality: 50)
+        ->toDataUri();
+
+        // Entferne die temporaere Datei
+        unlink($output);
+
+        return $image;
+    }
+
+    public static function pdfToThumbnail(string $path): ?string
+    {
+        $input = storage_path("app/$path");
+        $output = storage_path("app/temp/$path");
+        $pdf = new Pdf($input);
+
+        $pdf->save($output);
+
+        $image = Image::read($output)
+        ->scaleDown(300, 300, function ($constraint) {
+            $constraint->aspectRatio();
+        })
+        ->toWebp(quality: 50)
+        ->toDataUri();
+
+        // Entferne die temporaere Datei
+        unlink($output);
+
+        return $image;
     }
     // END: Media conversions
 
