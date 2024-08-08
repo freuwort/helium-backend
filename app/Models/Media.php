@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasAccessControl;
+use FFMpeg\FFMpeg;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\File;
@@ -317,11 +318,9 @@ class Media extends Model
 
 
     // TODO: Make this async
-    // TODO: Add ImageMagick
     // TODO: Add SVG support
-    // TODO: Add FFMPEG
+    // TODO: Add PDF support
     // TODO: Add Video thumbnail support
-    // TODO: Add Audio thumbnail support
     public function generateThumbnail(): void
     {
         $thumbnail = match ($this->mime_type)
@@ -329,6 +328,7 @@ class Media extends Model
             'image/jpeg' => self::rasterImageToThumbnail($this->src_path),
             'image/png' => self::rasterImageToThumbnail($this->src_path),
             'image/gif' => self::rasterImageToThumbnail($this->src_path),
+            'audio/mpeg' => self::audioToThumbnail($this->src_path),
             default => null,
         };
 
@@ -338,10 +338,91 @@ class Media extends Model
     // START: Media conversions
     public static function rasterImageToThumbnail(string $path): ?string
     {
-        return Image::read(Storage::get($path))
+        $path = Storage::url($path);
+
+        return Image::read($path)
         ->scaleDown(300, 300, function ($constraint) {
             $constraint->aspectRatio();
         })
+        ->toWebp(quality: 50)
+        ->toDataUri();
+    }
+
+    public static function audioToThumbnail(string $path): ?string
+    {
+        // Get absolute path
+        $input = storage_path("app/$path");
+        $shell_input = escapeshellarg($input);
+
+        $hash = hash_file('sha256', $input);
+
+        $output = storage_path("app/temp/$hash.wav");
+        $shell_output = escapeshellarg($output);
+
+        $command = "ffmpeg -y -i $shell_input -vn -acodec pcm_s16le -ar 44100 -ac 1 $shell_output";
+        shell_exec($command);
+
+
+
+        $amplitudes = [];
+
+        $file = fopen($output, 'rb');
+
+        while (!feof($file))
+        {
+            $bytes = fread($file, 2);
+        
+            // Falls keine 2 Bytes mehr übrig sind, breche die Schleife ab
+            if (strlen($bytes) < 2) {
+                break;
+            }
+            
+            // Entpacke die Bytes in einen Integer
+            $amplitude = unpack('s', $bytes)[1];
+            
+            // Speichere die Amplitude im Array
+            $amplitudes[] = $amplitude;
+        }
+
+        fclose($file);
+
+        // Entferne die temporaere Datei
+        unlink($output);
+
+
+
+        $sampleSize = 300;
+
+        // Normaliseere die Amplituden
+        $amplitudes = array_map(fn ($amplitude) => min(abs($amplitude), 32768) / 32768 * 3, $amplitudes);
+
+        // nimm 100 sample
+        $amplitudes = array_chunk($amplitudes, ceil(count($amplitudes) / $sampleSize));
+
+        $amplitudes = array_map(fn ($chunk) => min(round((int) array_sum($chunk) / count($chunk) * 100), 100), $amplitudes);
+        
+
+
+        $width = 300;
+        $height = 300;
+        $image = Image::create($width, $height)->fill('#ffffff00');
+        
+        foreach ($amplitudes as $key => $amplitude)
+        {
+            $amplitude = min(($amplitude + 2), $height);
+            $x = $key * $width / $sampleSize;
+            $y1 = $height / 2 - $amplitude / 2;
+            $y2 = $height / 2 + $amplitude / 2;
+
+            $image->drawLine(function ($line) use ($x, $y1, $y2) {
+                $line->from($x, $y1);
+                $line->to($x, $y2);
+                $line->color('#f59e0b');
+                $line->width(1);
+            });
+        }
+
+        return $image
         ->toWebp(quality: 50)
         ->toDataUri();
     }
