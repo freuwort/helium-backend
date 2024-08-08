@@ -19,8 +19,8 @@ class EditorUserResource extends JsonResource
             'id' => $this->id,
 
             'model' => [
-                'profile_image' => $this->profile_image,
-                'profile_banner' => $this->profile_banner,
+                'avatar' => $this->getProfileMedia('avatar'),
+                'banner' => $this->getProfileMedia('banner'),
                 'email' => $this->email,
                 'name' => $this->name,
                 'username' => $this->username,

@@ -58,11 +58,11 @@ class UserController extends Controller
 
 
 
-    public function uploadProfileImage(UploadProfileMediaRequest $request)
+    public function uploadProfileAvatar(UploadProfileMediaRequest $request)
     {
-        $this->authorize('uploadImage', $request->user());
+        $this->authorize('uploadAvatar', $request->user());
 
-        $request->user()->uploadProfileMedia($request->file('file'), User::MEDIA_IMAGE);
+        $request->user()->uploadProfileMedia($request->file('file'), 'avatar');
     }
 
 
@@ -71,7 +71,7 @@ class UserController extends Controller
     {
         $this->authorize('uploadBanner', $request->user());
 
-        $request->user()->uploadProfileMedia($request->file('file'), User::MEDIA_BANNER);
+        $request->user()->uploadProfileMedia($request->file('file'), 'banner');
     }
 
 

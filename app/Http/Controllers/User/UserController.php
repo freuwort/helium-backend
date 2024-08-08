@@ -182,7 +182,7 @@ class UserController extends Controller
         // Sync roles
         $user->syncRoles($request->validated('roles'));
 
-        return EditorUserResource::make($user);
+        return EditorUserResource::make($user->fresh());
     }
 
     public function updatePassword(UpdateUserPasswordRequest $request, User $user)
@@ -206,18 +206,18 @@ class UserController extends Controller
         $user->enable($request->validated('enabled'));
     }
 
-    public function uploadProfileImage(UploadProfileMediaRequest $request, User $user)
+    public function uploadProfileAvatar(UploadProfileMediaRequest $request, User $user)
     {
-        $this->authorize('uploadImage', $user);
+        $this->authorize('uploadAvatar', $user);
 
-        $user->uploadProfileMedia($request->file('file'), User::MEDIA_IMAGE);
+        $user->uploadProfileMedia($request->file('file'), 'avatar');
     }
 
     public function uploadProfileBanner(UploadProfileMediaRequest $request, User $user)
     {
         $this->authorize('uploadBanner', $user);
 
-        $user->uploadProfileMedia($request->file('file'), User::MEDIA_BANNER);
+        $user->uploadProfileMedia($request->file('file'), 'banner');
     }
 
     

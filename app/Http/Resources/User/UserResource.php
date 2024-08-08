@@ -20,8 +20,8 @@ class UserResource extends JsonResource
 
             'media' => $this->media,
 
-            'profile_image' => $this->profile_image,
-            'profile_banner' => $this->profile_banner,
+            'avatar' => $this->getProfileMedia('avatar'),
+            'banner' => $this->getProfileMedia('banner'),
             'email' => $this->email,
             'username' => $this->username,
 

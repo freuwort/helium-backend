@@ -57,7 +57,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::patch('/settings/{key}', [UserSettingController::class, 'updateView'])->where('key', 'view_[a-z0-9_]+');
             Route::patch('/username', [AuthUserController::class, 'updateUsername']);
             Route::patch('/password', [AuthUserController::class, 'updatePassword']);
-            Route::post('/image', [AuthUserController::class, 'uploadProfileImage']);
+            Route::post('/avatar', [AuthUserController::class, 'uploadProfileAvatar']);
             Route::post('/banner', [AuthUserController::class, 'uploadProfileBanner']);
             Route::delete('/', [AuthUserController::class, 'delete']);
     
@@ -94,7 +94,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
         // Users
         Route::get('/users/basic', [UserController::class, 'indexBasic']);
-        Route::post('/users/{user}/image', [UserController::class, 'uploadProfileImage']);
+        Route::post('/users/{user}/avatar', [UserController::class, 'uploadProfileAvatar']);
         Route::post('/users/{user}/banner', [UserController::class, 'uploadProfileBanner']);
         Route::patch('/users/{user}/password', [UserController::class, 'updatePassword']);
         Route::patch('/users/{user}/verify-email', [UserController::class, 'updateEmailVerified']);

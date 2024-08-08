@@ -10,8 +10,8 @@ class DefaultImageController extends Controller
 {
     public function __invoke(Request $request)
     {
-        if (in_array($request->type, ['profile_image', 'logo', 'avatar'])) return $this->profileImage($request);
-        if (in_array($request->type, ['profile_banner', 'banner'])) return $this->profileBanner($request);
+        if (in_array($request->type, ['logo', 'avatar'])) return $this->profileImage($request);
+        if (in_array($request->type, ['banner'])) return $this->profileBanner($request);
         
         return abort(404);
     }

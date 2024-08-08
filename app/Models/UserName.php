@@ -24,13 +24,25 @@ class UserName extends Model
 
 
 
-    public function user()
+    protected static function booted(): void
     {
-        return $this->belongsTo(User::class);
+        static::saving(function ($model) {
+            $model->updateParentName();
+        });
     }
 
 
 
+    // START: Relationships
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+    // END: Relationships
+
+
+
+    // START: Attributes
     public function getFullnameAttribute()
     {
         return implode(' ', array_filter([$this->prefix, $this->firstname, $this->middlename, $this->lastname, $this->suffix]));
@@ -40,4 +52,16 @@ class UserName extends Model
     {
         return $this->fullname ? $this->fullname : $this->nickname;
     }
+    // END: Attributes
+
+
+
+    // START: Update parent name
+    public function updateParentName()
+    {
+        $this->user()->update([
+            'name' => $this->fullname_or_nickname,
+        ]);
+    }
+    // END: Update parent name
 }

@@ -37,8 +37,8 @@ class UpdateDomainSettingRequest extends FormRequest
             'policy_allow_password_reset' => 'nullable|boolean',
             'policy_allow_email_change' => 'nullable|boolean',
             'policy_allow_username_change' => 'nullable|boolean',
-            'policy_allow_profile_image_upload' => 'nullable|boolean',
-            'policy_allow_profile_banner_upload' => 'nullable|boolean',
+            'policy_allow_avatar_upload' => 'nullable|boolean',
+            'policy_allow_banner_upload' => 'nullable|boolean',
             'legal_notice' => 'nullable|string|max:32000',
             'legal_privacy' => 'nullable|string|max:32000',
         ];

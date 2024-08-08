@@ -4,6 +4,7 @@ namespace App\Models;
 
 
 use App\Classes\Permissions\Permissions;
+use App\Traits\HasMedia;
 use App\Traits\HasTwoFactorAuthentication;
 use App\Traits\SyncMany;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -11,16 +12,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasRoles, HasApiTokens, HasFactory, HasTwoFactorAuthentication, Notifiable, SyncMany, SoftDeletes;
+    use HasRoles, HasApiTokens, HasFactory, HasTwoFactorAuthentication, HasMedia, Notifiable, SyncMany, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -50,8 +49,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'two_factor_methods',
     ];
 
-    public const MEDIA_IMAGE = 'profile_image';
-    public const MEDIA_BANNER = 'profile_banner';
+    public $media_types = [
+        'avatar',
+        'banner',
+    ];
 
 
 
@@ -109,11 +110,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function links(): MorphMany
     {
         return $this->morphMany(Link::class, 'linkable');
-    }
-
-    public function media()
-    {
-        return $this->morphToMany(Media::class, 'model', 'model_has_media')->withPivot('type');
     }
     // END: Relationships
 
@@ -185,20 +181,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
     // START: Attributes
-    public function getProfileImageAttribute()
-    {
-        $media = $this->media->filter(fn ($e) => $e->pivot->type == 'profile_image')->first();
-
-        return $media ? $media->cdn_path : url(route('default.image', ['profile_image', $this->username]));
-    }
-
-    public function getProfileBannerAttribute()
-    {
-        $media = $this->media->filter(fn ($e) => $e->pivot->type == 'profile_banner')->first();
-        
-        return $media ? $media->cdn_path : url(route('default.image', ['profile_banner', $this->username]));
-    }
-
     public function getSettingsAttribute()
     {
         return $this->raw_settings->mapWithKeys(function ($item) {
@@ -226,6 +208,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->two_factor_methods->filter(fn ($e) => $e->enabled)->isNotEmpty();
     }
     // END: Attributes
+
+
+
+    // START: Profile media
+    public function getDefaultProfileMedia($type)
+    {
+        return url(route('default.image', [$type, $this->username ?? 'Unknown']));
+    }
+    // END: Profile media
 
 
 
@@ -312,29 +303,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->raw_settings()->firstWhere('key', $key)->value;
     }
     // END: Settings
-
-
-
-    // START: Profile media
-    public function uploadProfileMedia(UploadedFile $file, String $type)
-    {
-        if(!in_array($type, ['profile_image', 'profile_banner'])) return;
-
-        // Delete old profile media
-        $this->media()->where('type', $type)->get()->each(function ($media) {
-            $media->delete();
-        });        
-
-        // Upload new profile media
-        $media = Media::upload('profiles', $file);
-
-        // Set profile image
-        $this->media()->syncWithoutDetaching([[
-            'media_id' => $media->id,
-            'type' => $type,
-        ]]);
-    }
-    // END: Profile media
 
 
 
