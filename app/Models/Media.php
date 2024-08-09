@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Classes\Utils;
 use App\Traits\HasAccessControl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -318,21 +319,34 @@ class Media extends Model
 
 
     // TODO: Make this async
-    // TODO: Add SVG support
-    // TODO: Add PDF support
     public function generateThumbnail(): void
     {
         $thumbnail = match ($this->mime_type)
         {
+            // Image types
             'image/jpeg' => self::rasterImageToThumbnail($this->src_path),
             'image/png' => self::rasterImageToThumbnail($this->src_path),
             'image/gif' => self::rasterImageToThumbnail($this->src_path),
+            'image/bmp' => self::rasterImageToThumbnail($this->src_path),
+            'image/webp' => self::rasterImageToThumbnail($this->src_path),
+            'image/tiff' => self::rasterImageToThumbnail($this->src_path),
+
+            // Vector types
+            'image/svg+xml' => self::vectorToThumbnail($this->src_path),
+
+            // Audio types
             'audio/mpeg' => self::audioToThumbnail($this->src_path),
+
+            // Video types
             'video/mp4' => self::videoToThumbnail($this->src_path),
             'video/webm' => self::videoToThumbnail($this->src_path),
             'video/ogg' => self::videoToThumbnail($this->src_path),
             'video/quicktime' => self::videoToThumbnail($this->src_path),
+            
+            // Other types
             'application/pdf' => self::pdfToThumbnail($this->src_path),
+
+            // Fallback
             default => null,
         };
 
@@ -342,19 +356,26 @@ class Media extends Model
     // START: Media conversions
     public static function rasterImageToThumbnail(string $path): ?string
     {
-        $path = Storage::path($path);
+        $input = storage_path("app/$path");
 
-        return Image::read($path)
-        ->scaleDown(300, 300, function ($constraint) {
-            $constraint->aspectRatio();
-        })
+        return Image::read($input)
+        ->pad(300, 300, '#00000000', 'center')
+        ->toWebp(quality: 50)
+        ->toDataUri();
+    }
+
+    public static function vectorToThumbnail(string $path): ?string
+    {
+        $input = storage_path("app/$path");
+
+        return Image::read($input)
+        ->pad(300, 300, '#00000000', 'center')
         ->toWebp(quality: 50)
         ->toDataUri();
     }
 
     public static function audioToThumbnail(string $path): ?string
     {
-        // Get absolute path
         $input = storage_path("app/$path");
         $shell_input = escapeshellarg($input);
 
@@ -363,8 +384,7 @@ class Media extends Model
         $output = storage_path("app/temp/$hash.wav");
         $shell_output = escapeshellarg($output);
 
-        $command = "ffmpeg -y -i $shell_input -vn -acodec pcm_s16le -ar 44100 -ac 1 $shell_output";
-        shell_exec($command);
+        shell_exec( "ffmpeg -y -i $shell_input -vn -acodec pcm_s16le -ar 8000 -ac 1 $shell_output");
 
 
 
@@ -376,40 +396,41 @@ class Media extends Model
         {
             $bytes = fread($file, 2);
         
-            // Falls keine 2 Bytes mehr übrig sind, breche die Schleife ab
-            if (strlen($bytes) < 2) {
-                break;
-            }
+            // Break if no bytes are left
+            if (strlen($bytes) < 2) break;
             
-            // Entpacke die Bytes in einen Integer
+            // Unpack bytes into integer
             $amplitude = unpack('s', $bytes)[1];
             
-            // Speichere die Amplitude im Array
+            // Add amplitude to array
             $amplitudes[] = $amplitude;
         }
 
         fclose($file);
 
-        // Entferne die temporaere Datei
+        // Remove temp file
         unlink($output);
 
 
 
         $sampleSize = 300;
 
-        // Normaliseere die Amplituden
+        // Normalize amplitudes
         $amplitudes = array_map(fn ($amplitude) => min(abs($amplitude), 32768) / 32768 * 3, $amplitudes);
 
-        // nimm 100 sample
+        // Combine amplitudes into chunks
         $amplitudes = array_chunk($amplitudes, ceil(count($amplitudes) / $sampleSize));
 
+        // Average chunks
         $amplitudes = array_map(fn ($chunk) => min(round((int) array_sum($chunk) / count($chunk) * 100), 100), $amplitudes);
         
 
 
         $width = 300;
         $height = 300;
-        $image = Image::create($width, $height)->fill('#ffffff00');
+        $colors = Utils::interpolateColors('#ff00ff', '#f59e0b', $sampleSize);
+        $image = Image::read(public_path('default/thumbnail_background_audio.png'))
+        ->pad($width, $height, '#00000000', 'center');
         
         foreach ($amplitudes as $key => $amplitude)
         {
@@ -417,11 +438,12 @@ class Media extends Model
             $x = $key * $width / $sampleSize;
             $y1 = $height / 2 - $amplitude / 2;
             $y2 = $height / 2 + $amplitude / 2;
+            $color = $colors[$key];
 
-            $image->drawLine(function ($line) use ($x, $y1, $y2) {
+            $image->drawLine(function ($line) use ($x, $y1, $y2, $color) {
                 $line->from($x, $y1);
                 $line->to($x, $y2);
-                $line->color('#f59e0b');
+                $line->color($color);
                 $line->width(1);
             });
         }
@@ -441,18 +463,15 @@ class Media extends Model
         $output = storage_path("app/temp/$hash.jpg");
         $shell_output = escapeshellarg($output);
 
-        $command = "ffmpeg -y -i $shell_input -ss 00:00:01.000 -vframes 1 $shell_output";
-        shell_exec($command);
-
+        shell_exec("ffmpeg -y -i $shell_input -ss 00:00:01.000 -update 1 -vframes 1 $shell_output");
 
         $image = Image::read($output)
-        ->scaleDown(300, 300, function ($constraint) {
-            $constraint->aspectRatio();
-        })
+        ->pad(300, 300, '#00000000', 'center')
+        ->place(public_path('default/thumbnail_foreground_video.png'), 'center', 0, 0, 100)
         ->toWebp(quality: 50)
         ->toDataUri();
 
-        // Entferne die temporaere Datei
+        // Remove temp file
         unlink($output);
 
         return $image;
@@ -461,20 +480,23 @@ class Media extends Model
     public static function pdfToThumbnail(string $path): ?string
     {
         $input = storage_path("app/$path");
-        $output = storage_path("app/temp/$path");
-        $pdf = new Pdf($input);
+        $shell_input = escapeshellarg($input);
 
-        $pdf->save($output);
+        $hash = hash_file('sha256', $input);
 
-        $image = Image::read($output)
-        ->scaleDown(300, 300, function ($constraint) {
-            $constraint->aspectRatio();
-        })
+        $output = storage_path("app/temp/$hash");
+        $shell_output = escapeshellarg($output);
+        $suffix = '-000001.png';
+
+        shell_exec("pdftopng -f 1 -l 1 -q $shell_input $shell_output");
+
+        $image = Image::read($output.$suffix)
+        ->pad(300, 300, '#00000000', 'center')
         ->toWebp(quality: 50)
         ->toDataUri();
 
-        // Entferne die temporaere Datei
-        unlink($output);
+        // Remove temp file
+        unlink($output.$suffix);
 
         return $image;
     }

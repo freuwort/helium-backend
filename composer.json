@@ -15,7 +15,6 @@
         "laravel/telescope": "^5.1",
         "laravel/tinker": "^2.8",
         "spatie/laravel-permission": "^6.3",
-        "spatie/pdf-to-image": "^2.3",
         "spomky-labs/otphp": "^11.2"
     },
     "require-dev": {
