@@ -172,9 +172,14 @@ class Permissions
 
 
 
-    public static function all($extendedInfo = false): array
+    public static function all($extendedInfo = false, $includeSuperAdmin = false): array
     {
         $groupedPermissions = self::GROUPED_PERMISSIONS;
+
+        if ($includeSuperAdmin)
+        {
+            $groupedPermissions['system']['permissions'][0][] = ['name' => self::SYSTEM_SUPER_ADMIN, 'label' => 'Super Admin', 'description' => 'Der Super Admin hat Zugriff auf alle Bereiche des Systems und kann Benutzer und Rollen verwalten.'];
+        }
         
         // flatten permissions
         $permissions = [];

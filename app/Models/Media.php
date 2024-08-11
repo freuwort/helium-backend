@@ -336,6 +336,10 @@ class Media extends Model
 
             // Audio types
             'audio/mpeg' => self::audioToThumbnail($this->src_path),
+            'audio/ogg' => self::audioToThumbnail($this->src_path),
+            'audio/wav' => self::audioToThumbnail($this->src_path),
+            'audio/webm' => self::audioToThumbnail($this->src_path),
+            'audio/flac' => self::audioToThumbnail($this->src_path),
 
             // Video types
             'video/mp4' => self::videoToThumbnail($this->src_path),

@@ -16,7 +16,7 @@ class PermissionsSeeder extends Seeder
     {
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $permissions = Permissions::all();
+        $permissions = Permissions::all(includeSuperAdmin: true);
 
         foreach ($permissions as $permission)
         {
