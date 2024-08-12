@@ -67,6 +67,9 @@ return [
             'use_for_media' => true,
             'default_access' => null,
             'generate_thumbnails' => true,
+            'ignore' => [
+                'domain/.gitignore'
+            ],
         ],
 
         'forms' => [
@@ -79,7 +82,10 @@ return [
             'allow_custom_filename' => false,
             'use_for_media' => true,
             'default_access' => null,
-            'generate_thumbnails' => false,
+            'generate_thumbnails' => true,
+            'ignore' => [
+                'forms/.gitignore'
+            ],
         ],
 
         'profiles' => [
@@ -92,7 +98,10 @@ return [
             'allow_custom_filename' => false,
             'use_for_media' => true,
             'default_access' => null,
-            'generate_thumbnails' => false,
+            'generate_thumbnails' => true,
+            'ignore' => [
+                'profiles/.gitignore'
+            ],
         ],
 
         's3' => [

@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\Classes\Utils;
+use App\Classes\Media\MediaConversion;
+use App\Jobs\Media\GenerateThumbnail;
 use App\Traits\HasAccessControl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,8 +13,6 @@ use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
-use Intervention\Image\Laravel\Facades\Image;
-use Spatie\PdfToImage\Pdf;
 
 class Media extends Model
 {
@@ -216,16 +215,24 @@ class Media extends Model
         // When subdirectory exists: check if the parent media model exists
         if ($path->hasSubdirectory && !$parent) throw new \Exception('The parent directory does not exist.');
 
+        // Ignore certain paths
+        if (in_array($path->path, $disk->ignore)) return;
 
         // Get all files and directories in the path
         foreach (Storage::files($path->path) as $file)
         {
+            // Ignore certain files
+            if (in_array($file, $disk->ignore)) continue;
+
             // Check if the file already exists
             if (!self::where('src_path', $file)->exists()) self::createMediaFromPath($file);
         }
 
         foreach (Storage::directories($path->path) as $directory)
         {
+            // Ignore certain directories
+            if (in_array($directory, $disk->ignore)) continue;
+
             // Check if the directory already exists
             if (!self::where('src_path', $directory)->exists()) self::createMediaFromPath($directory);
 
@@ -239,6 +246,7 @@ class Media extends Model
     public static function createMediaFromPath(string $path): Media
     {
         $path = self::dissectPath($path);
+        $disk = self::getMediaDisk($path->diskname);
         $parent = self::getDirectory($path->filepath);
         $filename = self::dissectFilename($path->filename);
         
@@ -278,7 +286,7 @@ class Media extends Model
             ],
         ]);
 
-        $media->generateThumbnail();
+        if ($disk && $disk->generate_thumbnails && $isFile) GenerateThumbnail::dispatch($media);
 
         return $media;
     }
@@ -318,193 +326,45 @@ class Media extends Model
 
 
 
-    // TODO: Make this async
     public function generateThumbnail(): void
     {
-        $thumbnail = match ($this->mime_type)
-        {
-            // Image types
-            'image/jpeg' => self::rasterImageToThumbnail($this->src_path),
-            'image/png' => self::rasterImageToThumbnail($this->src_path),
-            'image/gif' => self::rasterImageToThumbnail($this->src_path),
-            'image/bmp' => self::rasterImageToThumbnail($this->src_path),
-            'image/webp' => self::rasterImageToThumbnail($this->src_path),
-            'image/tiff' => self::rasterImageToThumbnail($this->src_path),
+        $this->update([
+            'thumbnail' => match ($this->mime_type) {
+                // Image types
+                'image/jpeg' => MediaConversion::rasterImageToThumbnail($this->src_path),
+                'image/png' => MediaConversion::rasterImageToThumbnail($this->src_path),
+                'image/gif' => MediaConversion::rasterImageToThumbnail($this->src_path),
+                'image/bmp' => MediaConversion::rasterImageToThumbnail($this->src_path),
+                'image/webp' => MediaConversion::rasterImageToThumbnail($this->src_path),
+                'image/tiff' => MediaConversion::rasterImageToThumbnail($this->src_path),
 
-            // Vector types
-            'image/svg+xml' => self::vectorToThumbnail($this->src_path),
+                // Vector types
+                'image/svg+xml' => MediaConversion::vectorToThumbnail($this->src_path),
 
-            // Audio types
-            'audio/mpeg' => self::audioToThumbnail($this->src_path),
-            'audio/ogg' => self::audioToThumbnail($this->src_path),
-            'audio/wav' => self::audioToThumbnail($this->src_path),
-            'audio/webm' => self::audioToThumbnail($this->src_path),
-            'audio/flac' => self::audioToThumbnail($this->src_path),
+                // Audio types
+                'audio/mpeg' => MediaConversion::audioToThumbnail($this->src_path),
+                'audio/ogg' => MediaConversion::audioToThumbnail($this->src_path),
+                'audio/wav' => MediaConversion::audioToThumbnail($this->src_path),
+                'audio/webm' => MediaConversion::audioToThumbnail($this->src_path),
+                'audio/flac' => MediaConversion::audioToThumbnail($this->src_path),
 
-            // Video types
-            'video/mp4' => self::videoToThumbnail($this->src_path),
-            'video/webm' => self::videoToThumbnail($this->src_path),
-            'video/ogg' => self::videoToThumbnail($this->src_path),
-            'video/quicktime' => self::videoToThumbnail($this->src_path),
-            
-            // Other types
-            'application/pdf' => self::pdfToThumbnail($this->src_path),
+                // Text types
+                'text/plain' => MediaConversion::rasterImageToThumbnail($this->src_path),
 
-            // Fallback
-            default => null,
-        };
+                // Video types
+                'video/mp4' => MediaConversion::videoToThumbnail($this->src_path),
+                'video/webm' => MediaConversion::videoToThumbnail($this->src_path),
+                'video/ogg' => MediaConversion::videoToThumbnail($this->src_path),
+                'video/quicktime' => MediaConversion::videoToThumbnail($this->src_path),
+                
+                // Other types
+                'application/pdf' => MediaConversion::pdfToThumbnail($this->src_path),
 
-        $this->update([ 'thumbnail' => $thumbnail ]);
+                // Fallback
+                default => null,
+            },
+        ]);
     }
-
-    // START: Media conversions
-    public static function rasterImageToThumbnail(string $path): ?string
-    {
-        $input = storage_path("app/$path");
-
-        return Image::read($input)
-        ->pad(300, 300, '#00000000', 'center')
-        ->toWebp(quality: 50)
-        ->toDataUri();
-    }
-
-    public static function vectorToThumbnail(string $path): ?string
-    {
-        $input = storage_path("app/$path");
-
-        return Image::read($input)
-        ->pad(300, 300, '#00000000', 'center')
-        ->toWebp(quality: 50)
-        ->toDataUri();
-    }
-
-    public static function audioToThumbnail(string $path): ?string
-    {
-        $input = storage_path("app/$path");
-        $shell_input = escapeshellarg($input);
-
-        $hash = hash_file('sha256', $input);
-
-        $output = storage_path("app/temp/$hash.wav");
-        $shell_output = escapeshellarg($output);
-
-        shell_exec( "ffmpeg -y -i $shell_input -vn -acodec pcm_s16le -ar 8000 -ac 1 $shell_output");
-
-
-
-        $amplitudes = [];
-
-        $file = fopen($output, 'rb');
-
-        while (!feof($file))
-        {
-            $bytes = fread($file, 2);
-        
-            // Break if no bytes are left
-            if (strlen($bytes) < 2) break;
-            
-            // Unpack bytes into integer
-            $amplitude = unpack('s', $bytes)[1];
-            
-            // Add amplitude to array
-            $amplitudes[] = $amplitude;
-        }
-
-        fclose($file);
-
-        // Remove temp file
-        unlink($output);
-
-
-
-        $sampleSize = 300;
-
-        // Normalize amplitudes
-        $amplitudes = array_map(fn ($amplitude) => min(abs($amplitude), 32768) / 32768 * 3, $amplitudes);
-
-        // Combine amplitudes into chunks
-        $amplitudes = array_chunk($amplitudes, ceil(count($amplitudes) / $sampleSize));
-
-        // Average chunks
-        $amplitudes = array_map(fn ($chunk) => min(round((int) array_sum($chunk) / count($chunk) * 100), 100), $amplitudes);
-        
-
-
-        $width = 300;
-        $height = 300;
-        $colors = Utils::interpolateColors('#ff00ff', '#f59e0b', $sampleSize);
-        $image = Image::read(public_path('default/thumbnail_background_audio.png'))
-        ->pad($width, $height, '#00000000', 'center');
-        
-        foreach ($amplitudes as $key => $amplitude)
-        {
-            $amplitude = min(($amplitude + 2), $height);
-            $x = $key * $width / $sampleSize;
-            $y1 = $height / 2 - $amplitude / 2;
-            $y2 = $height / 2 + $amplitude / 2;
-            $color = $colors[$key];
-
-            $image->drawLine(function ($line) use ($x, $y1, $y2, $color) {
-                $line->from($x, $y1);
-                $line->to($x, $y2);
-                $line->color($color);
-                $line->width(1);
-            });
-        }
-
-        return $image
-        ->toWebp(quality: 50)
-        ->toDataUri();
-    }
-
-    public static function videoToThumbnail(string $path): ?string
-    {
-        $input = storage_path("app/$path");
-        $shell_input = escapeshellarg($input);
-
-        $hash = hash_file('sha256', $input);
-
-        $output = storage_path("app/temp/$hash.jpg");
-        $shell_output = escapeshellarg($output);
-
-        shell_exec("ffmpeg -y -i $shell_input -ss 00:00:01.000 -update 1 -vframes 1 $shell_output");
-
-        $image = Image::read($output)
-        ->pad(300, 300, '#00000000', 'center')
-        ->place(public_path('default/thumbnail_foreground_video.png'), 'center', 0, 0, 100)
-        ->toWebp(quality: 50)
-        ->toDataUri();
-
-        // Remove temp file
-        unlink($output);
-
-        return $image;
-    }
-
-    public static function pdfToThumbnail(string $path): ?string
-    {
-        $input = storage_path("app/$path");
-        $shell_input = escapeshellarg($input);
-
-        $hash = hash_file('sha256', $input);
-
-        $output = storage_path("app/temp/$hash");
-        $shell_output = escapeshellarg($output);
-        $suffix = '-000001.png';
-
-        shell_exec("pdftopng -f 1 -l 1 -q $shell_input $shell_output");
-
-        $image = Image::read($output.$suffix)
-        ->pad(300, 300, '#00000000', 'center')
-        ->toWebp(quality: 50)
-        ->toDataUri();
-
-        // Remove temp file
-        unlink($output.$suffix);
-
-        return $image;
-    }
-    // END: Media conversions
 
 
 
