@@ -18,6 +18,9 @@ use App\Http\Controllers\Media\DirectoryController;
 use App\Http\Controllers\Media\MediaController;
 use App\Http\Controllers\Permission\PermissionController;
 use App\Http\Controllers\Permission\RoleController;
+use App\Http\Controllers\Screen\ScreenController;
+use App\Http\Controllers\Screen\ScreenDeviceController;
+use App\Http\Controllers\Screen\ScreenPlaylistController;
 use App\Http\Controllers\User\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -143,6 +146,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 
+        // Screens
+        Route::resource('/screens/devices', ScreenDeviceController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+        Route::delete('/screens/devices', [ScreenDeviceController::class, 'destroyMany']);
+        
+        Route::resource('/screens/playlists', ScreenPlaylistController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+        Route::delete('/screens/playlists', [ScreenPlaylistController::class, 'destroyMany']);
+        
+        Route::resource('/screens', ScreenController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+        Route::delete('/screens', [ScreenController::class, 'destroyMany']);
+
+
+
+        // Content
         Route::patch('/content/posts/{postGroup}/review', [ContentPostController::class, 'updateReviewStatus']);
         Route::patch('/content/posts/{postGroup}/approve', [ContentPostController::class, 'approveDraft']);
         Route::resource('/content/posts', ContentPostController::class)->only(['show', 'index', 'store', 'update', 'destroy'])->parameters(['posts' => 'postGroup']);

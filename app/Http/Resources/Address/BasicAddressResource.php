@@ -22,6 +22,7 @@ class BasicAddressResource extends JsonResource
             'state' => $this->state,
             'postal_code' => $this->postal_code,
             'country_code' => $this->country_code,
+            'notes' => $this->notes,
         ];
     }
 }

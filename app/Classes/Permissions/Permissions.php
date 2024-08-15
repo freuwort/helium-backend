@@ -57,6 +57,21 @@ class Permissions
     public const APP_EDIT_EVENTS = 'app.edit.events';
     public const APP_DELETE_EVENTS = 'app.delete.events';
 
+    // Screens
+    public const APP_VIEW_SCREENDEVICES = 'app.view.screens.devices';
+    public const APP_MANAGE_SCREENDEVICES = 'app.manage.screens.devices';
+
+    public const APP_VIEW_SCREENPLAYLISTS = 'app.view.screens.playlists';
+    public const APP_CREATE_SCREENPLAYLISTS = 'app.create.screens.playlists';
+    public const APP_EDIT_SCREENPLAYLISTS = 'app.edit.screens.playlists';
+    public const APP_DELETE_SCREENPLAYLISTS = 'app.delete.screens.playlists';
+
+    public const APP_VIEW_SCREENS = 'app.view.screens';
+    public const APP_CREATE_SCREENS = 'app.create.screens';
+    public const APP_EDIT_SCREENS = 'app.edit.screens';
+    public const APP_DELETE_SCREENS = 'app.delete.screens';
+
+
     // Content
     public const APP_VIEW_CONTENT = 'app.view.content';
 
@@ -129,6 +144,28 @@ class Permissions
                     ['name' => self::APP_CREATE_EVENTS, 'label' => 'Events erstellen', 'description' => 'Der Benutzer kann Events erstellen.'],
                     ['name' => self::APP_EDIT_EVENTS, 'label' => 'Events bearbeiten', 'description' => 'Der Benutzer kann Events bearbeiten.'],
                     ['name' => self::APP_DELETE_EVENTS, 'label' => 'Events löschen', 'description' => 'Der Benutzer kann Events löschen.'],
+                ],
+            ],
+        ],
+
+        'app.screens' => [
+            'title' => 'App – Screens',
+            'permissions' => [
+                [
+                    ['name' => self::APP_VIEW_SCREENDEVICES, 'label' => 'Screen-Geräte anzeigen', 'description' => 'Der Benutzer kann Screen-Geräte ansehen.'],
+                    ['name' => self::APP_MANAGE_SCREENDEVICES, 'label' => 'Screen-Geräte verwalten', 'description' => 'Der Benutzer kann Screen-Geräte verwalten.'],
+                ],
+                [
+                    ['name' => self::APP_VIEW_SCREENPLAYLISTS, 'label' => 'Screen-Playlists anzeigen', 'description' => 'Der Benutzer kann Screen-Playlists ansehen.'],
+                    ['name' => self::APP_CREATE_SCREENPLAYLISTS, 'label' => 'Screen-Playlists erstellen', 'description' => 'Der Benutzer kann Screen-Playlists erstellen.'],
+                    ['name' => self::APP_EDIT_SCREENPLAYLISTS, 'label' => 'Screen-Playlists bearbeiten', 'description' => 'Der Benutzer kann Screen-Playlists bearbeiten.'],
+                    ['name' => self::APP_DELETE_SCREENPLAYLISTS, 'label' => 'Screen-Playlists löschen', 'description' => 'Der Benutzer kann Screen-Playlists löschen.'],
+                ],
+                [
+                    ['name' => self::APP_VIEW_SCREENS, 'label' => 'Screens anzeigen', 'description' => 'Der Benutzer kann Screens ansehen.'],
+                    ['name' => self::APP_CREATE_SCREENS, 'label' => 'Screens erstellen', 'description' => 'Der Benutzer kann Screens erstellen.'],
+                    ['name' => self::APP_EDIT_SCREENS, 'label' => 'Screens bearbeiten', 'description' => 'Der Benutzer kann Screens bearbeiten.'],
+                    ['name' => self::APP_DELETE_SCREENS, 'label' => 'Screens löschen', 'description' => 'Der Benutzer kann Screens löschen.'],
                 ],
             ],
         ],
