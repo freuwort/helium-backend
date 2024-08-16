@@ -72,6 +72,8 @@ class ScreenDeviceController extends Controller
         $device->update($request->validated('model'));
         $device->address()->update($request->validated('address'));
 
+        $device->playlists()->sync($request->validated('playlists'));
+
         return EditorScreenDeviceResource::make($device->fresh());
     }
 

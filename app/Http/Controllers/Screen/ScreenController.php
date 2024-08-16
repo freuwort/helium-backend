@@ -3,31 +3,29 @@
 namespace App\Http\Controllers\Screen;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Form\CreateFormRequest;
-use App\Http\Requests\Form\DestroyManyFormRequest;
-use App\Http\Requests\Form\UpdateFormRequest;
-use App\Http\Resources\Form\EditorFormResource;
-use App\Http\Resources\Form\FormResource;
-use App\Models\Form;
+use App\Http\Requests\Screen\CreateScreenRequest;
+use App\Http\Requests\Screen\DestroyManyScreenRequest;
+use App\Http\Requests\Screen\UpdateScreenRequest;
+use App\Http\Resources\Screen\EditorScreenResource;
+use App\Http\Resources\Screen\ScreenResource;
+use App\Models\Screen;
 use Illuminate\Http\Request;
 
 class ScreenController extends Controller
 {
     public function index(Request $request)
     {
-        $this->authorize('viewAny', Form::class);
+        $this->authorize('viewAny', Screen::class);
 
         // Base query
-        $query = Form::with(['fields', 'submissions']);
+        $query = Screen::with([]);
 
         // Search
         if ($request->filter_search)
         {
             $query->whereFuzzy(function ($query) use ($request) {
                 $query
-                    ->orWhereFuzzy('name', $request->filter_search)
-                    ->orWhereFuzzy('slug', $request->filter_search)
-                    ->orWhereFuzzy('description', $request->filter_search);
+                    ->orWhereFuzzy('name', $request->filter_search);
             });
         }
 
@@ -40,62 +38,57 @@ class ScreenController extends Controller
         $query->orderBy($field, $order);
 
         // Return collection + pagination
-        return FormResource::collection($query->paginate($request->size ?? 20));
+        return ScreenResource::collection($query->paginate($request->size ?? 20));
     }
 
     
     
-    public function show(Form $form)
+    public function show(Screen $screen)
     {
-        $this->authorize('view', $form);
+        $this->authorize('view', $screen);
 
-        return EditorFormResource::make($form);
+        return EditorScreenResource::make($screen);
     }
 
     
     
-    public function store(CreateFormRequest $request)
+    public function store(CreateScreenRequest $request)
     {
-        $this->authorize('create', Form::class);
+        $this->authorize('create', Screen::class);
 
-        $form = Form::create($request->model);
+        $screen = Screen::create($request->validated('model'));
 
-        $form->fields()->createMany($request->form_fields);
-
-        return EditorFormResource::make($form);
+        return EditorScreenResource::make($screen);
     }
 
     
     
-    public function update(UpdateFormRequest $request, Form $form)
+    public function update(UpdateScreenRequest $request, Screen $screen)
     {
-        $this->authorize('update', $form);
+        $this->authorize('update', $screen);
 
-        $form->update($request->model);
+        $screen->update($request->validated('model'));
 
-        $form->fields()->delete();
-        $form->fields()->createMany($request->form_fields);
-
-        return EditorFormResource::make($form);
+        return EditorScreenResource::make($screen->fresh());
     }
 
     
     
-    public function destroy(Form $form)
+    public function destroy(Screen $screen)
     {
-        $this->authorize('delete', $form);
+        $this->authorize('delete', $screen);
 
-        $form->delete();
+        $screen->delete();
     }
 
     
     
-    public function destroyMany(DestroyManyFormRequest $request)
+    public function destroyMany(DestroyManyScreenRequest $request)
     {
-        $forms = Form::whereIn('id', $request->validated('ids'));
+        $screens = Screen::whereIn('id', $request->validated('ids'));
 
-        $this->authorize('deleteMany', [Form::class, $forms->get()]);
+        $this->authorize('deleteMany', [Screen::class, $screens->get()]);
 
-        $forms->delete();
+        $screens->delete();
     }
 }

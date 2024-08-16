@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Resources\ScreenDevice;
+namespace App\Http\Resources\ScreenPlaylist;
 
 use App\Http\Resources\User\BasicUserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class EditorScreenDeviceResource extends JsonResource
+class EditorScreenPlaylistResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
@@ -15,13 +15,12 @@ class EditorScreenDeviceResource extends JsonResource
 
             'model' => [
                 'owner' => BasicUserResource::make($this->owner),
+                'type' => $this->type,
                 'name' => $this->name,
-                'group' => $this->group,
+                'screen_order' => $this->screen_order,
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
             ],
-            
-            'address' => $this->address,
         ];
     }
 }

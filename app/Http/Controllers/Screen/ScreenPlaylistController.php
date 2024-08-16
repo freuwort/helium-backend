@@ -3,22 +3,22 @@
 namespace App\Http\Controllers\Screen;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Form\CreateFormRequest;
-use App\Http\Requests\Form\DestroyManyFormRequest;
-use App\Http\Requests\Form\UpdateFormRequest;
-use App\Http\Resources\Form\EditorFormResource;
-use App\Http\Resources\Form\FormResource;
-use App\Models\Form;
+use App\Http\Requests\ScreenPlaylist\CreateScreenPlaylistRequest;
+use App\Http\Requests\ScreenPlaylist\DestroyManyScreenPlaylistRequest;
+use App\Http\Requests\ScreenPlaylist\UpdateScreenPlaylistRequest;
+use App\Http\Resources\ScreenPlaylist\EditorScreenPlaylistResource;
+use App\Http\Resources\ScreenPlaylist\ScreenPlaylistResource;
+use App\Models\ScreenPlaylist;
 use Illuminate\Http\Request;
 
 class ScreenPlaylistController extends Controller
 {
     public function index(Request $request)
     {
-        $this->authorize('viewAny', Form::class);
+        $this->authorize('viewAny', ScreenPlaylist::class);
 
         // Base query
-        $query = Form::with(['fields', 'submissions']);
+        $query = ScreenPlaylist::with([]);
 
         // Search
         if ($request->filter_search)
@@ -26,8 +26,7 @@ class ScreenPlaylistController extends Controller
             $query->whereFuzzy(function ($query) use ($request) {
                 $query
                     ->orWhereFuzzy('name', $request->filter_search)
-                    ->orWhereFuzzy('slug', $request->filter_search)
-                    ->orWhereFuzzy('description', $request->filter_search);
+                    ->orWhereFuzzy('type', $request->filter_search);
             });
         }
 
@@ -40,62 +39,57 @@ class ScreenPlaylistController extends Controller
         $query->orderBy($field, $order);
 
         // Return collection + pagination
-        return FormResource::collection($query->paginate($request->size ?? 20));
+        return ScreenPlaylistResource::collection($query->paginate($request->size ?? 20));
     }
 
     
     
-    public function show(Form $form)
+    public function show(ScreenPlaylist $playlist)
     {
-        $this->authorize('view', $form);
+        $this->authorize('view', $playlist);
 
-        return EditorFormResource::make($form);
+        return EditorScreenPlaylistResource::make($playlist);
     }
 
     
     
-    public function store(CreateFormRequest $request)
+    public function store(CreateScreenPlaylistRequest $request)
     {
-        $this->authorize('create', Form::class);
+        $this->authorize('create', ScreenPlaylist::class);
 
-        $form = Form::create($request->model);
+        $playlist = ScreenPlaylist::create($request->validated('model'));
 
-        $form->fields()->createMany($request->form_fields);
-
-        return EditorFormResource::make($form);
+        return EditorScreenPlaylistResource::make($playlist);
     }
 
     
     
-    public function update(UpdateFormRequest $request, Form $form)
+    public function update(UpdateScreenPlaylistRequest $request, ScreenPlaylist $playlist)
     {
-        $this->authorize('update', $form);
+        $this->authorize('update', $playlist);
 
-        $form->update($request->model);
+        $playlist->update($request->validated('model'));
 
-        $form->fields()->delete();
-        $form->fields()->createMany($request->form_fields);
-
-        return EditorFormResource::make($form);
+        return EditorScreenPlaylistResource::make($playlist->fresh());
     }
 
     
     
-    public function destroy(Form $form)
+    public function destroy(ScreenPlaylist $playlist)
     {
-        $this->authorize('delete', $form);
+        $this->authorize('delete', $playlist);
 
-        $form->delete();
+        $playlist->delete();
     }
 
     
     
-    public function destroyMany(DestroyManyFormRequest $request)
+    public function destroyMany(DestroyManyScreenPlaylistRequest $request)
     {
-        $forms = Form::whereIn('id', $request->validated('ids'));
+        $playlists = ScreenPlaylist::whereIn('id', $request->validated('ids'));
 
-        $this->authorize('deleteMany', [Form::class, $forms->get()]);
+        $this->authorize('deleteMany', [ScreenPlaylist::class, $playlists->get()]);
 
-        $forms->delete();
+        $playlists->delete();
     }
 }
