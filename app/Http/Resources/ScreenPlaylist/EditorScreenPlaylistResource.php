@@ -21,6 +21,18 @@ class EditorScreenPlaylistResource extends JsonResource
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
             ],
+
+            'screens' => $this->screens->map(function ($screen) {
+                return [
+                    'id' => $screen->id,
+                    'name' => $screen->name,
+                    'from_date' => $screen->pivot->from_date,
+                    'from_time' => $screen->pivot->from_time,
+                    'to_date' => $screen->pivot->to_date,
+                    'to_time' => $screen->pivot->to_time,
+                    'on_days' => $screen->pivot->on_days,
+                ];
+            }),
         ];
     }
 }

@@ -35,10 +35,10 @@ class UpdateScreenDeviceRequest extends FormRequest
             // Playlists
             'playlists' => ['nullable', 'array'],
             'playlists.*.id' => ['exists:screen_playlists,id'],
-            'playlists.*.from_date' => ['nullable', 'date'],
-            'playlists.*.from_time' => ['nullable', 'time'],
-            'playlists.*.to_date' => ['nullable', 'date'],
-            'playlists.*.to_time' => ['nullable', 'time'],
+            'playlists.*.from_date' => ['nullable', 'date_format:Y-m-d'],
+            'playlists.*.from_time' => ['nullable', 'date_format:H:i:s'],
+            'playlists.*.to_date' => ['nullable', 'date_format:Y-m-d'],
+            'playlists.*.to_time' => ['nullable', 'date_format:H:i:s'],
             'playlists.*.on_days' => ['nullable', 'array'],
             'playlists.*.on_days.*' => ['in:0,1,2,3,4,5,6'],
             'playlists.*.on_screen' => ['nullable', 'string', 'max:255'],
@@ -47,7 +47,6 @@ class UpdateScreenDeviceRequest extends FormRequest
 
 
 
-    // after validation passed: transform data
     public function passedValidation()
     {
         $this->merge(['playlists' => collect($this->input('playlists'))->mapWithKeys(function ($item) {

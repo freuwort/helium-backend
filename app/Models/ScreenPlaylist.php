@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Pivots\PlaylistScreenPivot;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -46,7 +47,7 @@ class ScreenPlaylist extends Model
 
     public function screens()
     {
-        return $this->belongsToMany(Screen::class)->withPivot(['from_date', 'from_time', 'to_date', 'to_time', 'on_days']);
+        return $this->belongsToMany(Screen::class)->using(PlaylistScreenPivot::class)->withPivot(['from_date', 'from_time', 'to_date', 'to_time', 'on_days']);
     }
     // END: Relationships
 }

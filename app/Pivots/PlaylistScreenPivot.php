@@ -4,7 +4,7 @@ namespace App\Pivots;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class DevicePlaylistPivot extends Pivot
+class PlaylistScreenPivot extends Pivot
 {
     protected $casts = [
         'on_days' => 'array',

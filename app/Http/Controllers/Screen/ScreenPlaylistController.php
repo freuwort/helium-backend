@@ -58,6 +58,7 @@ class ScreenPlaylistController extends Controller
         $this->authorize('create', ScreenPlaylist::class);
 
         $playlist = ScreenPlaylist::create($request->validated('model'));
+        $playlist->screens()->sync($request->screens);
 
         return EditorScreenPlaylistResource::make($playlist);
     }
@@ -69,6 +70,7 @@ class ScreenPlaylistController extends Controller
         $this->authorize('update', $playlist);
 
         $playlist->update($request->validated('model'));
+        $playlist->screens()->sync($request->screens);
 
         return EditorScreenPlaylistResource::make($playlist->fresh());
     }

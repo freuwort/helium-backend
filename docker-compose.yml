@@ -1,0 +1,27 @@
+version: '3'
+volumes:
+  data:
+services:
+  db:
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: helium
+      MYSQL_USER: heliumuser
+      MYSQL_PASSWORD: pass
+    volumes:
+      - data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+  backend:
+    image: helium-backend
+    build:
+      context: .
+    ports:
+      - "8000:80"
+    env_file: .env
+  frontend:
+    image: helium-frontend
+    ports:
+      - "3000:3000"
+ 
