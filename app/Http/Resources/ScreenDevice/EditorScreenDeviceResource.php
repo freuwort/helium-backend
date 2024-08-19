@@ -22,6 +22,19 @@ class EditorScreenDeviceResource extends JsonResource
             ],
             
             'address' => $this->address,
+
+            'playlists' => $this->playlists->map(function ($playlist) {
+                return [
+                    'id' => $playlist->id,
+                    'name' => $playlist->name,
+                    'from_date' => $playlist->pivot->from_date,
+                    'from_time' => $playlist->pivot->from_time,
+                    'to_date' => $playlist->pivot->to_date,
+                    'to_time' => $playlist->pivot->to_time,
+                    'on_days' => $playlist->pivot->on_days,
+                    'on_screen' => $playlist->pivot->on_screen,
+                ];
+            }),
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Pivots\DevicePlaylistPivot;
 
 class ScreenDevice extends Model
 {
@@ -52,7 +53,7 @@ class ScreenDevice extends Model
 
     public function playlists()
     {
-        return $this->hasMany(ScreenPlaylist::class)->withPivot(['from_date', 'from_time', 'to_date', 'to_time', 'on_days', 'on_screen']);
+        return $this->belongsToMany(ScreenPlaylist::class)->using(DevicePlaylistPivot::class)->withPivot(['from_date', 'from_time', 'to_date', 'to_time', 'on_days', 'on_screen']);
     }
     // END: Relationships
 

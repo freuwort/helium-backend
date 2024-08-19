@@ -46,7 +46,7 @@ class ScreenPlaylist extends Model
 
     public function screens()
     {
-        return $this->hasMany(Screen::class)->withPivot(['from_date', 'from_time', 'to_date', 'to_time', 'on_days']);
+        return $this->belongsToMany(Screen::class)->withPivot(['from_date', 'from_time', 'to_date', 'to_time', 'on_days']);
     }
     // END: Relationships
 }

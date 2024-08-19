@@ -71,8 +71,10 @@ class ScreenDeviceController extends Controller
 
         $device->update($request->validated('model'));
         $device->address()->update($request->validated('address'));
+        
+        // return abort(511, json_encode($request->playlists));
 
-        $device->playlists()->sync($request->validated('playlists'));
+        $device->playlists()->sync($request->playlists); // We deliberately do not use $request->validated('playlists') here
 
         return EditorScreenDeviceResource::make($device->fresh());
     }
