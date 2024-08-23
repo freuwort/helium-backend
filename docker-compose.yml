@@ -19,7 +19,7 @@ services:
       context: .
     ports:
       - "8000:80"
-    env_file: .env
+    env_file: .env.production
   frontend:
     image: helium-frontend
     ports:
