@@ -142,9 +142,9 @@ class MediaConversion
 
         $output = storage_path("app/temp/$hash");
         $shell_output = escapeshellarg($output);
-        $suffix = '-000001.png';
+        $suffix = '.png';
 
-        shell_exec("pdftopng -f 1 -l 1 -q $shell_input $shell_output");
+        shell_exec("pdftoppm $shell_input $shell_output -png -f 1 -singlefile");
 
         $image = Image::read($output.$suffix);
 

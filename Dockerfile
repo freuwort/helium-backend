@@ -1,12 +1,21 @@
 # Use PHP with Apache as the base image
-FROM php:8.2-apache as web
+FROM php:8.2-apache AS web
 
 # Install Additional System Dependencies
 RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
-    ffmpeg
-    # php-imagick \
+    libmagickwand-dev \
+    ffmpeg \
+    xpdf \
+    poppler-utils \
+    inkscape
+
+RUN pecl install imagick;
+RUN docker-php-ext-enable imagick;
+
+RUN pecl install redis;
+RUN docker-php-ext-enable redis;
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -30,7 +39,7 @@ COPY . /var/www/html
 WORKDIR /var/www/html
 
 # Delete the .env
-RUN rm .env
+# RUN rm .env*
 
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -40,3 +49,5 @@ RUN composer install
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+ENTRYPOINT ["/var/www/html/run.sh"]
