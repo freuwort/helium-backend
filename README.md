@@ -6,7 +6,7 @@
 
 To build the Helium Backend image:
 ```sh
-docker build -t helium-backend
+docker build -t helium-backend .
 ```
 
 ## Security Vulnerabilities
