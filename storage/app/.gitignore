@@ -1,6 +1,7 @@
 *
-!temp/
 !domain/
 !forms/
 !profiles/
+!public/
+!temp/
 !.gitignore
