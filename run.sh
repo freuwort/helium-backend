@@ -14,6 +14,8 @@ mkdir -p storage/app/forms
 mkdir -p storage/app/profiles
 mkdir -p storage/app/temp
 
+chmod -R 777 storage
+
 echo "[3/5] Sleeping..."
 sleep 5
 
