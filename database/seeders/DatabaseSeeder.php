@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
         // $this->call(CurrenciesSeeder::class);
         // $this->call(PermissionsSeeder::class);
         $this->call(RolesSeeder::class);
-        $this->call(SuperAdminSeeder::class);
+        // $this->call(SuperAdminSeeder::class);
         $this->call(DomainSettingSeeder::class);
 
 

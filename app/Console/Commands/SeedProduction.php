@@ -10,7 +10,7 @@ use App\Models\Currency;
 use Illuminate\Console\Command;
 use Spatie\Permission\Models\Permission;
 
-class ProductionSeed extends Command
+class SeedProduction extends Command
 {
     protected $signature = 'seed:production';
     protected $description = 'Seeds the database with production data.';
@@ -24,19 +24,19 @@ class ProductionSeed extends Command
         $timestamp = now();
         $this->line('  <fg=yellow;bg=default>RUNNING</> Seeding Countries.');
         $this->seedCountries();
-        $this->line('  <fg=green;bg=default>DONE</>    <fg=white;bg=default>Seeding Countries.</> ('.now()->diffInMilliseconds($timestamp).' ms)');
+        $this->line('  <fg=green;bg=default>DONE</>    Seeding Countries. ('.now()->diffInMilliseconds($timestamp).' ms)');
         $this->line('');
 
         $timestamp = now();
         $this->line('  <fg=yellow;bg=default>RUNNING</> Seeding Currencies.');
         $this->seedCurrencies();
-        $this->line('  <fg=green;bg=default>DONE</>    <fg=default;bg=default>Seeding Currencies.</> ('.now()->diffInMilliseconds($timestamp).' ms)');
+        $this->line('  <fg=green;bg=default>DONE</>    Seeding Currencies. ('.now()->diffInMilliseconds($timestamp).' ms)');
         $this->line('');
 
         $timestamp = now();
         $this->line('  <fg=yellow;bg=default>RUNNING</> Seeding Permissions.');
         $this->seedPermissions();
-        $this->line('  <fg=green;bg=default>DONE</>    <fg=white;bg=default>Seeding Permissions.</> ('.now()->diffInMilliseconds($timestamp).' ms)');
+        $this->line('  <fg=green;bg=default>DONE</>    Seeding Permissions. ('.now()->diffInMilliseconds($timestamp).' ms)');
         $this->line('');
     }
 
