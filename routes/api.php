@@ -83,6 +83,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
         // Domain
         Route::patch('/settings', [DomainSettingController::class, 'update']);
+        Route::post('/settings/logo', [DomainSettingController::class, 'uploadLogo']);
         
         // Base units
         Route::get('/domain/units', [DomainController::class, 'indexUnits']);
