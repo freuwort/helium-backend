@@ -19,7 +19,7 @@ class DomainSettingController extends Controller
     public function update(UpdateDomainSettingRequest $request)
     {
         Setting::setSetting($request->validated());
-        Setting::setSetting('onboarding_domain_settings', true);
+        Setting::setSetting('setup_completed_domain_basics', true);
     }
 
     public function uploadLogo(UploadProfileMediaRequest $request)
@@ -27,7 +27,13 @@ class DomainSettingController extends Controller
         $file = $request->file('file');
         $name = 'logo.'.$file->getClientOriginalExtension();
         
+        // Upload to storage
         Storage::putFileAs('public/branding', $file, $name);
-        Setting::setSetting('company_logo', url('/storage/branding/'.$name));
+
+        // Set as logo and complete logo setup
+        Setting::setSetting([
+            'company_logo' => url('/storage/branding/'.$name),
+            'setup_completed_domain_logo' => true,
+        ]);
     }
 }

@@ -12,6 +12,13 @@ class CreateRoleRequest extends FormRequest
         return true;
     }
 
+
+
+    public function prepareForValidation(): void
+    {
+        $this->merge([ 'guard_name' => 'web' ]);
+    }
+
     
     
     public function rules(): array
@@ -20,7 +27,8 @@ class CreateRoleRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'color' => ['nullable', 'string', 'max:31'],
             'icon' => ['nullable', 'string', 'max:63'],
-            'permissions' => ['nullable', 'array',],
+            'guard_name' => ['nullable', 'string', 'in:web'],
+            'permissions' => ['nullable', 'array'],
             'permissions.*' => ['required', 'distinct', 'exists:permissions,name'],
         ];
     }

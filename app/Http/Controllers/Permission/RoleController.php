@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Permission;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Role\CreateRoleRequest;
 use App\Http\Requests\Role\DestroyManyRoleRequest;
+use App\Http\Requests\Role\ImportRolesRequest;
 use App\Http\Requests\Role\UpdateRoleRequest;
 use App\Http\Resources\Role\BasicRoleResource;
 use App\Http\Resources\Role\RoleResource;
@@ -114,10 +115,23 @@ class RoleController extends Controller
     {
         $this->authorize('create', [Role::class, $request->permissions]);
 
-        $role = Role::create([...$request->validated(), 'guard_name' => 'web']);
+        $role = Role::create($request->validated());
         $role->syncPermissions($request->permissions);
 
         return RoleResource::make($role);
+    }
+
+
+
+    public function import(ImportRolesRequest $request)
+    {
+        $this->authorize('import', [Role::class, $request->items]);
+
+        foreach ($request->items as $item)
+        {
+            $role = Role::create($item);
+            $role->syncPermissions($item['permissions']);
+        }
     }
 
     

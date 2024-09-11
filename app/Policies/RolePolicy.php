@@ -60,6 +60,28 @@ class RolePolicy
 
         return Response::allow();
     }
+
+
+
+    public function import(User $user, Collection $roles): Response
+    {
+        // Permission check
+        if (!$user->can([Permissions::SYSTEM_VIEW_ROLES, Permissions::SYSTEM_CREATE_ROLES])) return Response::deny('You are missing the required permission.');
+
+        foreach ($roles as $role)
+        {
+            // If creation includes forbidden permissions
+            if (Permissions::partOfForbidden($role['permissions'])) return Response::deny('Some permissions are not allowed to be added.');
+
+            // If creation includes elevated permissions
+            if (Permissions::partOfElevated($role['permissions']) && !$user->is_admin) return Response::deny('You are missing the required permission.');
+
+            // Check if user tries to assign roles they don't have themselves
+            if (!$user->can($role['permissions'])) return Response::deny('You can only assign permissions you have yourself.');
+        }
+
+        return Response::allow();
+    }
     
     
     

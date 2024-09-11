@@ -93,6 +93,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
         // Roles
         Route::get('/roles/basic', [RoleController::class, 'indexBasic']);
+        Route::post('/roles/import', [RoleController::class, 'import']);
         Route::resource('/roles', RoleController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/roles', [RoleController::class, 'destroyMany']);
     
