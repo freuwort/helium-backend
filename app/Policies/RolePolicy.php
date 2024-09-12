@@ -63,7 +63,7 @@ class RolePolicy
 
 
 
-    public function import(User $user, Collection $roles): Response
+    public function import(User $user, Collection|array $roles): Response
     {
         // Permission check
         if (!$user->can([Permissions::SYSTEM_VIEW_ROLES, Permissions::SYSTEM_CREATE_ROLES])) return Response::deny('You are missing the required permission.');

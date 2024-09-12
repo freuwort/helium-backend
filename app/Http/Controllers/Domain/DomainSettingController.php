@@ -19,7 +19,6 @@ class DomainSettingController extends Controller
     public function update(UpdateDomainSettingRequest $request)
     {
         Setting::setSetting($request->validated());
-        Setting::setSetting('setup_completed_domain_basics', true);
     }
 
     public function uploadLogo(UploadProfileMediaRequest $request)
@@ -30,10 +29,7 @@ class DomainSettingController extends Controller
         // Upload to storage
         Storage::putFileAs('public/branding', $file, $name);
 
-        // Set as logo and complete logo setup
-        Setting::setSetting([
-            'company_logo' => url('/storage/branding/'.$name),
-            'setup_completed_domain_logo' => true,
-        ]);
+        // Set as logo
+        Setting::setSetting('company_logo', url('/storage/branding/'.$name));
     }
 }

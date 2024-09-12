@@ -15,13 +15,11 @@ class ImportRolesRequest extends FormRequest
 
     public function prepareForValidation(): void
     {
-        foreach ($this->items as $key => $item) {
-            $this->items[$key]['guard_name'] = 'web';
-
-            if (!is_string($item['permissions'])) continue;
-
-            $this->items[$key]['permissions'] = explode(',', $item['permissions']);
-        }
+        $this->merge(['items' => array_map(fn ($item) => [
+            ...$item,
+            'guard_name' => 'web',
+            'permissions' => is_string($item['permissions']) ? explode(',', $item['permissions']) : $item['permissions'],
+        ], $this->items)]);
     }
 
     

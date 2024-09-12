@@ -26,7 +26,7 @@ class DomainController extends Controller
         // Only authenticated admins
         if ($request->user() && $request->user()->can(Permissions::SYSTEM_ADMIN))
         {
-            $query->orWhere('key', 'like', 'setup_completed_%');
+            $query->orWhere('key', 'like', 'setup_%');
         }
 
         return response()->json($query->get()->mapWithKeys(fn ($setting) => [$setting->key => $setting->value]));

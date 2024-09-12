@@ -10,6 +10,7 @@ use App\Http\Requests\Role\UpdateRoleRequest;
 use App\Http\Resources\Role\BasicRoleResource;
 use App\Http\Resources\Role\RoleResource;
 use App\Models\Role;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 
