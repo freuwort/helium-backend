@@ -1,10 +1,10 @@
 #!/bin/bash
 
-echo "[1/8] Go to working directory..."
+echo "[1/7] Go to working directory..."
 cd /var/www/html
 
 
-echo "[2/8] Creating storage folders..."
+echo "[2/7] Creating storage folders..."
 mkdir -p storage/framework/sessions
 mkdir -p storage/framework/views
 mkdir -p storage/framework/cache
@@ -17,15 +17,11 @@ mkdir -p storage/app/temp
 chmod -R 777 storage
 
 
-echo "[3/8] Linking storage..."
+echo "[3/7] Linking storage..."
 php artisan storage:link
 
 
-echo "[4/8] Sleeping..."
-sleep 5
-
-
-echo "[5/8] Migrating..."
+echo "[4/7] Migrating..."
 if [ "$APP_ENV" == "local" ]; then
     php artisan migrate:fresh
 else
@@ -33,13 +29,13 @@ else
 fi
 
 
-echo "[6/8] Seeding..."
+echo "[5/7] Seeding..."
 php artisan seed:production
 
 
-echo "[7/8] Creating super user..."
+echo "[6/7] Creating super user..."
 php artisan superuser:init
 
 
-echo "[8/8] Starting Apache..."
+echo "[7/7] Starting Apache..."
 apache2-foreground
