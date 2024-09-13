@@ -37,9 +37,6 @@ COPY . /var/www/html
 # Set the working directory
 WORKDIR /var/www/html
 
-# Delete the .env
-RUN rm .env*
-
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
