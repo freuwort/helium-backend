@@ -1,0 +1,5 @@
+php_value upload_max_filesize 2048M#
+php_value max_file_uploads = 1000
+php_value post_max_size 2048M
+php_value max_execution_time 200
+php_value max_input_time 200
