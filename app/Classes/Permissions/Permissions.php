@@ -13,6 +13,8 @@ class Permissions
     // Admin
     public const SYSTEM_SUPER_ADMIN = 'system.super-admin'; // Only assigned to root user
     public const SYSTEM_ADMIN = 'system.admin';
+    public const SYSTEM_DEBUGGER = 'system.debugger';
+    public const SYSTEM_DEVELOPER = 'system.developer';
 
     // Access
     public const SYSTEM_ACCESS_ADMIN_PANEL = 'system.access.admin.panel';
@@ -94,6 +96,8 @@ class Permissions
             'permissions' => [
                 [
                     ['name' => self::SYSTEM_ADMIN, 'label' => 'Admin', 'description' => 'Der Admin hat Zugriff auf alle Bereiche des Systems und kann Benutzer und Rollen verwalten.'],
+                    ['name' => self::SYSTEM_DEBUGGER, 'label' => 'Debugger', 'description' => 'Benutzer mit Einsicht auf Debug-Bereiche.'],
+                    ['name' => self::SYSTEM_DEVELOPER, 'label' => 'Entwickler', 'description' => 'Benutzer mit Einsicht auf InDev-Bereiche.'],
                 ],
                 [
                     ['name' => self::SYSTEM_VIEW_ROLES, 'label' => 'Rollen anzeigen', 'description' => 'Der Benutzer kann die Rollen ansehen.'],

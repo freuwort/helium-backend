@@ -169,10 +169,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/content/spaces', [ContentSpaceController::class, 'destroyMany']);
         Route::resource('/categories', CategoryController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/categories', [CategoryController::class, 'destroyMany']);
-
-
-
-        // Debug
-        Route::get('/debug/status/{status}', [DebugController::class, 'status']);
     });
 });
