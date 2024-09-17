@@ -66,6 +66,9 @@ class Kernel extends HttpKernel
         'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
         'verified.tfa' => \App\Http\Middleware\VerifyTwoFactorAuthentication::class,
 
+        'mode.debug' => \App\Http\Middleware\debugMode::class,
+        'mode.developer' => \App\Http\Middleware\developerMode::class,
+
         // 'role' => \Spatie\Permission\Middlewares\RoleMiddleware::class,
         // 'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
         // 'role_or_permission' => \Spatie\Permission\Middlewares\RoleOrPermissionMiddleware::class,

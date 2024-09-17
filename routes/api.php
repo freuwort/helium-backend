@@ -54,33 +54,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Routes needing: authentication, two factor authentication
     Route::middleware(['verified', 'verified.tfa'])->group(function () {
 
-        // Personal User Routes
-        Route::prefix('user')->group(function () {
-            Route::patch('/settings', [UserSettingController::class, 'update']);
-            Route::patch('/settings/{key}', [UserSettingController::class, 'updateView'])->where('key', 'view_[a-z0-9_]+');
-            Route::patch('/username', [AuthUserController::class, 'updateUsername']);
-            Route::patch('/password', [AuthUserController::class, 'updatePassword']);
-            Route::post('/avatar', [AuthUserController::class, 'uploadProfileAvatar']);
-            Route::post('/banner', [AuthUserController::class, 'uploadProfileBanner']);
-            Route::delete('/', [AuthUserController::class, 'delete']);
-    
-            // Two factor
-            Route::prefix('two-factor')->group(function () {
-                Route::put('/default/{method}', [TwoFactorController::class, 'setDefaultTfaMethod']);
-                Route::delete('/destroy/{method}', [TwoFactorController::class, 'destroyTfaMethod']);
-                
-                Route::prefix('backup')->group(function () {
-                    Route::get('/show', [TwoFactorController::class, 'showTfaBackupCodes']);
-                    Route::post('/generate', [TwoFactorController::class, 'generateTfaBackupCodes']);
-                });
-        
-                Route::prefix('totp')->group(function () {
-                    Route::put('/setup', [TwoFactorController::class, 'setupTfaTotp']);
-                    Route::put('/enable', [TwoFactorController::class, 'enableTfaTotp']);
-                });
-            });
-        });
-    
+        // System
+        Route::get('/debug', [DebugController::class, 'index']);
+        Route::get('/debug/phpinfo', [DebugController::class, 'phpinfo']);
+
         // Domain
         Route::patch('/settings', [DomainSettingController::class, 'update']);
         Route::post('/settings/logo', [DomainSettingController::class, 'uploadLogo']);
@@ -169,5 +146,34 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/content/spaces', [ContentSpaceController::class, 'destroyMany']);
         Route::resource('/categories', CategoryController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/categories', [CategoryController::class, 'destroyMany']);
+
+
+
+        // Personal User Routes
+        Route::prefix('user')->group(function () {
+            Route::patch('/settings', [UserSettingController::class, 'update']);
+            Route::patch('/settings/{key}', [UserSettingController::class, 'updateView'])->whereIn('key', ['view_[a-z0-9_]+', 'ui_[a-z0-9_]+']);
+            Route::patch('/username', [AuthUserController::class, 'updateUsername']);
+            Route::patch('/password', [AuthUserController::class, 'updatePassword']);
+            Route::post('/avatar', [AuthUserController::class, 'uploadProfileAvatar']);
+            Route::post('/banner', [AuthUserController::class, 'uploadProfileBanner']);
+            Route::delete('/', [AuthUserController::class, 'delete']);
+    
+            // Two factor
+            Route::prefix('two-factor')->group(function () {
+                Route::put('/default/{method}', [TwoFactorController::class, 'setDefaultTfaMethod']);
+                Route::delete('/destroy/{method}', [TwoFactorController::class, 'destroyTfaMethod']);
+                
+                Route::prefix('backup')->group(function () {
+                    Route::get('/show', [TwoFactorController::class, 'showTfaBackupCodes']);
+                    Route::post('/generate', [TwoFactorController::class, 'generateTfaBackupCodes']);
+                });
+        
+                Route::prefix('totp')->group(function () {
+                    Route::put('/setup', [TwoFactorController::class, 'setupTfaTotp']);
+                    Route::put('/enable', [TwoFactorController::class, 'enableTfaTotp']);
+                });
+            });
+        });
     });
 });
