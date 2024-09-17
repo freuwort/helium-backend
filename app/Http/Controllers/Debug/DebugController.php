@@ -28,6 +28,7 @@ class DebugController extends Controller
 
     public function phpinfo()
     {
+        ini_set('display_errors', 1);
         phpinfo();
     }
 }
