@@ -77,7 +77,7 @@ class MediaController extends Controller
         $media->addAccess(null, ['permission' => $request->validated('public_access')]);
         $media->update(['inherit_access' => $request->validated('inherit_access')]);
 
-        foreach ($request->validated('access') as $access) {
+        foreach ($request->access as $access) {
             $media->addAccess([
                 'id' => $access['permissible_id'],
                 'type' => $access['permissible_type'],
