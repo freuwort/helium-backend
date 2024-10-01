@@ -65,9 +65,10 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
         'verified.tfa' => \App\Http\Middleware\VerifyTwoFactorAuthentication::class,
+        'enabled' => \App\Http\Middleware\Enabled::class,
 
-        'mode.debug' => \App\Http\Middleware\debugMode::class,
-        'mode.developer' => \App\Http\Middleware\developerMode::class,
+        'mode.debug' => \App\Http\Middleware\DebugMode::class,
+        'mode.developer' => \App\Http\Middleware\DeveloperMode::class,
 
         // 'role' => \Spatie\Permission\Middlewares\RoleMiddleware::class,
         // 'permission' => \Spatie\Permission\Middlewares\PermissionMiddleware::class,
