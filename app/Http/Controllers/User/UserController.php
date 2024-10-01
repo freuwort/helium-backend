@@ -7,6 +7,7 @@ use App\Http\Requests\UploadProfileMediaRequest;
 use App\Http\Requests\User\DestroyManyUserRequest;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\EnableUserRequest;
+use App\Http\Requests\User\ImportUsersRequest;
 use App\Http\Requests\User\UpdateUserPasswordRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Requests\User\VerifyUserEmailRequest;
@@ -157,6 +158,23 @@ class UserController extends Controller
         $user->syncRoles($request->validated('roles'));
 
         return EditorUserResource::make($user);
+    }
+
+
+
+    public function import(ImportUsersRequest $request)
+    {
+        $this->authorize('import', [User::class, $request->items]);
+
+        foreach ($request->items as $item)
+        {
+            $user = User::create($item);
+            
+            $user->user_name()->updateOrCreate([], $item['user_name']);
+            $user->user_company()->updateOrCreate([], $item['user_company']);
+
+            $user->syncRoles($item['roles']);
+        }
     }
 
     

@@ -76,6 +76,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
         // Users
         Route::get('/users/basic', [UserController::class, 'indexBasic']);
+        Route::post('/users/import', [UserController::class, 'import']);
         Route::post('/users/{user}/avatar', [UserController::class, 'uploadProfileAvatar']);
         Route::post('/users/{user}/banner', [UserController::class, 'uploadProfileBanner']);
         Route::patch('/users/{user}/password', [UserController::class, 'updatePassword']);
