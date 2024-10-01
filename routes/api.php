@@ -52,7 +52,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/session', [AuthUserController::class, 'getSession']);
 
     // Routes needing: authentication, two factor authentication
-    Route::middleware(['verified', 'verified.tfa'])->group(function () {
+    Route::middleware(['verified', 'verified.tfa', 'enabled'])->group(function () {
 
         // System
         Route::get('/debug', [DebugController::class, 'index']);

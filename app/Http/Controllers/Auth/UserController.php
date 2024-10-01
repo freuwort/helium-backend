@@ -25,6 +25,7 @@ class UserController extends Controller
     {
         $user = Auth::user();
         $authenticated = Auth::check();
+        $enabled = $user->is_enabled;
         $tfa_enabled = $user->has_tfa_enabled;
         $tfa_verified = session('two_factor_verified', false);
 
@@ -32,6 +33,7 @@ class UserController extends Controller
             'user' => PrivateUserResource::make($user),
             'session' => [
                 'authenticated' => $authenticated,
+                'enabled' => $enabled,
                 'tfa_enabled' => $tfa_enabled,
                 'tfa_verified' => $tfa_verified,
             ],
