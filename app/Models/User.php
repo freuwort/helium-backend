@@ -188,6 +188,11 @@ class User extends Authenticatable implements MustVerifyEmail
         });
     }
 
+    public function getIsEnabledAttribute(): bool
+    {
+        return $this->enabled_at !== null;
+    }
+
     public function getIsAdminAttribute(): bool
     {
         return Permissions::partOfAdmin($this->getAllPermissionNames());
