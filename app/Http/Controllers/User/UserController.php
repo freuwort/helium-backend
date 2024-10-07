@@ -166,10 +166,12 @@ class UserController extends Controller
     {
         $this->authorize('import', [User::class, $request->items]);
 
+        // return response()->json($request->items);
+
         foreach ($request->items as $item)
         {
             $user = User::create($item);
-            
+
             $user->user_name()->updateOrCreate([], $item['user_name']);
             $user->user_company()->updateOrCreate([], $item['user_company']);
 

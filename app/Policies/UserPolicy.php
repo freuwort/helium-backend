@@ -74,7 +74,7 @@ class UserPolicy
 
 
 
-    public function import(User $user, Collection $models): Response
+    public function import(User $user, Collection|array $models): Response
     {
         // Permission check
         if (!$user->can([Permissions::SYSTEM_VIEW_USERS, Permissions::SYSTEM_CREATE_USERS])) return Response::deny('You are missing the required permission.');
@@ -82,7 +82,7 @@ class UserPolicy
         foreach ($models as $model)
         {
             // Check if user tries to assign roles
-            if ($model['roles']->isNotEmpty())
+            if ($model['roles'] && $model['roles']->isNotEmpty())
             {
                 // Check if user can generally assign roles
                 if (!$user->can(Permissions::SYSTEM_ASSIGN_ROLES)) return Response::deny('You are missing the required permission.');
@@ -91,7 +91,7 @@ class UserPolicy
                 foreach ($model['roles'] as $roleName)
                 {
                     $role = $user->roles()->where('name', $roleName)->first();
-                    
+
                     // If creation includes forbidden permissions
                     if (Permissions::partOfForbidden($role->getPermissionNames())) return Response::deny('Some roles are not allowed to be assigned.');
 

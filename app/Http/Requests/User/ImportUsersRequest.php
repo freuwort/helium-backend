@@ -21,14 +21,21 @@ class ImportUsersRequest extends FormRequest
                 ...$item,
                 'roles' => is_string($item['roles']) ? explode(',', $item['roles']) : $item['roles'],
                 'user_name' => collect($item)
-                    ->filter(fn ($value, $key) => startsWith($key, 'user_name_'))
-                    ->map(fn ($value, $key) => [str_replace('user_name_', '', $key) => $value])
-                    ->toArray(),
+                    ->filter(fn ($value, $key) => str_starts_with($key, 'user_name_'))
+                    ->reduce(function ($carry, $value, $key) {
+                        $newKey = str_replace('user_name_', '', $key);
+                        $carry[$newKey] = $value;
+                        return $carry;
+                    }, []),
                 'user_company' => collect($item)
-                    ->filter(fn ($value, $key) => startsWith($key, 'user_company_'))
-                    ->map(fn ($value, $key) => [str_replace('user_company_', '', $key) => $value])
-                    ->toArray(),
+                    ->filter(fn ($value, $key) => str_starts_with($key, 'user_company_'))
+                    ->reduce(function ($carry, $value, $key) {
+                        $newKey = str_replace('user_company_', '', $key);
+                        $carry[$newKey] = $value;
+                        return $carry;
+                    }, []),
             ])
+            ->toArray(),
         ]);
     }
 
