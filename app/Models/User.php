@@ -26,6 +26,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'username',
         'email',
         'password',
+        'requires_password_change',
+        'requires_two_factor',
         'email_verified_at',
         'enabled_at',
         'deleted_at',
@@ -41,6 +43,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'enabled_at' => 'datetime',
         'deleted_at' => 'datetime',
         'password' => 'hashed',
+        'requires_password_change' => 'boolean',
+        'requires_two_factor' => 'boolean',
     ];
 
     protected $with = [

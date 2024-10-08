@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('email')->unique()->nullable();
             $table->string('password')->nullable();
             $table->rememberToken();
+            $table->boolean('requires_password_change')->default(false);
+            $table->boolean('requires_two_factor')->default(false);
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('enabled_at')->nullable();
             $table->timestamp('deleted_at')->nullable();
