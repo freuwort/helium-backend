@@ -10,7 +10,7 @@ class Enabled
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || !$request->user()->is_enabled)
+        if (!$request->user() || !$request->user()->enabled_at)
         {
             return response()->json(['message' => __('Your account is disabled.')], 403);
         }
