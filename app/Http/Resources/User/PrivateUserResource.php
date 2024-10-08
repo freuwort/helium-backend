@@ -42,6 +42,9 @@ class PrivateUserResource extends JsonResource
             'department' => $this->user_company->department ?? '',
             'title' => $this->user_company->title ?? '',
 
+            'requires_password_change' => $this->requires_password_change,
+            'requires_two_factor' => $this->requires_two_factor,
+
             'email_verified_at' => $this->email_verified_at,
             'enabled_at' => $this->enabled_at,
             'deleted_at' => $this->deleted_at,

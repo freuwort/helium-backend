@@ -8,6 +8,8 @@ use App\Http\Requests\User\DestroyManyUserRequest;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\EnableUserRequest;
 use App\Http\Requests\User\ImportUsersRequest;
+use App\Http\Requests\User\RequirePasswordChangeRequest;
+use App\Http\Requests\User\RequireTwoFactorRequest;
 use App\Http\Requests\User\UpdateUserPasswordRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Requests\User\VerifyUserEmailRequest;
@@ -166,8 +168,6 @@ class UserController extends Controller
     {
         $this->authorize('import', [User::class, $request->items]);
 
-        // return response()->json($request->items);
-
         foreach ($request->items as $item)
         {
             $user = User::create($item);
@@ -205,12 +205,34 @@ class UserController extends Controller
         return EditorUserResource::make($user->fresh());
     }
 
+
+
     public function updatePassword(UpdateUserPasswordRequest $request, User $user)
     {
         $this->authorize('updatePassword', $user);
 
         $user->updatePassword($request->validated('password'));
     }
+
+
+
+    public function requirePasswordChange(RequirePasswordChangeRequest $request, User $user)
+    {
+        $this->authorize('requirePasswordChange', $user);
+
+        $user->update(['requires_password_change' => $request->validated('requires_password_change')]);
+    }
+
+
+
+    public function requireTwoFactor(RequireTwoFactorRequest $request, User $user)
+    {
+        $this->authorize('requireTwoFactor', $user);
+
+        $user->update(['requires_two_factor' => $request->validated('requires_two_factor')]);
+    }
+
+
 
     public function updateEmailVerified(VerifyUserEmailRequest $request, User $user)
     {
@@ -219,6 +241,8 @@ class UserController extends Controller
         $user->verifyEmail($request->validated('email_verified'));
     }
 
+
+
     public function updateEnabled(EnableUserRequest $request, User $user)
     {
         $this->authorize('enable', $user);
@@ -226,12 +250,16 @@ class UserController extends Controller
         $user->enable($request->validated('enabled'));
     }
 
+
+
     public function uploadProfileAvatar(UploadProfileMediaRequest $request, User $user)
     {
         $this->authorize('uploadAvatar', $user);
 
         $user->uploadProfileMedia($request->file('file'), 'avatar');
     }
+
+
 
     public function uploadProfileBanner(UploadProfileMediaRequest $request, User $user)
     {

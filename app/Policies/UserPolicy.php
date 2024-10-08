@@ -157,26 +157,33 @@ class UserPolicy
 
 
 
-    public function updatePassword(User $user, User $model): Response
+    public function updatePassword(User $user, User $model)
     {
-        // Permission check
-        if (!$user->canAny([Permissions::ADMIN_PERMISSIONS])) return Response::deny('You are missing the required permission.');
-
-        // Check if edit includes forbidden permissions
-        if ($model->has_forbidden_permissions) return Response::deny('User password cannot be manually changed.');
-        
-        return Response::allow();
+        return $this->checkAdministrativeAction($user, $model);
     }
 
+    public function requirePasswordChange(User $user, User $model)
+    {
+        return $this->checkAdministrativeAction($user, $model);
+    }
 
+    public function requireTwoFactor(User $user, User $model)
+    {
+        return $this->checkAdministrativeAction($user, $model);
+    }
 
-    public function verifyEmail(User $user, User $model): Response
+    public function verifyEmail(User $user, User $model)
+    {
+        return $this->checkAdministrativeAction($user, $model);
+    }
+
+    private function checkAdministrativeAction(User $user, User $model): Response
     {
         // Permission check
         if (!$user->canAny([Permissions::ADMIN_PERMISSIONS])) return Response::deny('You are missing the required permission.');
 
         // Check if edit includes forbidden permissions
-        if ($model->has_forbidden_permissions) return Response::deny('User email cannot be manually verified.');
+        if ($model->has_forbidden_permissions) return Response::deny('Action cannot be performed on this user.');
         
         return Response::allow();
     }

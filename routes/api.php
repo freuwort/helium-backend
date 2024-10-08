@@ -80,6 +80,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/users/{user}/avatar', [UserController::class, 'uploadProfileAvatar']);
         Route::post('/users/{user}/banner', [UserController::class, 'uploadProfileBanner']);
         Route::patch('/users/{user}/password', [UserController::class, 'updatePassword']);
+        Route::patch('/users/{user}/require-password-change', [UserController::class, 'requirePasswordChange']);
+        Route::patch('/users/{user}/require-two-factor', [UserController::class, 'requireTwoFactor']);
         Route::patch('/users/{user}/verify-email', [UserController::class, 'updateEmailVerified']);
         Route::patch('/users/{user}/enable', [UserController::class, 'updateEnabled']);
         Route::resource('/users', UserController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
