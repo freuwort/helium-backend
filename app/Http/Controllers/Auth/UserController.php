@@ -52,6 +52,7 @@ class UserController extends Controller
     public function updatePassword(UpdateUserPasswordRequest $request)
     {
         $request->user()->updatePassword($request->validated('new_password'));
+        $request->user()->update(['requires_password_change' => false]);
 
         return response()->json(['message' => __('Password updated successfully')]);
     }
