@@ -53,8 +53,6 @@ CORS > CSRF > Auth
 //////////////////////////////////////////////////////////////////////////*/
 Route::middleware(['auth:sanctum'])->group(function () {
 
-    // Auth-info of current user
-    Route::get('/user', [AuthUserController::class, 'getUser']);
     // Session info
     Route::get('/session', [AuthUserController::class, 'getSession']);
 

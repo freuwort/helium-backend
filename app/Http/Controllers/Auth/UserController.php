@@ -14,13 +14,6 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    public function getUser()
-    {
-        return PrivateUserResource::make(Auth::user());
-    }
-
-
-
     public function getSession()
     {
         $user = Auth::user();
