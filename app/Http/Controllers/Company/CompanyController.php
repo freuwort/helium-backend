@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Company\DestroyManyCompanyRequest;
 use App\Http\Requests\UploadProfileMediaRequest;
 use App\Http\Resources\Company\CompanyResource;
 use App\Http\Resources\Company\EditorCompanyResource;
@@ -123,7 +124,7 @@ class CompanyController extends Controller
 
 
 
-    public function destroyMany(Request $request)
+    public function destroyMany(DestroyManyCompanyRequest $request)
     {
         $companies = Company::whereIn('id', $request->validated('ids'));
         
