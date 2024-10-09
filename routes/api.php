@@ -93,7 +93,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('/totp/enable', [TwoFactorController::class, 'enableTfaTotp']);
         });
 
-        
+
 
         // System
         Route::get('/debug', [DebugController::class, 'index']);
@@ -112,8 +112,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Roles
         Route::get('/roles/basic', [RoleController::class, 'indexBasic']);
         Route::post('/roles/import', [RoleController::class, 'import']);
-        Route::resource('/roles', RoleController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/roles', [RoleController::class, 'destroyMany']);
+        Route::resource('/roles', RoleController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
     
         // Users
         Route::get('/users/basic', [UserController::class, 'indexBasic']);
@@ -125,14 +125,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/users/{user}/require-two-factor', [UserController::class, 'requireTwoFactor']);
         Route::patch('/users/{user}/verify-email', [UserController::class, 'updateEmailVerified']);
         Route::patch('/users/{user}/enable', [UserController::class, 'updateEnabled']);
-        Route::resource('/users', UserController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/users', [UserController::class, 'destroyMany']);
+        Route::resource('/users', UserController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
     
         // Companies
         Route::post('/companies/{company}/logo', [CompanyController::class, 'uploadLogo']);
         Route::post('/companies/{company}/banner', [CompanyController::class, 'uploadBanner']);
-        Route::resource('/companies', CompanyController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/companies', [CompanyController::class, 'destroyMany']);
+        Route::resource('/companies', CompanyController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
     
         // Media
         Route::post('/upload', [FileController::class, 'upload']);
@@ -142,14 +142,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/media/share', [MediaController::class, 'share']);
         Route::patch('/media/move', [MediaController::class, 'move']);
         Route::patch('/media/rename', [MediaController::class, 'rename']);
-        Route::patch('/media/discover', [MediaController::class, 'discover']);
         Route::delete('/media', [MediaController::class, 'destroy']);
+        Route::patch('/media/discover', [MediaController::class, 'discover']);
 
 
 
         // Form
-        Route::resource('/forms', FormController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/forms', [FormController::class, 'destroyMany']);
+        Route::resource('/forms', FormController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
 
 
 
@@ -159,8 +159,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/events/{event}/invites/email', [EventInviteController::class, 'sendTemplatedEmail']);
         Route::delete('/events/{event}/invites', [EventInviteController::class, 'destroyMany']);
         Route::resource('/events/{event}/invites', EventInviteController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
-        Route::resource('/events', EventController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+        
         Route::delete('/events', [EventController::class, 'destroyMany']);
+        Route::resource('/events', EventController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
 
         // Event invite
         Route::patch('/event-invite/{code}/claim', [EventInviteController::class, 'claim']);
@@ -170,25 +171,27 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
         // Screens
-        Route::resource('/screens/devices', ScreenDeviceController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/screens/devices', [ScreenDeviceController::class, 'destroyMany']);
+        Route::resource('/screens/devices', ScreenDeviceController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         
-        Route::resource('/screens/playlists', ScreenPlaylistController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/screens/playlists', [ScreenPlaylistController::class, 'destroyMany']);
+        Route::resource('/screens/playlists', ScreenPlaylistController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         
-        Route::resource('/screens', ScreenController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
         Route::delete('/screens', [ScreenController::class, 'destroyMany']);
+        Route::resource('/screens', ScreenController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
 
 
 
         // Content
         Route::patch('/content/posts/{postGroup}/review', [ContentPostController::class, 'updateReviewStatus']);
         Route::patch('/content/posts/{postGroup}/approve', [ContentPostController::class, 'approveDraft']);
-        Route::resource('/content/posts', ContentPostController::class)->only(['show', 'index', 'store', 'update', 'destroy'])->parameters(['posts' => 'postGroup']);
         Route::delete('/content/posts', [ContentPostController::class, 'destroyMany']);
-        Route::resource('/content/spaces', ContentSpaceController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+        Route::resource('/content/posts', ContentPostController::class)->only(['show', 'index', 'store', 'update', 'destroy'])->parameters(['posts' => 'postGroup']);
+        
         Route::delete('/content/spaces', [ContentSpaceController::class, 'destroyMany']);
-        Route::resource('/categories', CategoryController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+        Route::resource('/content/spaces', ContentSpaceController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+        
         Route::delete('/categories', [CategoryController::class, 'destroyMany']);
+        Route::resource('/categories', CategoryController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
     });
 });
