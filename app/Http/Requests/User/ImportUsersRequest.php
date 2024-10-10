@@ -19,6 +19,8 @@ class ImportUsersRequest extends FormRequest
             collect($this->items)
             ->map(fn ($item) => [
                 ...$item,
+                'enabled_at' => now(),
+                'email_verified_at' => now(),
                 'roles' => is_string($item['roles']) ? explode(',', $item['roles']) : $item['roles'],
                 'user_name' => collect($item)
                     ->filter(fn ($value, $key) => str_starts_with($key, 'user_name_'))
@@ -48,6 +50,9 @@ class ImportUsersRequest extends FormRequest
             // User Model
             'items.*.username' => ['nullable', 'string', 'max:255', 'unique:users,username'],
             'items.*.email' => ['nullable', 'string', 'email', 'max:255', 'unique:users,email'],
+            'items.*.password' => ['nullable', 'string', 'max:255'],
+            'items.*.email_verified_at' => ['nullable', 'date'],
+            'items.*.enabled_at' => ['nullable', 'date'],
 
             // User Roles
             'items.*.roles' => ['nullable', 'array'],
