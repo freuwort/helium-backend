@@ -107,6 +107,24 @@ class RolePolicy
         return Response::allow();
     }
 
+
+
+    public function assignMany(User $user, Collection $roles): Response
+    {
+        if (!$user->can([Permissions::SYSTEM_ASSIGN_ROLES])) return Response::deny('You are missing the required permission.');
+
+        foreach ($roles as $role)
+        {
+            $permissions = $role->getPermissionNames();
+
+            if (Permissions::partOfForbidden($permissions)) return Response::deny('Some roles are not allowed to be assigned or removed.');
+            if (Permissions::partOfElevated($permissions) && !$user->is_admin) return Response::deny('You are missing the required permission.');
+            if (!$user->can($permissions)) return Response::deny('You can only assign permissions you have yourself.');
+        }
+
+        return Response::allow();
+    }
+
     
     
     public function delete(User $user, Role $role): Response

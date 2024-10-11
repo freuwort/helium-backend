@@ -22,6 +22,7 @@ use App\Http\Controllers\Screen\ScreenController;
 use App\Http\Controllers\Screen\ScreenDeviceController;
 use App\Http\Controllers\Screen\ScreenPlaylistController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\User\UserRoleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -123,6 +124,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/users/{user}/require-two-factor', [UserController::class, 'requireTwoFactor']);
         Route::patch('/users/{user}/verify-email', [UserController::class, 'updateEmailVerified']);
         Route::patch('/users/{user}/enable', [UserController::class, 'updateEnabled']);
+        Route::put('/users/roles', [UserRoleController::class, 'assignRoles']);
+        Route::delete('/users/roles', [UserRoleController::class, 'revokeRoles']);
         Route::delete('/users', [UserController::class, 'destroyMany']);
         Route::resource('/users', UserController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
     
