@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Classes\Permissions\Permissions;
+use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
@@ -55,31 +56,23 @@ class UserPolicy
 
     public function import(User $user, Collection|array $models): Response
     {
-        // Permission check
         if (!$user->can([Permissions::SYSTEM_VIEW_USERS, Permissions::SYSTEM_CREATE_USERS])) return Response::deny('You are missing the required permission.');
 
         foreach ($models as $model)
         {
-            // Check if user tries to assign roles
-            if ($model['roles'] && $model['roles']->isNotEmpty())
+            if (!$model['roles']) continue;
+            if ($model['roles']->isEmpty()) continue;
+
+            if (!$user->can(Permissions::SYSTEM_ASSIGN_ROLES)) return Response::deny('You are missing the required permission.');
+
+            $roles = Role::whereIn('name', $model['roles'])->get();
+            
+            foreach ($roles as $role)
             {
-                // Check if user can generally assign roles
-                if (!$user->can(Permissions::SYSTEM_ASSIGN_ROLES)) return Response::deny('You are missing the required permission.');
-                
-                // Check if specific roles can be assigned
-                foreach ($model['roles'] as $roleName)
-                {
-                    $role = $user->roles()->where('name', $roleName)->first();
-
-                    // If creation includes forbidden permissions
-                    if (Permissions::partOfForbidden($role->getPermissionNames())) return Response::deny('Some roles are not allowed to be assigned.');
-
-                    // If creation includes elevated permissions
-                    if (Permissions::partOfElevated($role->getPermissionNames()) && !$user->is_admin) return Response::deny('You are missing the required permission.');
-
-                    // Check if user tries to assign roles with permissions they don't have themselves
-                    if (!$user->can($role->getPermissionNames())) return Response::deny('You can only assign permissions you have yourself.');
-                }
+                $permissions = $role->getPermissionNames();
+                if (Permissions::partOfForbidden($permissions)) return Response::deny('Some roles are not allowed to be assigned.');
+                if (Permissions::partOfElevated($permissions) && !$user->is_admin) return Response::deny('You are missing the required permission.');
+                if (!$user->can($permissions)) return Response::deny('You can only assign permissions you have yourself.');
             }
         }
 
