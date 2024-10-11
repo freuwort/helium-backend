@@ -140,7 +140,7 @@ class UserController extends Controller
     
     public function store(CreateUserRequest $request)
     {
-        $this->authorize('create', [User::class, Role::whereIn('id', $request->validated('roles'))->get()]);
+        $this->authorize('create', User::class);
 
         // Create model
         $user = User::create($request->validated('model'));
@@ -155,9 +155,6 @@ class UserController extends Controller
         $user->syncMany(Phonenumber::class,         $request->validated('phonenumbers'));
         $user->syncMany(Date::class,                $request->validated('dates'));
         $user->syncMany(Link::class,                $request->validated('links'));
-
-        // Sync roles
-        $user->syncRoles($request->validated('roles'));
 
         return EditorUserResource::make($user);
     }
@@ -183,7 +180,7 @@ class UserController extends Controller
     
     public function update(UpdateUserRequest $request, User $user)
     {
-        $this->authorize('update', [$user, Role::whereIn('id', $request->validated('roles'))->get()]);
+        $this->authorize('update', $user);
 
         // Update model
         $user->update($request->validated('model'));
@@ -198,9 +195,6 @@ class UserController extends Controller
         $user->syncMany(Phonenumber::class,         $request->validated('phonenumbers'));
         $user->syncMany(Date::class,                $request->validated('dates'));
         $user->syncMany(Link::class,                $request->validated('links'));
-
-        // Sync roles
-        $user->syncRoles($request->validated('roles'));
 
         return EditorUserResource::make($user->fresh());
     }
