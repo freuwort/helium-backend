@@ -21,10 +21,6 @@ class UpdateUserRequest extends FormRequest
             'model.username' => ['nullable', 'string', 'max:255', 'unique:users,username,'.$this->user->id],
             'model.email' => ['nullable', 'string', 'email', 'max:255', 'unique:users,email,'.$this->user->id],
 
-            // User Roles
-            'roles' => ['nullable', 'array'],
-            'roles.*' => ['required', 'exists:roles,id'],
-
             // User Name
             'user_name.salutation' => ['nullable', 'string', 'max:255'],
             'user_name.prefix' => ['nullable', 'string', 'max:255'],
