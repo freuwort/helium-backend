@@ -158,6 +158,25 @@ class User extends Authenticatable implements MustVerifyEmail
         });
     }
 
+    public function scopeWhereCan($query, $permissions)
+    {
+        return $query
+        ->where(function ($query) use ($permissions) {
+            return $query
+            ->whereHas('permissions', function ($query) use ($permissions) {
+                return $query
+                ->whereIn('name', [...$permissions, ...Permissions::ADMIN_PERMISSIONS]);
+            })
+            ->orWhereHas('roles', function ($query) use ($permissions) {
+                return $query
+                ->whereHas('permissions', function ($query) use ($permissions) {
+                    return $query
+                    ->whereIn('name', [...$permissions, ...Permissions::ADMIN_PERMISSIONS]);
+                });
+            });
+        });
+    }
+
     public function scopeWhereEmailVerified($query, $value = true)
     {
         if ($value) return $query->whereNotNull('email_verified_at');
@@ -305,6 +324,13 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         if (!$this->hasSetting($key)) return null;
         return $this->raw_settings()->firstWhere('key', $key)->value;
+    }
+
+
+
+    public function wantsNotificationsFor($type, $via = 'email'): bool
+    {
+        return $this->getSetting('notification_'.$via.'_'.$type) ?? false;
     }
     // END: Settings
 
