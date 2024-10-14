@@ -121,6 +121,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/users/{user}/password', [UserController::class, 'updatePassword']);
         Route::patch('/users/{user}/require-password-change', [UserController::class, 'requirePasswordChange']);
         Route::patch('/users/{user}/require-two-factor', [UserController::class, 'requireTwoFactor']);
+        Route::post('/users/{user}/send-verification-email', [UserController::class, 'sendVerificationEmail']);
         Route::patch('/users/{user}/verify-email', [UserController::class, 'updateEmailVerified']);
         Route::patch('/users/{user}/enable', [UserController::class, 'updateEnabled']);
         Route::put('/users/roles', [UserRoleController::class, 'assignRoles']);

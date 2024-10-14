@@ -90,6 +90,15 @@ class UserPolicy
 
 
 
+    public function sendVerificationEmail(User $user, User $model): Response
+    {
+        if (!$user->can([Permissions::SYSTEM_VIEW_USERS]) || !$user->canAny([Permissions::SYSTEM_CREATE_USERS, Permissions::SYSTEM_EDIT_USERS])) return Response::deny('You are missing the required permission.');
+
+        return Response::allow();
+    }
+
+
+
     public function updateUsername(User $user, User $model): Response
     {
         // Check if domain policy allows username change (only for the user themself)

@@ -228,6 +228,18 @@ class UserController extends Controller
 
 
 
+    public function sendVerificationEmail(Request $request, User $user)
+    {
+        $this->authorize('sendVerificationEmail', $user);
+        
+        if (!$user->hasVerifiedEmail())
+        {
+            $user->sendEmailVerificationNotification();
+        }
+    }
+
+
+
     public function updateEmailVerified(VerifyUserEmailRequest $request, User $user)
     {
         $this->authorize('verifyEmail', $user);
