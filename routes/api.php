@@ -85,7 +85,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         
         // Personal User Routes
         Route::patch('/user/settings', [UserSettingController::class, 'update']);
-        Route::patch('/user/settings/{key}', [UserSettingController::class, 'updateView'])->whereIn('key', ['view_[a-z0-9_]+', 'ui_[a-z0-9_]+']);
+        Route::patch('/user/settings/{key}', [UserSettingController::class, 'updateView'])->whereIn('key', ['view_[a-z0-9_]+', 'ui_[a-z0-9_]+', 'notification_[a-z0-9_]+']);
         Route::patch('/user/username', [AuthUserController::class, 'updateUsername']);
         Route::post('/user/avatar', [AuthUserController::class, 'uploadProfileAvatar']);
         Route::post('/user/banner', [AuthUserController::class, 'uploadProfileBanner']);
