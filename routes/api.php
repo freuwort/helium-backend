@@ -65,12 +65,23 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::patch('/user/password', [AuthUserController::class, 'updatePassword'])
         ->middleware(['verified', 'verified.tfa', 'enabled']);
 
+    Route::prefix('user/two-factor')->middleware(['verified', 'verified.tfa', 'enabled'])->group(function () {
+        Route::put('/default/{method}', [TwoFactorController::class, 'setDefaultTfaMethod']);
+        Route::delete('/destroy/{method}', [TwoFactorController::class, 'destroyTfaMethod']);
+        
+        Route::get('/backup/show', [TwoFactorController::class, 'showTfaBackupCodes']);
+        Route::post('/backup/generate', [TwoFactorController::class, 'generateTfaBackupCodes']);
+
+        Route::put('/totp/setup', [TwoFactorController::class, 'setupTfaTotp']);
+        Route::put('/totp/enable', [TwoFactorController::class, 'enableTfaTotp']);
+    });
+
 
 
     /*//////////////////////////////////////////////////////////////////////////
-    CORS > CSRF > Auth > Email Verified > 2FA Verified > Enabled > Password Changed
+    CORS > CSRF > Auth > Email Verified > 2FA Verified > Enabled > Password Changed > 2FA is set up
     //////////////////////////////////////////////////////////////////////////*/
-    Route::middleware(['verified', 'verified.tfa', 'enabled', 'password.changed'])->group(function () {
+    Route::middleware(['verified', 'verified.tfa', 'enabled', 'password.changed', 'tfa.enabled'])->group(function () {
         
         // Personal User Routes
         Route::patch('/user/settings', [UserSettingController::class, 'update']);
@@ -79,18 +90,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/user/avatar', [AuthUserController::class, 'uploadProfileAvatar']);
         Route::post('/user/banner', [AuthUserController::class, 'uploadProfileBanner']);
         Route::delete('/user', [AuthUserController::class, 'delete']);
-
-        // Two factor
-        Route::prefix('user/two-factor')->group(function () {
-            Route::put('/default/{method}', [TwoFactorController::class, 'setDefaultTfaMethod']);
-            Route::delete('/destroy/{method}', [TwoFactorController::class, 'destroyTfaMethod']);
-            
-            Route::get('/backup/show', [TwoFactorController::class, 'showTfaBackupCodes']);
-            Route::post('/backup/generate', [TwoFactorController::class, 'generateTfaBackupCodes']);
-    
-            Route::put('/totp/setup', [TwoFactorController::class, 'setupTfaTotp']);
-            Route::put('/totp/enable', [TwoFactorController::class, 'enableTfaTotp']);
-        });
 
 
 
