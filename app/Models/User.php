@@ -4,6 +4,7 @@ namespace App\Models;
 
 
 use App\Classes\Permissions\Permissions;
+use App\Notifications\ResetPasswordNotification;
 use App\Traits\HasMedia;
 use App\Traits\HasTwoFactorAuthentication;
 use App\Traits\SyncMany;
@@ -345,4 +346,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $rolePermissions->merge($directPermissions)->unique();
     }
     // END: Misc methods
+
+
+
+    public function sendPasswordResetNotification($token)
+    {
+        $url = config('app.frontend_url')."/reset-password?token=$token&email=$this->email";
+        $this->notify(new ResetPasswordNotification($this, $url));
+    }
 }
