@@ -158,21 +158,21 @@ class User extends Authenticatable implements MustVerifyEmail
         });
     }
 
-    public function scopeWhereCan($query, $permissions)
+    public function scopeWhereCan($query, string $permission)
     {
-        return $query
-        ->where(function ($query) use ($permissions) {
-            return $query
-            ->whereHas('permissions', function ($query) use ($permissions) {
-                return $query
-                ->whereIn('name', [...$permissions, ...Permissions::ADMIN_PERMISSIONS]);
-            })
-            ->orWhereHas('roles', function ($query) use ($permissions) {
-                return $query
-                ->whereHas('permissions', function ($query) use ($permissions) {
-                    return $query
-                    ->whereIn('name', [...$permissions, ...Permissions::ADMIN_PERMISSIONS]);
+        return $query->where(function ($query) use ($permission) {
+            $query->where(function ($query) use ($permission){
+                $query->whereHas('permissions', function ($query) use ($permission) {
+                    $query->where('name', $permission);
+                })
+                ->orWhereHas('roles', function ($query) use ($permission) {
+                    $query->whereHas('permissions', function ($query) use ($permission) {
+                        $query->where('name', $permission);
+                    });
                 });
+            })
+            ->orWhere(function ($query) {
+                $query->whereIsAdmin();
             });
         });
     }
@@ -328,9 +328,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
 
-    public function wantsNotificationsFor($type, $via = 'email'): bool
+    public function wantsNotificationsFor($type, $via = 'mail'): bool|null
     {
-        return $this->getSetting('notification_'.$via.'_'.$type) ?? false;
+        return $this->getSetting('notification_'.$via.'_'.$type);
     }
     // END: Settings
 

@@ -9,25 +9,18 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Notification;
 
-class SendAdministrativeUserVerifiedTheirEmailNotification
+class SendAdministrativeUserVerifiedTheirEmailNotification implements ShouldQueue
 {
-    /**
-     * Create the event listener.
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
-     * Handle the event.
-     */
     public function handle(object $event): void
     {
+        if (!!$event->user->enabled_at) return;
+
         $users = User::query()
         ->whereEmailVerified()
         ->whereEnabled()
-        ->whereCan([Permissions::SYSTEM_ENABLE_USERS])
+        ->whereCan(Permissions::SYSTEM_ACCESS_ADMIN_PANEL)
+        ->whereCan(Permissions::SYSTEM_VIEW_USERS)
+        ->whereCan(Permissions::SYSTEM_ENABLE_USERS)
         ->get();
 
         Notification::send($users, new UserVerifiedTheirEmail($event->user));

@@ -231,9 +231,8 @@ class UserController extends Controller
     public function sendVerificationEmail(Request $request, User $user)
     {
         $this->authorize('sendVerificationEmail', $user);
-        
-        if (!$user->hasVerifiedEmail())
-        {
+
+        if (!$user->hasVerifiedEmail()) {
             $user->sendEmailVerificationNotification();
         }
     }
