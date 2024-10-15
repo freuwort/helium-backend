@@ -16,6 +16,7 @@ use App\Http\Controllers\Form\FormController;
 use App\Http\Controllers\Media\FileController;
 use App\Http\Controllers\Media\DirectoryController;
 use App\Http\Controllers\Media\MediaController;
+use App\Http\Controllers\Notification\NotificationController;
 use App\Http\Controllers\Permission\PermissionController;
 use App\Http\Controllers\Permission\RoleController;
 use App\Http\Controllers\Screen\ScreenController;
@@ -96,6 +97,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // System
         Route::get('/debug', [DebugController::class, 'index']);
         Route::get('/debug/phpinfo', [DebugController::class, 'phpinfo']);
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::patch('/notifications/read', [NotificationController::class, 'markRead']);
+        Route::patch('/notifications/unread', [NotificationController::class, 'markRead']);
 
         // Domain
         Route::patch('/settings', [DomainSettingController::class, 'update']);
