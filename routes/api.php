@@ -99,7 +99,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/debug/phpinfo', [DebugController::class, 'phpinfo']);
         Route::get('/notifications', [NotificationController::class, 'index']);
         Route::patch('/notifications/read', [NotificationController::class, 'markRead']);
-        Route::patch('/notifications/unread', [NotificationController::class, 'markRead']);
+        Route::patch('/notifications/unread', [NotificationController::class, 'markUnread']);
 
         // Domain
         Route::patch('/settings', [DomainSettingController::class, 'update']);
