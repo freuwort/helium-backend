@@ -52,6 +52,18 @@ class UpdateDomainSettingRequest extends FormRequest
             'setup_completed_role_import' => 'nullable|boolean',
             'setup_completed_user_import' => 'nullable|boolean',
             'setup_completed_admin_selection' => 'nullable|boolean',
+
+            // Registration profiles
+            'registration_profiles' => 'nullable|array',
+            'registration_profiles.*.name' => 'required|string|max:255|distinct',
+            'registration_profiles.*.fields' => 'required|array',
+            'registration_profiles.*.fields.*.name' => 'required|string|max:255|distinct',
+            'registration_profiles.*.fields.*.required' => 'required|boolean',
+            'registration_profiles.*.auto_approve' => 'required|boolean',
+            'registration_profiles.*.auto_assign_roles' => 'required|array',
+            'registration_profiles.*.auto_assign_roles.*' => 'required|string|max:255',
+            'registration_profiles.*.compatible_with' => 'required|array',
+            'registration_profiles.*.compatible_with.*' => 'required|string|max:255',
         ];
     }
 }
