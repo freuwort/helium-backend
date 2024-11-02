@@ -14,6 +14,12 @@ enum UnitType {
     OTHER = 'other',
 }
 
+enum AccountingContactType {
+    CUSTOMER = 'customer',
+    SUPPLIER = 'supplier',
+    EMPLOYEE = 'employee',
+}
+
 enum AccountingDocumentStatus {
     DRAFT = 'draft',
     PENDING = 'pending',
@@ -64,12 +70,12 @@ type Currency = {
 }
 
 
-type AccountingDocumentParty = {
+type AccountingContact = {
     id: Number,
     version: Number,
+    type: AccountingContactType,
     name: String,
-    partyable_id: Number | null
-    partyable_type: String | null,
+    user_id: Number | null
     main_address: Address['id'] | null,
     billing_address: Address['id'] | null,
     shipping_address: Address['id'] | null,
@@ -101,8 +107,8 @@ type AccountingDocument = {
     type: AccountingDocumentType,
     status: AccountingDocumentStatus,
 
-    sender: AccountingDocumentParty['id'],
-    recipient: AccountingDocumentParty['id'],
+    sender: AccountingContact['id'],
+    recipient: AccountingContact['id'],
 
     quote_id: String | null,
     order_id: String | null,
