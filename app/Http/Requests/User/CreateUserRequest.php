@@ -19,72 +19,35 @@ class CreateUserRequest extends FormRequest
             // User Model
             'model.username' => ['nullable', 'string', 'max:255', 'unique:users,username'],
             'model.email' => ['nullable', 'string', 'email', 'max:255', 'unique:users,email'],
+            'model.phone' => ['nullable', 'string', 'max:255'],
 
-            // User Name
-            'user_name.salutation' => ['nullable', 'string', 'max:255'],
-            'user_name.prefix' => ['nullable', 'string', 'max:255'],
-            'user_name.firstname' => ['nullable', 'string', 'max:255'],
-            'user_name.middlename' => ['nullable', 'string', 'max:255'],
-            'user_name.lastname' => ['nullable', 'string', 'max:255'],
-            'user_name.suffix' => ['nullable', 'string', 'max:255'],
-            'user_name.legalname' => ['nullable', 'string', 'max:255'],
-            'user_name.nickname' => ['nullable', 'string', 'max:255'],
+            // User Info
+            'user_info.salutation' => ['nullable', 'string', 'max:255'],
+            'user_info.prefix' => ['nullable', 'string', 'max:255'],
+            'user_info.firstname' => ['nullable', 'string', 'max:255'],
+            'user_info.middlename' => ['nullable', 'string', 'max:255'],
+            'user_info.lastname' => ['nullable', 'string', 'max:255'],
+            'user_info.suffix' => ['nullable', 'string', 'max:255'],
+            'user_info.legalname' => ['nullable', 'string', 'max:255'],
+            'user_info.nickname' => ['nullable', 'string', 'max:255'],
+            'user_info.organisation' => ['nullable', 'string', 'max:255'],
+            'user_info.department' => ['nullable', 'string', 'max:255'],
+            'user_info.job_title' => ['nullable', 'string', 'max:255'],
+            'user_info.customer_id' => ['nullable', 'string', 'max:255'],
+            'user_info.employee_id' => ['nullable', 'string', 'max:255'],
+            'user_info.member_id' => ['nullable', 'string', 'max:255'],
+            'user_info.notes' => ['nullable', 'string', 'max:1023'],
 
-            // User Company
-            'user_company.company' => ['nullable', 'string', 'max:255'],
-            'user_company.department' => ['nullable', 'string', 'max:255'],
-            'user_company.title' => ['nullable', 'string', 'max:255'],
-
-            // User Identifiers
-            'identifiers' => ['nullable', 'array'],
-            'identifiers.*.type' => ['nullable', 'string', 'max:255'],
-            'identifiers.*.label' => ['nullable', 'string', 'max:255'],
-            'identifiers.*.value' => ['nullable', 'string', 'max:255'],
-
-            // User Addresses
-            'addresses' => ['nullable', 'array'],
-            'addresses.*.type' => ['required', 'string', 'max:255'],
-            'addresses.*.address_line_1' => ['nullable', 'string', 'max:255'],
-            'addresses.*.address_line_2' => ['nullable', 'string', 'max:255'],
-            'addresses.*.city' => ['nullable', 'string', 'max:255'],
-            'addresses.*.state' => ['nullable', 'string', 'max:255'],
-            'addresses.*.postal_code' => ['nullable', 'string', 'max:255'],
-            'addresses.*.country_code' => ['nullable', 'exists:countries,code'],
-            'addresses.*.latitude' => ['nullable', 'numeric'],
-            'addresses.*.longitude' => ['nullable', 'numeric'],
-            'addresses.*.notes' => ['nullable', 'string', 'max:255'],
-
-            // User Bank Connections
-            'bank_connections' => ['nullable', 'array'],
-            'bank_connections.*.type' => ['required', 'string', 'max:255'],
-            'bank_connections.*.bank_name' => ['nullable', 'string', 'max:255'],
-            'bank_connections.*.branch' => ['nullable', 'string', 'max:255'],
-            'bank_connections.*.account_name' => ['nullable', 'string', 'max:255'],
-            'bank_connections.*.account_number' => ['nullable', 'string', 'max:255'],
-            'bank_connections.*.swift_code' => ['nullable', 'string', 'max:255'],
-            'bank_connections.*.iban' => ['nullable', 'string', 'max:255'],
-
-            // User Emails
-            'emails' => ['nullable', 'array'],
-            'emails.*.type' => ['required', 'string', 'max:255'],
-            'emails.*.email' => ['required', 'string', 'email', 'max:255'],
-
-            // User Phonenumbers
-            'phonenumbers' => ['nullable', 'array'],
-            'phonenumbers.*.type' => ['required', 'string', 'max:255'],
-            'phonenumbers.*.number' => ['required', 'string', 'max:255'],
-
-            // User Dates
-            'dates' => ['nullable', 'array'],
-            'dates.*.type' => ['required', 'string', 'max:255'],
-            'dates.*.date' => ['required', 'date'],
-            'dates.*.ignore_year' => ['nullable', 'boolean'],
-            'dates.*.repeats_annually' => ['nullable', 'boolean'],
-
-            // User Links
-            'links' => ['nullable', 'array'],
-            'links.*.name' => ['required', 'string', 'max:255'],
-            'links.*.url' => ['required', 'string', 'max:255'],
+            // Main Address
+            'user_info.main_address.address_line_1' => ['nullable', 'string', 'max:255'],
+            'user_info.main_address.address_line_2' => ['nullable', 'string', 'max:255'],
+            'user_info.main_address.city' => ['nullable', 'string', 'max:255'],
+            'user_info.main_address.state' => ['nullable', 'string', 'max:255'],
+            'user_info.main_address.postal_code' => ['nullable', 'string', 'max:255'],
+            'user_info.main_address.country_code' => ['nullable', 'exists:countries,code'],
+            'user_info.main_address.latitude' => ['nullable', 'numeric'],
+            'user_info.main_address.longitude' => ['nullable', 'numeric'],
+            'user_info.main_address.notes' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

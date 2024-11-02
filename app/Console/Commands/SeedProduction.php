@@ -4,9 +4,11 @@ namespace App\Console\Commands;
 
 use App\Classes\Data\Countries;
 use App\Classes\Data\Currencies;
+use App\Classes\Data\Units;
 use App\Classes\Permissions\Permissions;
 use App\Models\Country;
 use App\Models\Currency;
+use App\Models\Unit;
 use Illuminate\Console\Command;
 use Spatie\Permission\Models\Permission;
 
@@ -19,6 +21,12 @@ class SeedProduction extends Command
     {
         $this->line('');
         $this->line('  <fg=white;bg=blue> INFO </> Seeding for production.');
+        $this->line('');
+
+        $timestamp = now();
+        $this->line('  <fg=yellow;bg=default>RUNNING</> Seeding Units.');
+        $this->seedUnits();
+        $this->line('  <fg=green;bg=default>DONE</>    Seeding Units. ('.now()->diffInMilliseconds($timestamp).' ms)');
         $this->line('');
 
         $timestamp = now();
@@ -38,6 +46,13 @@ class SeedProduction extends Command
         $this->seedPermissions();
         $this->line('  <fg=green;bg=default>DONE</>    Seeding Permissions. ('.now()->diffInMilliseconds($timestamp).' ms)');
         $this->line('');
+    }
+
+    private function seedUnits()
+    {
+        foreach (Units::get() as $unit) {
+            Unit::updateOrCreate([ 'code' => $unit['code'] ], $unit);
+        }
     }
 
     private function seedCountries()

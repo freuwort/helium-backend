@@ -20,16 +20,4 @@ class Country extends Model
         'alpha_3',
         'name',
     ];
-
-
-
-    public function prices()
-    {
-        return $this->morphedByMany(Price::class, 'model', 'model_has_countries');
-    }
-
-    public function taxes()
-    {
-        return $this->morphedByMany(Tax::class, 'model', 'model_has_countries');
-    }
 }

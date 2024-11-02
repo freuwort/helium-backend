@@ -13,11 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('legal_details', function (Blueprint $table) {
-            $table->id();
-            $table->nullableMorphs('governable');
-            $table->string('type')->nullable();
-            $table->text('value')->nullable();
+        Schema::create('countries', function (Blueprint $table) {
+            $table->string('code')->primary();
+            $table->string('alpha_3')->nullable();
+            $table->string('name')->nullable();
+
+            $table->index('code');
+            $table->index('name');
         });
     }
 
@@ -28,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('legal_details');
+        Schema::dropIfExists('countries');
     }
 };

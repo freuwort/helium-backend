@@ -50,7 +50,6 @@ class InitiateSuperUser extends Command
     private function createSuperUser()
     {
         $superuser = User::create([
-            'name' => 'Super User',
             'username' => 'superuser',
             'email' => env('SUPER_USER_EMAIL'),
             'password' => Hash::make(env('SUPER_USER_PASSWORD')),
@@ -58,8 +57,8 @@ class InitiateSuperUser extends Command
             'enabled_at' => now(),
         ]);
 
-        $superuser->user_company()->create([]);
-        $superuser->user_name()->create(['firstname' => 'Super User']);
         $superuser->givePermissionTo(Permissions::SYSTEM_SUPER_ADMIN);
+        
+        $superuser->user_info()->create(['firstname' => 'Super', 'lastname' => 'User']);
     }
 }

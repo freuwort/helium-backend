@@ -13,11 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('links', function (Blueprint $table) {
-            $table->id();
-            $table->nullableMorphs('linkable');
-            $table->string('name')->nullable();
-            $table->string('url');
+        Schema::create('currencies', function (Blueprint $table) {
+            $table->string('code')->primary();
+            $table->string('name');
+            $table->string('symbol');
+            $table->integer('decimal_places');
+
+            $table->index('code');
+            $table->index('name');
         });
     }
 
@@ -28,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('links');
+        Schema::dropIfExists('currencies');
     }
 };

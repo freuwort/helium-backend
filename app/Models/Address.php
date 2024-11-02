@@ -11,7 +11,6 @@ class Address extends Model
     use HasFactory;
 
     protected $fillable = [
-        'type',
         'address_line_1',
         'address_line_2',
         'city',
@@ -24,11 +23,6 @@ class Address extends Model
     ];
 
 
-
-    public function addressable(): MorphTo
-    {
-        return $this->morphTo();
-    }
 
     public function country()
     {

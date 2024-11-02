@@ -23,13 +23,14 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasRoles, HasApiTokens, HasFactory, HasTwoFactorAuthentication, HasMedia, Notifiable, SyncMany, SoftDeletes;
 
     protected $fillable = [
-        'name',
         'username',
         'email',
+        'phone',
         'password',
         'requires_password_change',
         'requires_two_factor',
         'email_verified_at',
+        'phone_verified_at',
         'enabled_at',
         'deleted_at',
     ];
@@ -41,6 +42,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'phone_verified_at' => 'datetime',
         'enabled_at' => 'datetime',
         'deleted_at' => 'datetime',
         'password' => 'hashed',
@@ -49,8 +51,7 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     protected $with = [
-        'user_name',
-        'user_company',
+        'user_info',
         'two_factor_methods',
     ];
 
@@ -67,54 +68,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->morphMany(TwoFactorMethod::class, 'authenticatable');
     }
 
-    public function user_name()
+    public function user_info()
     {
-        return $this->hasOne(UserName::class);
-    }
-
-    public function user_company()
-    {
-        return $this->hasOne(UserCompany::class);
+        return $this->hasOne(UserInfo::class);
     }
 
     public function raw_settings()
     {
         return $this->hasMany(UserSetting::class);
-    }
-
-    public function identifiers()
-    {
-        return $this->morphMany(Identifier::class, 'identifiable');
-    }
-
-    public function addresses(): MorphMany
-    {
-        return $this->morphMany(Address::class, 'addressable');
-    }
-
-    public function bank_connections(): MorphMany
-    {
-        return $this->morphMany(BankConnection::class, 'bankable');
-    }
-
-    public function emails(): MorphMany
-    {
-        return $this->morphMany(Email::class, 'emailable');
-    }
-
-    public function phonenumbers(): MorphMany
-    {
-        return $this->morphMany(Phonenumber::class, 'phoneable');
-    }
-
-    public function dates(): MorphMany
-    {
-        return $this->morphMany(Date::class, 'dateable');
-    }
-
-    public function links(): MorphMany
-    {
-        return $this->morphMany(Link::class, 'linkable');
     }
     // END: Relationships
 

@@ -21,11 +21,4 @@ class Currency extends Model
         'symbol',
         'decimal_places',
     ];
-
-
-
-    public function prices()
-    {
-        return $this->hasMany(Price::class);
-    }
 }

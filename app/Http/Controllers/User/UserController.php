@@ -41,9 +41,11 @@ class UserController extends Controller
         {
             $query->whereFuzzy(function ($query) use ($request) {
                 $query
-                    ->orWhereFuzzy('name', $request->filter_search)
                     ->orWhereFuzzy('username', $request->filter_search)
                     ->orWhereFuzzy('email', $request->filter_search);
+            })
+            ->orWhereHas('user_info', function ($query) use ($request) {
+                $query->whereFuzzy('name', $request->filter_search);
             });
         }
 
@@ -77,9 +79,11 @@ class UserController extends Controller
         {
             $query->whereFuzzy(function ($query) use ($request) {
                 $query
-                    ->orWhereFuzzy('name', $request->filter_search)
                     ->orWhereFuzzy('username', $request->filter_search)
                     ->orWhereFuzzy('email', $request->filter_search);
+            })
+            ->orWhereHas('user_info', function ($query) use ($request) {
+                $query->whereFuzzy('name', $request->filter_search);
             });
         }
 
@@ -145,16 +149,8 @@ class UserController extends Controller
         // Create model
         $user = User::create($request->validated('model'));
 
-        // Sync model related data
-        $user->user_name()->updateOrCreate([],      $request->validated('user_name'));
-        $user->user_company()->updateOrCreate([],   $request->validated('user_company'));
-        $user->syncMany(Identifier::class,          $request->validated('identifiers'));
-        $user->syncMany(Address::class,             $request->validated('addresses'));
-        $user->syncMany(BankConnection::class,      $request->validated('bank_connections'), 'bank_connections');
-        $user->syncMany(Email::class,               $request->validated('emails'));
-        $user->syncMany(Phonenumber::class,         $request->validated('phonenumbers'));
-        $user->syncMany(Date::class,                $request->validated('dates'));
-        $user->syncMany(Link::class,                $request->validated('links'));
+        $user->user_info()->updateOrCreate([], $request->validated('user_info'));
+        $user->user_info()->main_address()->updateOrCreate([], $request->validated('user_info')['main_address']);
 
         return EditorUserResource::make($user);
     }
@@ -168,10 +164,7 @@ class UserController extends Controller
         foreach ($request->items as $item)
         {
             $user = User::create($item);
-
-            $user->user_name()->updateOrCreate([], $item['user_name']);
-            $user->user_company()->updateOrCreate([], $item['user_company']);
-
+            $user->user_info()->updateOrCreate([], $item['user_info']);
             $user->syncRoles($item['roles']);
         }
     }
@@ -186,15 +179,7 @@ class UserController extends Controller
         $user->update($request->validated('model'));
 
         // Sync model related data
-        $user->user_name()->updateOrCreate([],      $request->validated('user_name'));
-        $user->user_company()->updateOrCreate([],   $request->validated('user_company'));
-        $user->syncMany(Identifier::class,          $request->validated('identifiers'));
-        $user->syncMany(Address::class,             $request->validated('addresses'));
-        $user->syncMany(BankConnection::class,      $request->validated('bank_connections'), 'bank_connections');
-        $user->syncMany(Email::class,               $request->validated('emails'));
-        $user->syncMany(Phonenumber::class,         $request->validated('phonenumbers'));
-        $user->syncMany(Date::class,                $request->validated('dates'));
-        $user->syncMany(Link::class,                $request->validated('links'));
+        $user->user_info()->updateOrCreate([], $request->validated('user_info'));
 
         return EditorUserResource::make($user->fresh());
     }

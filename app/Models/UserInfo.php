@@ -5,13 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class UserName extends Model
+class UserInfo extends Model
 {
     use HasFactory;
 
     public $timestamps = false;
+    protected $table = 'user_info';
 
     protected $fillable = [
+        'name',
         'salutation',
         'prefix',
         'firstname',
@@ -20,6 +22,13 @@ class UserName extends Model
         'suffix',
         'nickname',
         'legalname',
+        'organisation',
+        'department',
+        'job_title',
+        'customer_id',
+        'employee_id',
+        'member_id',
+        'notes',
     ];
 
 
@@ -27,7 +36,7 @@ class UserName extends Model
     protected static function booted(): void
     {
         static::saving(function ($model) {
-            $model->updateParentName();
+            $model->updateName();
         });
     }
 
@@ -37,6 +46,21 @@ class UserName extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function main_address()
+    {
+        return $this->belongsTo(Address::class, 'main_address_id');
+    }
+
+    public function billing_address()
+    {
+        return $this->belongsTo(Address::class, 'billing_address_id');
+    }
+
+    public function shipping_address()
+    {
+        return $this->belongsTo(Address::class, 'shipping_address_id');
     }
     // END: Relationships
 
@@ -56,12 +80,10 @@ class UserName extends Model
 
 
 
-    // START: Update parent name
-    public function updateParentName()
+    public function updateName($name = null)
     {
-        $this->user()->update([
-            'name' => $this->fullname_or_nickname,
+        $this->update([
+            'name' => $name ?: $this->fullname_or_nickname,
         ]);
     }
-    // END: Update parent name
 }
