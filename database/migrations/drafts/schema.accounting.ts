@@ -72,10 +72,10 @@ type Currency = {
 
 type AccountingContact = {
     id: Number,
-    version: Number,
     type: AccountingContactType,
     name: String,
-    user_id: Number | null
+    sync_id: Number | null
+    onwer_id: Number | null
     main_address: Address['id'] | null,
     billing_address: Address['id'] | null,
     shipping_address: Address['id'] | null,
@@ -85,13 +85,14 @@ type AccountingContact = {
     supplier_id: String | null,
     employee_id: String | null,
     contact_person: String | null,
+    version: Number,
+    created_at: Date,
+    updated_at: Date,
 }
 
 type AccountingDocumentItem = {
     id: Number,
-    document_id: Number,
-    itemable_id: Number | null,
-    itemable_type: String | null,
+    accounting_document_id: Number,
     type: AccountingDocumentItemType,
     description: String,
     quantity: Number,
@@ -109,6 +110,7 @@ type AccountingDocument = {
 
     sender: AccountingContact['id'],
     recipient: AccountingContact['id'],
+    onwer_id: Number | null,
 
     quote_id: String | null,
     order_id: String | null,
@@ -132,7 +134,7 @@ type AccountingDocument = {
     due_date: Date | null,
     paid_date: Date | null,
     delivery_date: Date | null,
-    shipment_date: Date | null,
+    shipping_date: Date | null,
 
     created_at: Date,
     updated_at: Date,
@@ -175,6 +177,7 @@ const invoice: Invoice = {
     
     sender: 1,
     recipient: 2,
+    onwer_id: null,
     
     quote_id: null,
     order_id: null,
@@ -189,9 +192,7 @@ const invoice: Invoice = {
     items: [
         {
             id: 1,
-            document_id: 1,
-            itemable_id: null,
-            itemable_type: null,
+            accounting_document_id: 1,
             type: AccountingDocumentItemType.PRODUCT,
             description: 'Product 1',
             quantity: 1,
@@ -213,7 +214,7 @@ const invoice: Invoice = {
     due_date: new Date('2021-01-31'),
     paid_date: null,
     delivery_date: new Date('2021-01-01'),
-    shipment_date: null,
+    shipping_date: null,
 
     created_at: new Date('2021-01-01T00:00:00Z'),
     updated_at: new Date('2021-01-01T00:00:00Z'),
