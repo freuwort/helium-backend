@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Events\TwoFactorMethodEnabled;
 use App\Listeners\GenerateTwoFactorBackupCodes;
+use App\Listeners\LogSuccessfulLogin;
 use App\Listeners\SendAdministrativeUserVerifiedTheirEmailNotification;
 use App\Listeners\SetDefaultTwoFactorMethod;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -21,6 +23,9 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+        Login::class => [
+            LogSuccessfulLogin::class,
         ],
         Verified::class => [
             SendAdministrativeUserVerifiedTheirEmailNotification::class,

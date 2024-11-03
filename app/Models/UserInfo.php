@@ -82,8 +82,7 @@ class UserInfo extends Model
 
     public function updateName($name = null)
     {
-        $this->update([
-            'name' => $name ?: $this->fullname_or_nickname,
-        ]);
+        $this->name = $name ?: $this->fullname_or_nickname;
+        $this->saveQuietly();
     }
 }

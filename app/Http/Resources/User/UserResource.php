@@ -52,7 +52,10 @@ class UserResource extends JsonResource
             
             'email_verified_at' => $this->email_verified_at,
             'phone_verified_at' => $this->phone_verified_at,
+            'last_login_at' => $this->last_login_at,
             'enabled_at' => $this->enabled_at,
+            'blocked_at' => $this->blocked_at,
+            'block_reason' => $this->block_reason,
             'deleted_at' => $this->deleted_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

@@ -6,23 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UploadProfileMediaRequest;
 use App\Http\Requests\User\DestroyManyUserRequest;
 use App\Http\Requests\User\CreateUserRequest;
-use App\Http\Requests\User\EnableUserRequest;
 use App\Http\Requests\User\ImportUsersRequest;
-use App\Http\Requests\User\RequirePasswordChangeRequest;
-use App\Http\Requests\User\RequireTwoFactorRequest;
-use App\Http\Requests\User\UpdateUserPasswordRequest;
 use App\Http\Requests\User\UpdateUserRequest;
-use App\Http\Requests\User\VerifyUserEmailRequest;
 use App\Http\Resources\User\EditorUserResource;
 use App\Http\Resources\User\BasicUserResource;
 use App\Http\Resources\User\UserResource;
-use App\Models\Address;
-use App\Models\BankConnection;
-use App\Models\Date;
-use App\Models\Email;
-use App\Models\Identifier;
-use App\Models\Link;
-use App\Models\Phonenumber;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -74,34 +62,37 @@ class UserController extends Controller
         // Base query
         $query = User::with(['media', 'roles', 'permissions', 'roles.permissions']);
 
+        // Join user_info
+        $query->join('user_info', 'users.id', '=', 'user_info.user_id');
+        $query->select('users.*', 'user_info.name', 'user_info.customer_id', 'user_info.employee_id', 'user_info.member_id');
+
         // Search
         if ($request->filter_search)
         {
             $query->whereFuzzy(function ($query) use ($request) {
                 $query
                     ->orWhereFuzzy('username', $request->filter_search)
-                    ->orWhereFuzzy('email', $request->filter_search);
-            })
-            ->orWhereHas('user_info', function ($query) use ($request) {
-                $query->whereFuzzy('name', $request->filter_search);
+                    ->orWhereFuzzy('email', $request->filter_search)
+                    ->orWhereFuzzy('phone', $request->filter_search)
+                    ->orWhereFuzzy('name', $request->filter_search)
+                    ->orWhereFuzzy('customer_id', $request->filter_search)
+                    ->orWhereFuzzy('employee_id', $request->filter_search)
+                    ->orWhereFuzzy('member_id', $request->filter_search);
             });
         }
 
         // Filter
-        if ($request->filter_exclude)
-        {
+        if ($request->filter_exclude) {
             $query->whereNotIn('id', $request->filter_exclude);
         }
 
-        if ($request->filter_roles)
-        {
+        if ($request->filter_roles) {
             $query->whereHas('roles', function ($query) use ($request) {
                 $query->whereIn('name', $request->filter_roles);
             });
         }
 
-        if ($request->filter_permission_levels)
-        {
+        if ($request->filter_permission_levels) {
             $query->where(function ($query) use ($request) {
                 if (in_array('admin', $request->filter_permission_levels)) $query->orWhere(fn ($query) => $query->whereIsAdmin());
                 if (in_array('elevated', $request->filter_permission_levels)) $query->orWhere(fn ($query) => $query->whereHasElevatedPermissions());
@@ -110,9 +101,15 @@ class UserController extends Controller
 
         if ($request->filter_email_verified === 'pending') $query->whereEmailVerified(false);
         if ($request->filter_email_verified === 'active') $query->whereEmailVerified(true);
+
+        if ($request->filter_phone_verified === 'pending') $query->wherePhoneVerified(false);
+        if ($request->filter_phone_verified === 'active') $query->wherePhoneVerified(true);
         
         if ($request->filter_enabled === 'pending') $query->whereEnabled(false);
         if ($request->filter_enabled === 'active') $query->whereEnabled(true);
+
+        if ($request->filter_blocked === 'inactive') $query->whereBlocked(false);
+        if ($request->filter_blocked === 'active') $query->whereBlocked(true);
 
         if ($request->filter_tfa_enabled === 'inactive') $query->whereTfaEnabled(false);
         if ($request->filter_tfa_enabled === 'active') $query->whereTfaEnabled(true);
@@ -150,7 +147,6 @@ class UserController extends Controller
         $user = User::create($request->validated('model'));
 
         $user->user_info()->updateOrCreate([], $request->validated('user_info'));
-        $user->user_info()->main_address()->updateOrCreate([], $request->validated('user_info')['main_address']);
 
         return EditorUserResource::make($user);
     }
@@ -186,29 +182,41 @@ class UserController extends Controller
 
 
 
-    public function updatePassword(UpdateUserPasswordRequest $request, User $user)
+    public function updatePassword(Request $request, User $user)
     {
-        $this->authorize('updatePassword', $user);
+        $this->authorize('adminAction', $user);
+        
+        $request->validate([
+            'password' => ['required', 'string', 'min:8'],
+        ]);
 
-        $user->updatePassword($request->validated('password'));
+        $user->updatePassword($request->password);
     }
 
 
 
-    public function requirePasswordChange(RequirePasswordChangeRequest $request, User $user)
+    public function requirePasswordChange(Request $request, User $user)
     {
-        $this->authorize('requirePasswordChange', $user);
+        $this->authorize('adminAction', $user);
+        
+        $request->validate([
+            'requires_password_change' => ['required', 'bool'],
+        ]);
 
-        $user->update(['requires_password_change' => $request->validated('requires_password_change')]);
+        $user->update(['requires_password_change' => $request->requires_password_change]);
     }
 
 
 
-    public function requireTwoFactor(RequireTwoFactorRequest $request, User $user)
+    public function requireTwoFactor(Request $request, User $user)
     {
-        $this->authorize('requireTwoFactor', $user);
+        $this->authorize('adminAction', $user);
+        
+        $request->validate([
+            'requires_two_factor' => ['required', 'bool'],
+        ]);
 
-        $user->update(['requires_two_factor' => $request->validated('requires_two_factor')]);
+        $user->update(['requires_two_factor' => $request->requires_two_factor]);
     }
 
 
@@ -224,20 +232,55 @@ class UserController extends Controller
 
 
 
-    public function updateEmailVerified(VerifyUserEmailRequest $request, User $user)
+    public function updateEmailVerified(Request $request, User $user)
     {
-        $this->authorize('verifyEmail', $user);
+        $this->authorize('adminAction', $user);
+        
+        $request->validate([
+            'email_verified' => ['required', 'bool'],
+        ]);
 
-        $user->verifyEmail($request->validated('email_verified'));
+        $user->verifyEmail($request->email_verified);
     }
 
 
 
-    public function updateEnabled(EnableUserRequest $request, User $user)
+    public function updatePhoneVerified(Request $request, User $user)
+    {
+        $this->authorize('adminAction', $user);
+        
+        $request->validate([
+            'phone_verified' => ['required', 'bool'],
+        ]);
+
+        $user->verifyPhone($request->phone_verified);
+    }
+
+
+
+    public function updateEnabled(Request $request, User $user)
     {
         $this->authorize('enable', $user);
 
-        $user->enable($request->validated('enabled'));
+        $request->validate([
+            'enabled' => ['required', 'bool'],
+        ]);
+
+        $user->enable($request->enabled);
+    }
+
+
+
+    public function updateBlocked(Request $request, User $user)
+    {
+        $this->authorize('enable', $user);
+        
+        $request->validate([
+            'blocked' => ['required', 'bool'],
+            'block_reason' => ['nullable', 'string'],
+        ]);
+
+        $user->block($request->blocked, $request->block_reason);
     }
 
 

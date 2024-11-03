@@ -22,7 +22,10 @@ return new class extends Migration
             $table->boolean('requires_two_factor')->default(false);
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('phone_verified_at')->nullable();
+            $table->timestamp('last_login_at')->nullable();
             $table->timestamp('enabled_at')->nullable();
+            $table->timestamp('blocked_at')->nullable();
+            $table->string('block_reason')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });

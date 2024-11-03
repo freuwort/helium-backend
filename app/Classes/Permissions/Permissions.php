@@ -33,12 +33,6 @@ class Permissions
     public const SYSTEM_DELETE_USERS = 'system.delete.users';
     public const SYSTEM_ENABLE_USERS = 'system.enable.users';
 
-    // Companies
-    public const SYSTEM_VIEW_COMPANIES = 'system.view.companies';
-    public const SYSTEM_CREATE_COMPANIES = 'system.create.companies';
-    public const SYSTEM_EDIT_COMPANIES = 'system.edit.companies';
-    public const SYSTEM_DELETE_COMPANIES = 'system.delete.companies';
-
     // Media
     public const SYSTEM_ACCESS_MEDIA = 'system.access.media';
 
@@ -115,12 +109,6 @@ class Permissions
                     ['name' => self::SYSTEM_EDIT_USERS, 'label' => 'Benutzer bearbeiten', 'description' => 'Der Benutzer kann andere Benutzer bearbeiten.'],
                     ['name' => self::SYSTEM_DELETE_USERS, 'label' => 'Benutzer löschen', 'description' => 'Der Benutzer kann andere Benutzer löschen.'],
                     ['name' => self::SYSTEM_ENABLE_USERS, 'label' => 'Benutzer aktivieren', 'description' => 'Der Benutzer kann andere Benutzer aktivieren/deaktivieren.'],
-                ],
-                [
-                    ['name' => self::SYSTEM_VIEW_COMPANIES, 'label' => 'Firmen anzeigen', 'description' => 'Der Benutzer kann die Firmen ansehen.'],
-                    ['name' => self::SYSTEM_CREATE_COMPANIES, 'label' => 'Firmen erstellen', 'description' => 'Der Benutzer kann Firmen erstellen.'],
-                    ['name' => self::SYSTEM_EDIT_COMPANIES, 'label' => 'Firmen bearbeiten', 'description' => 'Der Benutzer kann Firmen bearbeiten.'],
-                    ['name' => self::SYSTEM_DELETE_COMPANIES, 'label' => 'Firmen löschen', 'description' => 'Der Benutzer kann Firmen löschen.'],
                 ],
                 [
                     ['name' => self::SYSTEM_ACCESS_MEDIA, 'label' => 'Medien Zugriff', 'description' => 'Der Benutzer kann auf die Medien zugreifen.'],

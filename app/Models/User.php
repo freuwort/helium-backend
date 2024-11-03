@@ -31,7 +31,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'requires_two_factor',
         'email_verified_at',
         'phone_verified_at',
+        'last_login_at',
         'enabled_at',
+        'blocked_at',
+        'block_reason',
         'deleted_at',
     ];
 
@@ -82,8 +85,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
     // START: Scopes
-    public function scopeWhereIsAdmin($query)
-    {
+    public function scopeWhereIsAdmin($query) {
         return $query
         ->where(function ($query) {
             return $query
@@ -101,8 +103,7 @@ class User extends Authenticatable implements MustVerifyEmail
         });
     }
 
-    public function scopeWhereHasElevatedPermissions($query)
-    {
+    public function scopeWhereHasElevatedPermissions($query) {
         return $query
         ->where(function ($query) {
             return $query
@@ -120,8 +121,7 @@ class User extends Authenticatable implements MustVerifyEmail
         });
     }
 
-    public function scopeWhereCan($query, string $permission)
-    {
+    public function scopeWhereCan($query, string $permission) {
         return $query->where(function ($query) use ($permission) {
             $query->where(function ($query) use ($permission){
                 $query->whereHas('permissions', function ($query) use ($permission) {
@@ -139,20 +139,27 @@ class User extends Authenticatable implements MustVerifyEmail
         });
     }
 
-    public function scopeWhereEmailVerified($query, $value = true)
-    {
+    public function scopeWhereEmailVerified($query, $value = true) {
         if ($value) return $query->whereNotNull('email_verified_at');
         return $query->whereNull('email_verified_at');
     }
 
-    public function scopeWhereEnabled($query, $value = true)
-    {
+    public function scopeWherePhoneVerified($query, $value = true) {
+        if ($value) return $query->whereNotNull('phone_verified_at');
+        return $query->whereNull('phone_verified_at');
+    }
+
+    public function scopeWhereEnabled($query, $value = true) {
         if ($value) return $query->whereNotNull('enabled_at');
         return $query->whereNull('enabled_at');
     }
 
-    public function scopeWhereTfaEnabled($query, $value = true)
-    {
+    public function scopeWhereBlocked($query, $value = true) {
+        if ($value) return $query->whereNotNull('blocked_at');
+        return $query->whereNull('blocked_at');
+    }
+
+    public function scopeWhereTfaEnabled($query, $value = true) {
         if ($value) return $query->whereHas('two_factor_methods', function ($query) {
             return $query->where('enabled', true);
         });
@@ -166,30 +173,23 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
     // START: Attributes
-    public function getSettingsAttribute()
-    {
-        return $this->raw_settings->mapWithKeys(function ($item) {
-            return [$item['key'] => $item['value']];
-        });
+    public function getSettingsAttribute() {
+        return $this->raw_settings->mapWithKeys(fn ($item) => [$item['key'] => $item['value']]);
     }
 
-    public function getIsAdminAttribute(): bool
-    {
+    public function getIsAdminAttribute(): bool {
         return Permissions::partOfAdmin($this->getAllPermissionNames());
     }
 
-    public function getHasForbiddenPermissionsAttribute(): bool
-    {
+    public function getHasForbiddenPermissionsAttribute(): bool {
         return Permissions::partOfForbidden($this->getAllPermissionNames());
     }
 
-    public function getHasElevatedPermissionsAttribute(): bool
-    {
+    public function getHasElevatedPermissionsAttribute(): bool {
         return Permissions::partOfElevated($this->getAllPermissionNames());
     }
 
-    public function getHasTfaEnabledAttribute(): bool
-    {
+    public function getHasTfaEnabledAttribute(): bool {
         return $this->two_factor_methods->filter(fn ($e) => $e->enabled)->isNotEmpty();
     }
     // END: Attributes
@@ -202,8 +202,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return url(route('default.image', [$type, $this->username ?? 'Unknown']));
     }
     // END: Profile media
-
-
 
     /**
      * Update the user's password. The password is hashed automatically.
@@ -218,8 +216,6 @@ class User extends Authenticatable implements MustVerifyEmail
         ]);
     }
 
-
-
     /**
      * Verify the user's email.
      *
@@ -233,7 +229,18 @@ class User extends Authenticatable implements MustVerifyEmail
         ]);
     }
 
-
+    /**
+     * Verify the user's phone.
+     * 
+     * @param  bool  $verified
+     * @return void
+     */
+    public function verifyPhone(bool $verified = true): void
+    {
+        $this->update([
+            'phone_verified_at' => $verified ? now() : null
+        ]);
+    }
 
     /**
      * Enable the user.
@@ -245,6 +252,21 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->update([
             'enabled_at' => $enabled ? now() : null
+        ]);
+    }
+
+    /**
+     * Block the user.
+     *
+     * @param  bool  $blocked
+     * @param  string|null  $reason
+     * @return void
+     */
+    public function block(bool $blocked = true, string $reason = null): void
+    {
+        $this->update([
+            'blocked_at' => $blocked ? now() : null,
+            'block_reason' => $blocked ? $reason : null,
         ]);
     }
 

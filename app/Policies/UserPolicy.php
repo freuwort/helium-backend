@@ -112,27 +112,7 @@ class UserPolicy
 
 
 
-    public function updatePassword(User $user, User $model)
-    {
-        return $this->checkAdministrativeAction($user, $model);
-    }
-
-    public function requirePasswordChange(User $user, User $model)
-    {
-        return $this->checkAdministrativeAction($user, $model);
-    }
-
-    public function requireTwoFactor(User $user, User $model)
-    {
-        return $this->checkAdministrativeAction($user, $model);
-    }
-
-    public function verifyEmail(User $user, User $model)
-    {
-        return $this->checkAdministrativeAction($user, $model);
-    }
-
-    private function checkAdministrativeAction(User $user, User $model): Response
+    public function adminAction(User $user, User $model): Response
     {
         // Permission check
         if (!$user->canAny([Permissions::ADMIN_PERMISSIONS])) return Response::deny('You are missing the required permission.');

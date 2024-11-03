@@ -3,7 +3,6 @@
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\UserController as AuthUserController;
 use App\Http\Controllers\Auth\UserSettingController;
-use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\Content\CategoryController;
 use App\Http\Controllers\Content\ContentPostController;
 use App\Http\Controllers\Content\ContentSpaceController;
@@ -127,17 +126,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/users/{user}/require-two-factor', [UserController::class, 'requireTwoFactor']);
         Route::post('/users/{user}/send-verification-email', [UserController::class, 'sendVerificationEmail']);
         Route::patch('/users/{user}/verify-email', [UserController::class, 'updateEmailVerified']);
+        Route::patch('/users/{user}/verify-phone', [UserController::class, 'updatePhoneVerified']);
         Route::patch('/users/{user}/enable', [UserController::class, 'updateEnabled']);
+        Route::patch('/users/{user}/block', [UserController::class, 'updateBlocked']);
         Route::put('/users/roles', [UserRoleController::class, 'assignRoles']);
         Route::delete('/users/roles', [UserRoleController::class, 'revokeRoles']);
         Route::delete('/users', [UserController::class, 'destroyMany']);
         Route::resource('/users', UserController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
-    
-        // Companies
-        Route::post('/companies/{company}/logo', [CompanyController::class, 'uploadLogo']);
-        Route::post('/companies/{company}/banner', [CompanyController::class, 'uploadBanner']);
-        Route::delete('/companies', [CompanyController::class, 'destroyMany']);
-        Route::resource('/companies', CompanyController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
     
         // Media
         Route::post('/upload', [FileController::class, 'upload']);
