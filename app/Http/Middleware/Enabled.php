@@ -10,9 +10,9 @@ class Enabled
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || !$request->user()->enabled_at)
+        if (!$request->user() || !$request->user()->enabled_at || $request->user()->blocked_at)
         {
-            return response()->json(['message' => __('Your account is disabled.')], 403);
+            return response()->json(['message' => __('Your account is disabled or blocked.')], 403);
         }
 
         return $next($request);
