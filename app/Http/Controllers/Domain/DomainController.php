@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Country;
 use App\Models\Currency;
 use App\Models\Setting;
+use App\Models\Unit;
 use Illuminate\Http\Request;
 
 class DomainController extends Controller
@@ -38,7 +39,7 @@ class DomainController extends Controller
     public function indexUnits()
     {
         return response()->json([
-            'base_units' => [],
+            'units' => Unit::all(),
             'countries' => Country::all(),
             'currencies' => Currency::all(),
         ]);

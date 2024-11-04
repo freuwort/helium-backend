@@ -41,8 +41,9 @@ class UpdateDomainSettingRequest extends FormRequest
             'policy_developer_mode' => 'nullable|boolean',
 
             // Legal
-            'legal_notice' => 'nullable|string|max:32000',
-            'legal_privacy' => 'nullable|string|max:32000',
+            'legal_notice' => 'nullable|string|max:255', // Legal notice
+            'legal_privacy' => 'nullable|string|max:255', // Data protection
+            'legal_terms' => 'nullable|string|max:255', // Terms and conditions
 
             // Setup steps
             'setup_dismissed' => 'nullable|boolean',
