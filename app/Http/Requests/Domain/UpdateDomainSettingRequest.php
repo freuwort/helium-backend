@@ -61,8 +61,8 @@ class UpdateDomainSettingRequest extends FormRequest
             'registration_profiles.*.fields.*' => 'required|string|max:255',
             'registration_profiles.*.auto_assign_roles' => 'present|array',
             'registration_profiles.*.auto_assign_roles.*' => 'required|string|max:255',
-            'registration_profiles.*.compatible_with' => 'present|array',
-            'registration_profiles.*.compatible_with.*' => 'required|string|max:255',
+            'registration_profiles.*.groups' => 'present|array',
+            'registration_profiles.*.groups.*' => 'required|string|max:255',
             'registration_profiles.*.auto_approve' => 'required|boolean',
         ];
     }
