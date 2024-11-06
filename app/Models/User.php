@@ -65,6 +65,19 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
 
+    // START: Boot events
+    public static function boot()
+    {
+        parent::boot();
+
+        self::created(function ($model) {
+            $model->user_info()->create([]);
+        });
+    }
+    // END: Boot events
+
+
+
     // START: Relationships
     public function two_factor_methods()
     {
