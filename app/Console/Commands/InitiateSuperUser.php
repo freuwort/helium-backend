@@ -59,6 +59,6 @@ class InitiateSuperUser extends Command
 
         $superuser->givePermissionTo(Permissions::SYSTEM_SUPER_ADMIN);
         
-        $superuser->user_info()->create(['firstname' => 'Super', 'lastname' => 'User']);
+        $superuser->user_info->update(['firstname' => 'Super', 'lastname' => 'User']);
     }
 }

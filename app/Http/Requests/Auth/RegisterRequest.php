@@ -2,76 +2,31 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Classes\Auth\RegistrationValidator;
+use App\Models\Role;
 use App\Models\Setting;
-use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 
 class RegisterRequest extends FormRequest
 {
-    private RegistrationProfile $profile;
-    private Collection $profiles;
-    private Array $selection;
+    private RegistrationValidator $registrationValidator;
+    private Object $registrationValidation;
 
     /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return Setting::getSetting('policy_allow_registration', false);
-    }
-
-    /**
-     * Prepare the data for validation.
-     */
-    public function prepareForValidation()
-    {
-        $this->selection = $this->getChosenProfiles();
-        $this->profiles = $this->getProfileSetting();
-        $this->profile = new RegistrationProfile($this->profiles);
-        $this->profile->select($this->selection);
-        $this->profile->getValidation();
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
+     * Get the available validation rules.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
-    {
-        return $this->profile->getRules($this->ruleset());
-    }
-
-
-
-    private function getProfileSetting(): Collection
-    {
-        $profiles = Setting::getSetting('registration_profiles', false);
-        if (!$profiles) throw new \Exception('Registration profiles invalid.');
-        
-        return collect($profiles);
-    }
-
-    private function getChosenProfiles(): Array
-    {
-        $profiles = $this->input('profiles');
-        if (!is_array($profiles)) throw new \Exception('Profile selection invalid.');
-
-        return $profiles;
-    }
-
-    
-
-    private function ruleset(): array
+    private function ruleset(): Array
     {
         return [
             'email' => ['email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email']],
             'phone' => ['phone' => ['required', 'string', 'max:255']],
             'username' => ['username' => ['required', 'string', 'max:255', 'unique:users,username']],
-            'password' => ['required', Rules\Password::defaults()],
-            'gdpr' => ['required', 'accepted'],
+            'password' => ['password' => ['required', Rules\Password::defaults()]],
+            'gdpr' => ['gdpr' => ['required', 'accepted']],
 
             'salutation' => ['salutation' => ['required', 'string', 'max:255']],
             'prefix' => ['prefix' => ['required', 'string', 'max:255']],
@@ -97,9 +52,6 @@ class RegisterRequest extends FormRequest
                 'main_address.state' => ['nullable', 'string', 'max:255'],
                 'main_address.postal_code' => ['nullable', 'string', 'max:255'],
                 'main_address.country_code' => ['nullable', 'exists:countries,code'],
-                'main_address.latitude' => ['nullable', 'numeric'],
-                'main_address.longitude' => ['nullable', 'numeric'],
-                'main_address.notes' => ['nullable', 'string', 'max:255'],
             ],
 
             'billing_address' => [
@@ -109,9 +61,6 @@ class RegisterRequest extends FormRequest
                 'billing_address.state' => ['nullable', 'string', 'max:255'],
                 'billing_address.postal_code' => ['nullable', 'string', 'max:255'],
                 'billing_address.country_code' => ['nullable', 'exists:countries,code'],
-                'billing_address.latitude' => ['nullable', 'numeric'],
-                'billing_address.longitude' => ['nullable', 'numeric'],
-                'billing_address.notes' => ['nullable', 'string', 'max:255'],
             ],
 
             'shipping_address' => [
@@ -121,62 +70,138 @@ class RegisterRequest extends FormRequest
                 'shipping_address.state' => ['nullable', 'string', 'max:255'],
                 'shipping_address.postal_code' => ['nullable', 'string', 'max:255'],
                 'shipping_address.country_code' => ['nullable', 'exists:countries,code'],
-                'shipping_address.latitude' => ['nullable', 'numeric'],
-                'shipping_address.longitude' => ['nullable', 'numeric'],
-                'shipping_address.notes' => ['nullable', 'string', 'max:255'],
             ],
         ];
     }
-}
 
-
-
-class RegistrationProfile {
-    private Collection $all_profiles;
-    private Collection $selected_profiles;
-    private $default_profile;
-
-    public function __construct(Collection $profiles)
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
     {
-        $this->all_profiles = $profiles;
-        $this->default_profile = $this->getDefaultProfile($profiles);
+        return Setting::getSetting('policy_allow_registration', false);
     }
 
-    public function select(Array $selection = []): RegistrationProfile
+    /**
+     * Prepare the data for validation.
+     */
+    public function prepareForValidation()
     {
-        $this->selected_profiles = $this->getSelectedProfiles($this->all_profiles, $selection);
-        return $this;
+        request()->validate([
+            'profiles' => ['present', 'array'],
+            'profiles.*' => ['required', 'string'],
+        ]);
+
+        $selection = request()->input('profiles');
+
+        $profiles = Setting::getSetting('registration_profiles', false);
+
+        if (!$profiles) {
+            abort(500, 'The registration is not fully configured.');
+        }
+
+        $this->registrationValidator = new RegistrationValidator($profiles);
+        $this->registrationValidator->loadProfiles($profiles);
+        $this->registrationValidator->selectProfiles($selection);
+
+        $this->registrationValidation = $this->registrationValidator->validate();
+
+        if (!$this->registrationValidation->isValid) {
+            abort(422, 'The selected profiles are not valid.');
+        }
     }
 
-    private function getDefaultProfile(Collection $profiles)
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
     {
-        $profile = $profiles->firstWhere('name', 'default');
-        if (!$profile) throw new \Exception('Registration profiles incomplete.');
-
-        return $profile;
-    }
-    
-    private function getSelectedProfiles(Collection $profiles, Array $selection = [])
-    {
-        return $profiles->whereIn('name', $selection);
-    }
-
-    public function getValidation(): Bool
-    {
-        return false;
+        return collect($this->ruleset())
+            ->filter(fn ($rule, $key) => in_array($key, $this->registrationValidation->fields))
+            ->reduce(fn ($carry, $rule) => array_merge($carry, $rule), []);
     }
 
-    public function getRules(Array $ruleset): Array
+    /**
+     * Prepare the data for further processing.
+     */
+    public function validated($key = null, $default = null)
     {
-        $computed_profiles = $this->selected_profiles->merge([$this->default_profile]);
-        $rules = [];
+        $validated = parent::validated($key, $default);
 
-        $fields = $computed_profiles->map(fn ($profile) => $profile['fields'])->flatten()->unique();
+        if (isset($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        }
 
-        $rules = $fields->map(fn ($field) => $ruleset[$field] ?? null);
-        
+        $user = [];
+        $toUser = [
+            'email',
+            'phone',
+            'username',
+            'password',
+        ];
 
-        throw new \Exception(json_encode($rules));
-        return [];
+        $userInfo = [];
+        $toUserInfo = [
+            'salutation',
+            'prefix',
+            'firstname',
+            'middlename',
+            'lastname',
+            'suffix',
+            'nickname',
+            'legalname',
+            'organisation',
+            'department',
+            'job_title',
+            'customer_id',
+            'employee_id',
+            'member_id',
+        ];
+
+        $mainAddress = null;
+        $billingAddress = null;
+        $shippingAddress = null;
+
+        // Categorize the validated data for easy processing
+        foreach ($validated as $key => $value) {
+            if (in_array($key, $toUser)) {
+                $user[$key] = $value;
+                continue;
+            }
+
+            if (in_array($key, $toUserInfo)) {
+                $userInfo[$key] = $value;
+                continue;
+            }
+
+            if ($key === 'main_address') {
+                $mainAddress = $value;
+                continue;
+            }
+
+            if ($key === 'billing_address') {
+                $billingAddress = $value;
+                continue;
+            }
+
+            if ($key === 'shipping_address') {
+                $shippingAddress = $value;
+                continue;
+            }
+        }
+
+        return [
+            'auto_enable' => $this->registrationValidation->autoEnable,
+            'roles' => Role::whereIn('name', $this->registrationValidation->roles)->pluck('id')->toArray(),
+            
+            'user' => $user,
+            'user_info' => $userInfo,
+            
+            'main_address' => $mainAddress,
+            'billing_address' => $billingAddress,
+            'shipping_address' => $shippingAddress,
+        ];
     }
 }

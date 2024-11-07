@@ -25,8 +25,9 @@ class UpdateDomainSettingRequest extends FormRequest
             // Defaults
             'default_currency' => 'nullable|string|in:EUR,USD,GBP',
             'default_unit_length' => 'nullable|string|in:m,ft',
-            'default_unit_weight' => 'nullable|string|in:kg,lb',
+            'default_unit_area' => 'nullable|string|in:sqm,sqft',
             'default_unit_volume' => 'nullable|string|in:l,gal',
+            'default_unit_weight' => 'nullable|string|in:kg,lb',
             'default_unit_temperature' => 'nullable|string|in:c,f',
             'default_unit_speed' => 'nullable|string|in:kmh,mph',
 
@@ -57,13 +58,14 @@ class UpdateDomainSettingRequest extends FormRequest
             // Registration profiles
             'registration_profiles' => 'nullable|array',
             'registration_profiles.*.name' => 'required|string|max:255|distinct',
+            'registration_profiles.*.description' => 'present|nullable|string|max:255',
             'registration_profiles.*.fields' => 'present|array',
             'registration_profiles.*.fields.*' => 'required|string|max:255',
             'registration_profiles.*.auto_assign_roles' => 'present|array',
             'registration_profiles.*.auto_assign_roles.*' => 'required|string|max:255',
             'registration_profiles.*.groups' => 'present|array',
             'registration_profiles.*.groups.*' => 'required|string|max:255',
-            'registration_profiles.*.auto_approve' => 'required|boolean',
+            'registration_profiles.*.auto_enable' => 'required|boolean',
         ];
     }
 }

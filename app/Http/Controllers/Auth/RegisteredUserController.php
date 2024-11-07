@@ -19,29 +19,30 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(RegisterRequest $request): Response
+    public function store(RegisterRequest $request)
     {
         $validated = $request->validated();
 
-        // $user = User::create([
-        //     'name' => $request->name,
-        //     'email' => $request->email,
-        //     'password' => Hash::make($request->password),
-        // ]);
-
-        $user = User::create($validated->user);
+        // Create user
+        $user = User::create($validated['user']);
         
-        if ($request->has_user_info) $user->user_info()->updateOrCreate([], $validated->user_info);
-        if ($request->has_main_address) $user->user_info()->main_address()->create($validated->main_address);
-        if ($request->has_billing_address) $user->user_info()->billing_address()->create($validated->billing_address);
-        if ($request->has_shipping_address) $user->user_info()->shipping_address()->create($validated->shipping_address);
+        // Administrative actions
+        if ($validated['auto_enable']) $user->enable();
+        if (count($validated['roles'])) $user->syncRoles($validated['roles']);
 
-        $user->syncRoles($validated->roles);
+        // Set user info
+        if (count($validated['user_info'])) $user->user_info()->updateOrCreate([], $validated['user_info']);
+
+        // Assign addresses
+        if ($validated['main_address']) $user->user_info()->main_address()->create($validated['main_address']);
+        if ($validated['billing_address']) $user->user_info()->billing_address()->create($validated['billing_address']);
+        if ($validated['shipping_address']) $user->user_info()->shipping_address()->create($validated['shipping_address']);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return response()->noContent();
+        // return response()->noContent();
+        return response()->json($validated);
     }
 }
