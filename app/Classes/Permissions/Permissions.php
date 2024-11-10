@@ -41,6 +41,12 @@ class Permissions
      * App permissions:
      */
 
+    // Accounting
+    public const APP_VIEW_ACCOUNTINGCONTACTS = 'app.view.accounting.contacts';
+    public const APP_CREATE_ACCOUNTINGCONTACTS = 'app.create.accounting.contacts';
+    public const APP_EDIT_ACCOUNTINGCONTACTS = 'app.edit.accounting.contacts';
+    public const APP_DELETE_ACCOUNTINGCONTACTS = 'app.delete.accounting.contacts';
+
     // Forms
     public const APP_VIEW_FORMS = 'app.view.forms';
     public const APP_CREATE_FORMS = 'app.create.forms';
@@ -112,6 +118,18 @@ class Permissions
                 ],
                 [
                     ['name' => self::SYSTEM_ACCESS_MEDIA, 'label' => 'Medien Zugriff', 'description' => 'Der Benutzer kann auf die Medien zugreifen.'],
+                ],
+            ],
+        ],
+
+        'app.accounting' => [
+            'title' => 'App – Buchhaltung',
+            'permissions' => [
+                [
+                    ['name' => self::APP_VIEW_ACCOUNTINGCONTACTS, 'label' => 'Kontakte anzeigen', 'description' => 'Der Benutzer kann Kontakte ansehen.'],
+                    ['name' => self::APP_CREATE_ACCOUNTINGCONTACTS, 'label' => 'Kontakte erstellen', 'description' => 'Der Benutzer kann Kontakte erstellen.'],
+                    ['name' => self::APP_EDIT_ACCOUNTINGCONTACTS, 'label' => 'Kontakte bearbeiten', 'description' => 'Der Benutzer kann Kontakte bearbeiten.'],
+                    ['name' => self::APP_DELETE_ACCOUNTINGCONTACTS, 'label' => 'Kontakte löschen', 'description' => 'Der Benutzer kann Kontakte löschen.'],
                 ],
             ],
         ],

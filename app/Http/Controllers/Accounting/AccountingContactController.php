@@ -3,23 +3,20 @@
 namespace App\Http\Controllers\Accounting;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Form\CreateFormRequest;
-use App\Http\Requests\Form\DestroyManyFormRequest;
-use App\Http\Requests\Form\UpdateFormRequest;
-use App\Http\Resources\Form\EditorFormResource;
-use App\Http\Resources\Form\FormResource;
+use App\Http\Requests\AccountingContact\CreateAccountingContactRequest;
+use App\Http\Requests\AccountingContact\UpdateAccountingContactRequest;
+use App\Http\Resources\AccountingContact\AccountingContactResource;
 use App\Models\AccountingContact;
-use App\Models\Form;
 use Illuminate\Http\Request;
 
 class AccountingContactController extends Controller
 {
     public function index(Request $request)
     {
-        $this->authorize('viewAny', Form::class);
+        $this->authorize('viewAny', AccountingContact::class);
 
         // Base query
-        $query = AccountingContact::with(['sync', 'owner']);
+        $query = AccountingContact::with(['sync', 'owner', 'main_address', 'billing_address', 'shipping_address']);
 
         // Search
         if ($request->filter_search)
@@ -39,62 +36,81 @@ class AccountingContactController extends Controller
         $query->orderBy($field, $order);
 
         // Return collection + pagination
-        return FormResource::collection($query->paginate($request->size ?? 20));
+        return AccountingContactResource::collection($query->paginate($request->size ?? 20));
     }
 
     
     
-    public function show(Form $form)
+    public function show(AccountingContact $contact)
     {
-        $this->authorize('view', $form);
+        $this->authorize('view', $contact);
 
-        return EditorFormResource::make($form);
+        return AccountingContactResource::make($contact);
     }
 
     
     
-    public function store(CreateFormRequest $request)
+    public function store(CreateAccountingContactRequest $request)
     {
-        $this->authorize('create', Form::class);
+        $this->authorize('create', AccountingContact::class);
 
-        $form = Form::create($request->model);
+        $contact = AccountingContact::create($request->validated([
+            'type',
+            'name',
+            'vat_id',
+            'tax_id',
+            'customer_id',
+            'supplier_id',
+            'employee_id',
+            'contact_person',
+            'sync_id',
+        ]));
 
-        $form->fields()->createMany($request->form_fields);
+        if ($request->main_address) $contact->main_address()->create($request->validated('main_address'));
+        if ($request->billing_address) $contact->billing_address()->create($request->validated('billing_address'));
+        if ($request->shipping_address) $contact->shipping_address()->create($request->validated('shipping_address'));
 
-        return EditorFormResource::make($form);
+        return AccountingContactResource::make($contact);
     }
 
     
     
-    public function update(UpdateFormRequest $request, Form $form)
+    public function update(UpdateAccountingContactRequest $request, AccountingContact $contact)
     {
-        $this->authorize('update', $form);
+        $this->authorize('update', $contact);
 
-        $form->update($request->model);
+        $contact->update($request->validated([
+            'name',
+            'vat_id',
+            'tax_id',
+            'customer_id',
+            'supplier_id',
+            'employee_id',
+            'contact_person',
+        ]));
 
-        $form->fields()->delete();
-        $form->fields()->createMany($request->form_fields);
-
-        return EditorFormResource::make($form);
+        return AccountingContactResource::make($contact);
     }
 
     
     
-    public function destroy(Form $form)
+    public function destroy(AccountingContact $contact)
     {
-        $this->authorize('delete', $form);
+        $this->authorize('delete', $contact);
 
-        $form->delete();
+        $contact->delete();
     }
 
     
     
-    public function destroyMany(DestroyManyFormRequest $request)
+    public function destroyMany(Request $request)
     {
-        $forms = Form::whereIn('id', $request->validated('ids'));
+        $request->validate(['ids.*' => ['required', 'integer', 'exists:accounting_contacts,id']]);
 
-        $this->authorize('deleteMany', [Form::class, $forms->get()]);
+        $contacts = AccountingContact::whereIn('id', $request->ids);
 
-        $forms->delete();
+        $this->authorize('deleteMany', [AccountingContact::class, $contacts->get()]);
+
+        $contacts->delete();
     }
 }
