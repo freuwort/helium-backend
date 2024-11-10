@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Accounting\AccountingContactController;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\UserController as AuthUserController;
 use App\Http\Controllers\Auth\UserSettingController;
@@ -144,6 +145,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/media/rename', [MediaController::class, 'rename']);
         Route::delete('/media', [MediaController::class, 'destroy']);
         Route::patch('/media/discover', [MediaController::class, 'discover']);
+
+
+
+        // Accounting
+        Route::delete('/accounting/contacts', [AccountingContactController::class, 'destroyMany']);
+        Route::resource('/accounting/contacts', AccountingContactController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
 
 
 
