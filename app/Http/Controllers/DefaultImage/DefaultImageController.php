@@ -84,6 +84,6 @@ class DefaultImageController extends Controller
 
     public function profileBanner(Request $request)
     {
-        return response()->file(public_path('/default/banner.png'));
+        return response()->file(public_path('/default/banner_1.jpg'));
     }
 }

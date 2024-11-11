@@ -36,6 +36,23 @@ class User extends Authenticatable implements MustVerifyEmail
         'blocked_at',
         'block_reason',
         'deleted_at',
+
+        'name',
+        'salutation',
+        'prefix',
+        'firstname',
+        'middlename',
+        'lastname',
+        'suffix',
+        'nickname',
+        'legalname',
+        'organisation',
+        'department',
+        'job_title',
+        'customer_id',
+        'employee_id',
+        'member_id',
+        'notes',
     ];
 
     protected $hidden = [
@@ -54,7 +71,6 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     protected $with = [
-        'user_info',
         'two_factor_methods',
     ];
 
@@ -70,8 +86,8 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         parent::boot();
 
-        self::created(function ($model) {
-            $model->user_info()->create([]);
+        static::saving(function ($model) {
+            $model->updateName();
         });
     }
     // END: Boot events
@@ -84,9 +100,19 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->morphMany(TwoFactorMethod::class, 'authenticatable');
     }
 
-    public function user_info()
+    public function main_address()
     {
-        return $this->hasOne(UserInfo::class);
+        return $this->belongsTo(Address::class, 'main_address_id');
+    }
+
+    public function billing_address()
+    {
+        return $this->belongsTo(Address::class, 'billing_address_id');
+    }
+
+    public function shipping_address()
+    {
+        return $this->belongsTo(Address::class, 'shipping_address_id');
     }
 
     public function raw_settings()
@@ -186,6 +212,16 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
     // START: Attributes
+    public function getFullnameAttribute()
+    {
+        return implode(' ', array_filter([$this->prefix, $this->firstname, $this->middlename, $this->lastname, $this->suffix]));
+    }
+
+    public function getFullnameOrNicknameAttribute()
+    {
+        return $this->fullname ? $this->fullname : $this->nickname;
+    }
+
     public function getSettingsAttribute() {
         return $this->raw_settings->mapWithKeys(fn ($item) => [$item['key'] => $item['value']]);
     }
@@ -209,12 +245,31 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
 
-    // START: Profile media
-    public function getDefaultProfileMedia($type)
+    /**
+     * Get the default profile media.
+     * 
+     * @param  string  $type
+     * @return string
+     */
+    public function getDefaultProfileMedia(string $type): string
     {
-        return url(route('default.image', [$type, $this->email ?? 'Unknown']));
+        if ($type == 'avatar') return url('/default/profile_'.((crc32($this->email) % 8) + 1).'.jpg');
+        if ($type == 'banner') return url('/default/banner_'.((crc32($this->email) % 8) + 1).'.jpg');
+
+        return url('/default/banner_1.jpg');
     }
-    // END: Profile media
+
+    /**
+     * Update the user's name.
+     *
+     * @param  string  $name
+     * @return void
+     */
+    public function updateName(string $name = null): void
+    {
+        $this->name = $name ?: $this->fullname_or_nickname;
+        $this->saveQuietly();
+    }
 
     /**
      * Update the user's password. The password is hashed automatically.

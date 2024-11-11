@@ -55,10 +55,10 @@ class InitiateSuperUser extends Command
             'password' => Hash::make(env('SUPER_USER_PASSWORD')),
             'email_verified_at' => now(),
             'enabled_at' => now(),
+            'firstname' => 'Super',
+            'lastname' => 'User',
         ]);
 
         $superuser->givePermissionTo(Permissions::SYSTEM_SUPER_ADMIN);
-        
-        $superuser->user_info->update(['firstname' => 'Super', 'lastname' => 'User']);
     }
 }

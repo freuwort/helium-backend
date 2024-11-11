@@ -30,13 +30,10 @@ class RegisteredUserController extends Controller
         if ($validated['auto_enable']) $user->enable();
         if (count($validated['roles'])) $user->syncRoles($validated['roles']);
 
-        // Set user info
-        if (count($validated['user_info'])) $user->user_info()->updateOrCreate([], $validated['user_info']);
-
         // Assign addresses
-        if ($validated['main_address']) $user->user_info()->main_address()->create($validated['main_address']);
-        if ($validated['billing_address']) $user->user_info()->billing_address()->create($validated['billing_address']);
-        if ($validated['shipping_address']) $user->user_info()->shipping_address()->create($validated['shipping_address']);
+        if ($validated['main_address']) $user->main_address()->create($validated['main_address']);
+        if ($validated['billing_address']) $user->billing_address()->create($validated['billing_address']);
+        if ($validated['shipping_address']) $user->shipping_address()->create($validated['shipping_address']);
 
         event(new Registered($user));
 

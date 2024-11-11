@@ -13,7 +13,7 @@ class BasicUserResource extends JsonResource
             'id' => $this->id,
             'avatar' => $this->getProfileMedia('avatar'),
             'banner' => $this->getProfileMedia('banner'),
-            'name' => $this->user_info->name ?? '',
+            'name' => $this->name ?? '',
             'username' => $this->username,
         ];
     }

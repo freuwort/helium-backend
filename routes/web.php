@@ -18,7 +18,4 @@ use Illuminate\Support\Facades\Route;
 // Media delivery
 Route::get('/media/{path}', DeliveryController::class)->where('path', '(.*)')->name('media');
 
-// Default images
-Route::get('/default/{type}/{seed?}', DefaultImageController::class)->name('default.image');
-
 require __DIR__.'/auth.php';

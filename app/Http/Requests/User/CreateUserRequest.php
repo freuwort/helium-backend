@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\User;
 
+use App\Rules\Address;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateUserRequest extends FormRequest
@@ -21,33 +22,28 @@ class CreateUserRequest extends FormRequest
             'model.email' => ['nullable', 'string', 'email', 'max:255', 'unique:users,email'],
             'model.phone' => ['nullable', 'string', 'max:255'],
 
-            // User Info
-            'user_info.salutation' => ['nullable', 'string', 'max:255'],
-            'user_info.prefix' => ['nullable', 'string', 'max:255'],
-            'user_info.firstname' => ['nullable', 'string', 'max:255'],
-            'user_info.middlename' => ['nullable', 'string', 'max:255'],
-            'user_info.lastname' => ['nullable', 'string', 'max:255'],
-            'user_info.suffix' => ['nullable', 'string', 'max:255'],
-            'user_info.legalname' => ['nullable', 'string', 'max:255'],
-            'user_info.nickname' => ['nullable', 'string', 'max:255'],
-            'user_info.organisation' => ['nullable', 'string', 'max:255'],
-            'user_info.department' => ['nullable', 'string', 'max:255'],
-            'user_info.job_title' => ['nullable', 'string', 'max:255'],
-            'user_info.customer_id' => ['nullable', 'string', 'max:255'],
-            'user_info.employee_id' => ['nullable', 'string', 'max:255'],
-            'user_info.member_id' => ['nullable', 'string', 'max:255'],
-            'user_info.notes' => ['nullable', 'string', 'max:1023'],
+            'salutation' => ['nullable', 'string', 'max:255'],
+            'prefix' => ['nullable', 'string', 'max:255'],
+            'firstname' => ['nullable', 'string', 'max:255'],
+            'middlename' => ['nullable', 'string', 'max:255'],
+            'lastname' => ['nullable', 'string', 'max:255'],
+            'suffix' => ['nullable', 'string', 'max:255'],
+            'legalname' => ['nullable', 'string', 'max:255'],
+            'nickname' => ['nullable', 'string', 'max:255'],
 
-            // Main Address
-            'user_info.main_address.address_line_1' => ['nullable', 'string', 'max:255'],
-            'user_info.main_address.address_line_2' => ['nullable', 'string', 'max:255'],
-            'user_info.main_address.city' => ['nullable', 'string', 'max:255'],
-            'user_info.main_address.state' => ['nullable', 'string', 'max:255'],
-            'user_info.main_address.postal_code' => ['nullable', 'string', 'max:255'],
-            'user_info.main_address.country_code' => ['nullable', 'exists:countries,code'],
-            'user_info.main_address.latitude' => ['nullable', 'numeric'],
-            'user_info.main_address.longitude' => ['nullable', 'numeric'],
-            'user_info.main_address.notes' => ['nullable', 'string', 'max:255'],
+            'organisation' => ['nullable', 'string', 'max:255'],
+            'department' => ['nullable', 'string', 'max:255'],
+            'job_title' => ['nullable', 'string', 'max:255'],
+
+            'customer_id' => ['nullable', 'string', 'max:255'],
+            'employee_id' => ['nullable', 'string', 'max:255'],
+            'member_id' => ['nullable', 'string', 'max:255'],
+
+            'notes' => ['nullable', 'string', 'max:1023'],
+
+            'main_address' => ['nullable', new Address],
+            'billing_address' => ['nullable', new Address],
+            'shipping_address' => ['nullable', new Address],
         ];
     }
 }

@@ -135,47 +135,12 @@ class RegisterRequest extends FormRequest
         }
 
         $user = [];
-        $toUser = [
-            'email',
-            'phone',
-            'username',
-            'password',
-        ];
-
-        $userInfo = [];
-        $toUserInfo = [
-            'salutation',
-            'prefix',
-            'firstname',
-            'middlename',
-            'lastname',
-            'suffix',
-            'nickname',
-            'legalname',
-            'organisation',
-            'department',
-            'job_title',
-            'customer_id',
-            'employee_id',
-            'member_id',
-        ];
-
         $mainAddress = null;
         $billingAddress = null;
         $shippingAddress = null;
 
         // Categorize the validated data for easy processing
         foreach ($validated as $key => $value) {
-            if (in_array($key, $toUser)) {
-                $user[$key] = $value;
-                continue;
-            }
-
-            if (in_array($key, $toUserInfo)) {
-                $userInfo[$key] = $value;
-                continue;
-            }
-
             if ($key === 'main_address') {
                 $mainAddress = $value;
                 continue;
@@ -190,15 +155,14 @@ class RegisterRequest extends FormRequest
                 $shippingAddress = $value;
                 continue;
             }
+
+            $user[$key] = $value;
         }
 
         return [
             'auto_enable' => $this->registrationValidation->autoEnable,
             'roles' => Role::whereIn('name', $this->registrationValidation->roles)->pluck('id')->toArray(),
-            
             'user' => $user,
-            'user_info' => $userInfo,
-            
             'main_address' => $mainAddress,
             'billing_address' => $billingAddress,
             'shipping_address' => $shippingAddress,

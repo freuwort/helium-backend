@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
+            // Core
             $table->id();
             $table->string('username')->nullable();
             $table->string('email')->unique()->nullable();
@@ -28,6 +29,27 @@ return new class extends Migration
             $table->string('block_reason')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
+
+            // Visuals
+            $table->string('name')->nullable();
+            $table->string('salutation')->nullable();
+            $table->string('prefix')->nullable();
+            $table->string('firstname')->nullable();
+            $table->string('middlename')->nullable();
+            $table->string('lastname')->nullable();
+            $table->string('suffix')->nullable();
+            $table->string('nickname')->nullable();
+            $table->string('legalname')->nullable();
+            $table->string('organisation')->nullable();
+            $table->string('department')->nullable();
+            $table->string('job_title')->nullable();
+            $table->foreignId('main_address_id')->nullable()->constrained('addresses')->onDelete('set null')->onUpdate('cascade');
+            $table->foreignId('billing_address_id')->nullable()->constrained('addresses')->onDelete('set null')->onUpdate('cascade');
+            $table->foreignId('shipping_address_id')->nullable()->constrained('addresses')->onDelete('set null')->onUpdate('cascade');
+            $table->string('customer_id')->nullable();
+            $table->string('employee_id')->nullable();
+            $table->string('member_id')->nullable();
+            $table->text('notes')->nullable();
         });
     }
 

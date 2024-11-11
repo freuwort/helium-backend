@@ -36,14 +36,6 @@ class UserFactory extends Factory
         ];
     }
 
-    public function configure(): static
-    {
-        return $this->afterCreating(function (User $user) {
-            $user->user_name()->save(UserName::factory()->make());
-            $user->user_company()->save(UserCompany::factory()->make());
-        });
-    }
-
     /**
      * Indicate that the model's email address should be unverified.
      */

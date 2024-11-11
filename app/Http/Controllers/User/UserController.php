@@ -4,11 +4,9 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UploadProfileMediaRequest;
-use App\Http\Requests\User\DestroyManyUserRequest;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\ImportUsersRequest;
 use App\Http\Requests\User\UpdateUserRequest;
-use App\Http\Resources\User\EditorUserResource;
 use App\Http\Resources\User\BasicUserResource;
 use App\Http\Resources\User\UserResource;
 use App\Models\Role;
@@ -30,10 +28,8 @@ class UserController extends Controller
             $query->whereFuzzy(function ($query) use ($request) {
                 $query
                     ->orWhereFuzzy('username', $request->filter_search)
-                    ->orWhereFuzzy('email', $request->filter_search);
-            })
-            ->orWhereHas('user_info', function ($query) use ($request) {
-                $query->whereFuzzy('name', $request->filter_search);
+                    ->orWhereFuzzy('email', $request->filter_search)
+                    ->whereFuzzy('name', $request->filter_search);
             });
         }
 
@@ -61,10 +57,6 @@ class UserController extends Controller
 
         // Base query
         $query = User::with(['media', 'roles', 'permissions', 'roles.permissions']);
-
-        // Join user_info
-        $query->join('user_info', 'users.id', '=', 'user_info.user_id');
-        $query->select('users.*', 'user_info.name', 'user_info.customer_id', 'user_info.employee_id', 'user_info.member_id');
 
         // Search
         if ($request->filter_search)
@@ -134,7 +126,7 @@ class UserController extends Controller
     {
         $this->authorize('view', $user);
 
-        return EditorUserResource::make($user);
+        return UserResource::make($user);
     }
 
     
@@ -143,12 +135,9 @@ class UserController extends Controller
     {
         $this->authorize('create', User::class);
 
-        // Create model
-        $user = User::create($request->validated('model'));
+        $user = User::create($request->validated());
 
-        $user->user_info()->updateOrCreate([], $request->validated('user_info'));
-
-        return EditorUserResource::make($user);
+        return UserResource::make($user);
     }
 
 
@@ -160,7 +149,6 @@ class UserController extends Controller
         foreach ($request->items as $item)
         {
             $user = User::create($item);
-            $user->user_info()->updateOrCreate([], $item['user_info']);
             $user->syncRoles($item['roles']);
         }
     }
@@ -171,13 +159,10 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
-        // Update model
-        $user->update($request->validated('model'));
+        if ($request->main_address === null) $user->main_address()->delete();
+        else $user->main_address = $request->main_address;
 
-        // Sync model related data
-        $user->user_info()->updateOrCreate([], $request->validated('user_info'));
-
-        return EditorUserResource::make($user->fresh());
+        return UserResource::make($user->fresh());
     }
 
 
@@ -312,9 +297,11 @@ class UserController extends Controller
 
     
     
-    public function destroyMany(DestroyManyUserRequest $request)
+    public function destroyMany(Request $request)
     {
-        $users = User::whereIn('id', $request->validated('ids'));
+        $request->validate(['ids.*' => ['required', 'integer', 'exists:users,id']]);
+        
+        $users = User::whereIn('id', $request->ids);
 
         $this->authorize('deleteMany', [User::class, $users->get()]);
 
