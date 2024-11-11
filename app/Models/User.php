@@ -5,12 +5,12 @@ namespace App\Models;
 
 use App\Classes\Permissions\Permissions;
 use App\Notifications\ResetPasswordNotification;
+use App\Traits\HasAddresses;
 use App\Traits\HasMedia;
 use App\Traits\HasTwoFactorAuthentication;
 use App\Traits\SyncMany;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -20,7 +20,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasRoles, HasApiTokens, HasFactory, HasTwoFactorAuthentication, HasMedia, Notifiable, SyncMany, SoftDeletes;
+    use HasRoles, HasApiTokens, HasFactory, HasTwoFactorAuthentication, HasMedia, HasAddresses, Notifiable, SyncMany, SoftDeletes;
 
     protected $fillable = [
         'username',
@@ -77,6 +77,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public $media_types = [
         'avatar',
         'banner',
+    ];
+
+    public $address_types = [
+        'main',
+        'billing',
+        'shipping',
     ];
 
 

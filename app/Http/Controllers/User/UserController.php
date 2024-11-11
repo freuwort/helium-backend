@@ -159,8 +159,10 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
-        if ($request->main_address === null) $user->main_address()->delete();
-        else $user->main_address = $request->main_address;
+        $user->update($request->validated());
+        $user->updateAddress('main', $request->main_address);
+        $user->updateAddress('billing', $request->billing_address);
+        $user->updateAddress('shipping', $request->shipping_address);
 
         return UserResource::make($user->fresh());
     }

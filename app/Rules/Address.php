@@ -29,10 +29,10 @@ class Address implements ValidationRule
             'longitude' => ['nullable', 'numeric'],
         ];
         
-        foreach ($value as $key => $val) {
-            if (!array_key_exists($key, $rules)) {
-                $fail("The $attribute key $key is invalid.");
-            }
+        $validator = validator($value, $rules);
+
+        if ($validator->fails()) {
+            $fail("The $attribute must be a valid address.");
         }
     }
 }
