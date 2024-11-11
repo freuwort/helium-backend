@@ -212,7 +212,7 @@ class User extends Authenticatable implements MustVerifyEmail
     // START: Profile media
     public function getDefaultProfileMedia($type)
     {
-        return url(route('default.image', [$type, $this->username ?? 'Unknown']));
+        return url(route('default.image', [$type, $this->email ?? 'Unknown']));
     }
     // END: Profile media
 
@@ -347,7 +347,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function sendPasswordResetNotification($token)
     {
-        $url = config('app.frontend_url')."/reset-password?token=$token&email=$this->email";
+        $url = config('app.frontend_url')."/auth/reset-password?token=$token&email=$this->email";
         $this->notify(new ResetPasswordNotification($this, $url));
     }
 }

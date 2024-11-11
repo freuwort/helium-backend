@@ -22,7 +22,7 @@ class ResetPasswordNotification extends Notification
     {
         $this->url = $url;
         $this->user_email = $user->email ?? '';
-        $this->user_name = $user->user_name->fullname ?? $user->name ?? '';
+        $this->user_name = $user->user_info->fullname ?? $user->name ?? '';
     }
 
     /**
