@@ -65,6 +65,7 @@ class PrivateUserResource extends JsonResource
             'permissions' => $this->permissions->pluck('name'),
 
             // Extra
+            'settings' => $this->settings,
             'has_tfa_enabled' => $this->has_tfa_enabled,
             'has_tfa_totp_method_enabled' => $this->has_tfa_totp_method_enabled,
             'has_tfa_sms_method_enabled' => $this->has_tfa_sms_method_enabled,
