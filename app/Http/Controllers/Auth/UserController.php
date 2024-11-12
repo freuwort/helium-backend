@@ -35,8 +35,6 @@ class UserController extends Controller
 
     public function updateUsername(UpdateUsernameRequest $request)
     {
-        $this->authorize('updateUsername', $request->user());
-
         $request->user()->update($request->validated('username'));
     }
 

@@ -19,9 +19,9 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             // User Model
-            'model.username' => ['nullable', 'string', 'max:255', 'unique:users,username,'.$this->user->id],
-            'model.email' => ['nullable', 'string', 'email', 'max:255', 'unique:users,email,'.$this->user->id],
-            'model.phone' => ['nullable', 'string', 'max:255'],
+            'username' => ['nullable', 'string', 'max:255', 'unique:users,username,'.$this->user->id],
+            'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users,email,'.$this->user->id],
+            'phone' => ['nullable', 'string', 'max:255'],
 
             'salutation' => ['nullable', 'string', 'max:255'],
             'prefix' => ['nullable', 'string', 'max:255'],

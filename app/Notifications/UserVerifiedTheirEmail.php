@@ -67,7 +67,7 @@ class UserVerifiedTheirEmail extends Notification implements ShouldQueue
         ->greeting(__('Hallo :name,', ['name' => $notifiable->name]))
         ->line(__('Der Nutzer **:name** (:email) hat sich registriert und deren Email bestätigt. Klicken Sie auf den folgenden Link um den Nutzer freizugeben.', ['name' => $this->user_name, 'email' => $this->user_email]))
         ->action(__('Jetzt freigeben'), config('app.frontend_url').'/users/editor/'.$this->user_id.'?action=enable')
-        ->salutation(__('– :organization Benachrichtigungen', ['organization' => config('app.name')]));
+        ->salutation(__('– :app Benachrichtigungen', ['app' => config('app.name')]));
     }
 
     /**

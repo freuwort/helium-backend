@@ -2,13 +2,14 @@
 
 namespace App\Http\Requests\User;
 
+use App\Models\Setting;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateUsernameRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return Setting::getSetting('policy_allow_username_change', false);
     }
 
     

@@ -18,9 +18,9 @@ class CreateUserRequest extends FormRequest
     {
         return [
             // User Model
-            'model.username' => ['nullable', 'string', 'max:255', 'unique:users,username'],
-            'model.email' => ['nullable', 'string', 'email', 'max:255', 'unique:users,email'],
-            'model.phone' => ['nullable', 'string', 'max:255'],
+            'username' => ['nullable', 'string', 'max:255', 'unique:users,username'],
+            'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'max:255'],
 
             'salutation' => ['nullable', 'string', 'max:255'],
             'prefix' => ['nullable', 'string', 'max:255'],

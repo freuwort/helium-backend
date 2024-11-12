@@ -3,9 +3,15 @@
 namespace App\Providers;
 
 use App\Events\TwoFactorMethodEnabled;
+use App\Events\UserBlocked;
+use App\Events\UserEnabled;
+use App\Events\UserUnblocked;
 use App\Listeners\GenerateTwoFactorBackupCodes;
 use App\Listeners\LogSuccessfulLogin;
 use App\Listeners\SendAdministrativeUserVerifiedTheirEmailNotification;
+use App\Listeners\SendBlockedNotification;
+use App\Listeners\SendEnabledNotification;
+use App\Listeners\SendUnblockedNotification;
 use App\Listeners\SetDefaultTwoFactorMethod;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Registered;
@@ -29,6 +35,15 @@ class EventServiceProvider extends ServiceProvider
         ],
         Verified::class => [
             SendAdministrativeUserVerifiedTheirEmailNotification::class,
+        ],
+        UserEnabled::class => [
+            SendEnabledNotification::class,
+        ],
+        UserBlocked::class => [
+            SendBlockedNotification::class,
+        ],
+        UserUnblocked::class => [
+            SendUnblockedNotification::class,
         ],
         TwoFactorMethodEnabled::class => [
             GenerateTwoFactorBackupCodes::class,

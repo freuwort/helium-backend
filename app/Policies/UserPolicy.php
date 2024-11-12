@@ -99,19 +99,6 @@ class UserPolicy
 
 
 
-    public function updateUsername(User $user, User $model): Response
-    {
-        // Check if domain policy allows username change (only for the user themself)
-        if (Setting::getSetting('policy_allow_username_change', false) && $user->id == $model->id) return Response::allow();
-
-        // Permission check
-        if ($user->can([Permissions::SYSTEM_VIEW_USERS, Permissions::SYSTEM_EDIT_USERS])) return Response::allow();
-        
-        return Response::allow();
-    }
-
-
-
     public function adminAction(User $user, User $model): Response
     {
         // Permission check

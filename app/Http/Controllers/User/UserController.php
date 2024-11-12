@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Events\UserBlocked;
+use App\Events\UserEnabled;
+use App\Events\UserUnblocked;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UploadProfileMediaRequest;
 use App\Http\Requests\User\CreateUserRequest;
@@ -253,6 +256,8 @@ class UserController extends Controller
             'enabled' => ['required', 'bool'],
         ]);
 
+        if ($request->enabled) event(new UserEnabled($user));
+
         $user->enable($request->enabled);
     }
 
@@ -266,6 +271,10 @@ class UserController extends Controller
             'blocked' => ['required', 'bool'],
             'block_reason' => ['nullable', 'string'],
         ]);
+
+        $request->blocked ?
+            event(new UserBlocked($user, $request->block_reason)) :
+            event(new UserUnblocked($user));
 
         $user->block($request->blocked, $request->block_reason);
     }
