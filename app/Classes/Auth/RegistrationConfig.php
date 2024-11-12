@@ -4,29 +4,49 @@ namespace App\Classes\Auth;
 
 use Illuminate\Support\Collection;
 
-class RegistrationValidator
+class ConfigError
+{
+    static function create(Int $code = 200, String $message = ''): Object
+    {
+        return (Object) [
+            'code' => $code,
+            'message' => $message,
+        ];
+    }
+}
+
+class RegistrationConfig
 {
     private Collection $profiles;
     private Collection $selectedProfiles;
     private Collection $computedProfiles;
-    private Array $defaultProfile;
+    private Array|null $defaultProfile;
+
+    /**
+     * Create a new RegistrationConfig instance.
+     *  
+     * @param Array $profiles
+     * @return RegistrationConfig
+     */
+    public function __construct(Array $profiles = [])
+    {
+        $this->load($profiles);
+
+        return $this;
+    }
 
     /**
      * Load the registration profiles.
      * 
      * @param Array $profiles
-     * @return RegistrationValidator
+     * @return RegistrationConfig
      */
-    public function loadProfiles(Array $profiles): RegistrationValidator
+    public function load(Array $profiles): RegistrationConfig
     {
         $profiles = collect($profiles);
 
         $this->profiles = $profiles;
         $this->defaultProfile = $profiles->firstWhere('name', 'default');
-
-        if (!$this->defaultProfile) {
-            throw new \Exception('Registration profiles incomplete.');
-        }
 
         return $this;
     }
@@ -35,9 +55,9 @@ class RegistrationValidator
      * Select the profiles.
      * 
      * @param Array<string> $selection
-     * @return RegistrationValidator
+     * @return RegistrationConfig
      */
-    public function selectProfiles(Array $selection = []): RegistrationValidator
+    public function select(Array $selection = []): RegistrationConfig
     {
         $this->selectedProfiles = $this->profiles->whereIn('name', $selection);
         $this->computedProfiles = $this->selectedProfiles->merge([$this->defaultProfile]);
@@ -48,16 +68,33 @@ class RegistrationValidator
     /**
      * Validate the profiles.
      *
-     * @return Object
+     * @return ?Object
      */
-    public function validate()
+    public function getOrElse($callback): ?Object
     {
+        if (!$this->hasValidProfiles()) {
+            return $callback(ConfigError::create(500, 'Registration is currently unavailable due to a configuration error. Please contact the site administrator.'));
+        }
+
+        if (!$this->hasValidSelection()) {
+            return $callback(ConfigError::create(422, 'The selection of profiles is not valid.'));
+        }
+
         return (Object) [
-            'isValid' => $this->getIsValid(),
-            'autoEnable' => $this->getAutoEnable(),
-            'fields' => $this->getFields(),
-            'roles' => $this->getRoles(),
+            'autoEnable' => $this->autoEnable(),
+            'fields' => $this->fields(),
+            'roles' => $this->roles(),
         ];
+    }
+
+
+
+    private function hasValidProfiles(): Bool    
+    {
+        if ($this->profiles->isEmpty()) return false;
+        if (!$this->defaultProfile) return false;
+
+        return true;
     }
 
     /**
@@ -65,7 +102,7 @@ class RegistrationValidator
      *
      * @return Bool
      */
-    private function getIsValid(): bool
+    private function hasValidSelection(): Bool
     {
         function getCommon(array $arrays): array
         {
@@ -98,7 +135,7 @@ class RegistrationValidator
      *
      * @return Bool
      */
-    private function getAutoEnable(): Bool
+    private function autoEnable(): Bool
     {
         return $this->computedProfiles->filter(fn ($profile) => $profile['auto_enable'])->isNotEmpty();
     }
@@ -108,7 +145,7 @@ class RegistrationValidator
      *
      * @return Array<string>
      */
-    private function getFields(): Array
+    private function fields(): Array
     {
         return $this->computedProfiles->map(fn ($profile) => $profile['fields'])->flatten()->unique()->toArray();
     }
@@ -118,7 +155,7 @@ class RegistrationValidator
      *
      * @return Array<string>
      */
-    private function getRoles(): Array
+    private function roles(): Array
     {
         return $this->computedProfiles->map(fn ($profile) => $profile['auto_assign_roles'])->flatten()->unique()->toArray();
     }

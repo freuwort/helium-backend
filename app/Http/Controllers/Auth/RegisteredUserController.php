@@ -9,8 +9,6 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 
 class RegisteredUserController extends Controller
 {
@@ -24,22 +22,18 @@ class RegisteredUserController extends Controller
         $validated = $request->validated();
 
         // Create user
-        $user = User::create($validated['user']);
+        $user = User::create($validated);
         
-        // Administrative actions
-        if ($validated['auto_enable']) $user->enable();
-        if (count($validated['roles'])) $user->syncRoles($validated['roles']);
-
-        // Assign addresses
-        if ($validated['main_address']) $user->main_address()->create($validated['main_address']);
-        if ($validated['billing_address']) $user->billing_address()->create($validated['billing_address']);
-        if ($validated['shipping_address']) $user->shipping_address()->create($validated['shipping_address']);
+        if (isset($validated['auto_enable'])) $user->enable();
+        if (isset($validated['roles'])) $user->syncRoles($validated['roles']);
+        if (isset($validated['main_address'])) $user->updateAddress('main', $validated['main_address']);
+        if (isset($validated['billing_address'])) $user->updateAddress('billing', $validated['billing_address']);
+        if (isset($validated['shipping_address'])) $user->updateAddress('shipping', $validated['shipping_address']);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        // return response()->noContent();
-        return response()->json($validated);
+        return response()->noContent();
     }
 }
