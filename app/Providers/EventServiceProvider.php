@@ -8,6 +8,7 @@ use App\Events\UserEnabled;
 use App\Events\UserUnblocked;
 use App\Listeners\GenerateTwoFactorBackupCodes;
 use App\Listeners\LogSuccessfulLogin;
+use App\Listeners\SendAdministrativeUserRegisteredNotification;
 use App\Listeners\SendAdministrativeUserVerifiedTheirEmailNotification;
 use App\Listeners\SendBlockedNotification;
 use App\Listeners\SendEnabledNotification;
@@ -29,6 +30,7 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+            SendAdministrativeUserRegisteredNotification::class,
         ],
         Login::class => [
             LogSuccessfulLogin::class,
