@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\DefaultImage\DefaultImageController;
 use App\Http\Controllers\Media\DeliveryController;
 use Illuminate\Support\Facades\Route;
 
