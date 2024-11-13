@@ -46,7 +46,9 @@ class DomainController extends Controller
 
 
         return response()->json(
-            $settings->merge([
+            collect([])
+            ->merge($settings)
+            ->merge([
                 'units' => $units,
                 'countries' => $countries,
                 'currencies' => $currencies,
