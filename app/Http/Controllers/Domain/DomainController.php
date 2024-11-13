@@ -14,34 +14,43 @@ class DomainController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Setting::where('key', 'like', 'company_%');
-        $query->orWhere('key', 'like', 'legal_%');
-        $query->orWhere('key', 'like', 'registration_profiles');
+        // Settings
+        $settings = Setting::where('key', 'like', 'company_%');
+        $settings->orWhere('key', 'like', 'legal_%');
+        $settings->orWhere('key', 'like', 'registration_profiles');
 
-        // Only authenticated users
+        // Settings only authenticated users
         if ($request->user())
         {
-            $query->orWhere('key', 'like', 'default_%');
-            $query->orWhere('key', 'like', 'policy_%');
+            $settings->orWhere('key', 'like', 'default_%');
+            $settings->orWhere('key', 'like', 'policy_%');
         }
         
-        // Only authenticated admins
+        // Settings only authenticated admins
         if ($request->user() && $request->user()->can(Permissions::SYSTEM_ADMIN))
         {
-            $query->orWhere('key', 'like', 'setup_%');
+            $settings->orWhere('key', 'like', 'setup_%');
         }
 
-        return response()->json($query->get()->mapWithKeys(fn ($setting) => [$setting->key => $setting->value]));
-    }
+        $settings = $settings->get()->mapWithKeys(fn ($setting) => [$setting->key => $setting->value]);
 
 
+        // Units
+        $units = Unit::orderBy('type')->get();
 
-    public function indexUnits()
-    {
-        return response()->json([
-            'units' => Unit::all(),
-            'countries' => Country::all(),
-            'currencies' => Currency::all(),
-        ]);
+        // Countries
+        $countries = Country::orderBy('name')->get();
+
+        // Currencies
+        $currencies = Currency::orderBy('name')->get();
+
+
+        return response()->json(
+            $settings->merge([
+                'units' => $units,
+                'countries' => $countries,
+                'currencies' => $currencies,
+            ])
+        );
     }
 }
