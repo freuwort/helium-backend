@@ -45,9 +45,6 @@ CORS > CSRF
 // General domain info
 Route::get('/domain/settings', [DomainController::class, 'index']);
 
-// Event invite info
-Route::get('/event-invite/{code}', [EventInviteController::class, 'showBasic']);
-
 
 
 /*//////////////////////////////////////////////////////////////////////////
@@ -90,7 +87,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/user/username', [AuthUserController::class, 'updateUsername']);
         Route::post('/user/avatar', [AuthUserController::class, 'uploadProfileAvatar']);
         Route::post('/user/banner', [AuthUserController::class, 'uploadProfileBanner']);
-        Route::delete('/user', [AuthUserController::class, 'delete']);
 
 
 
@@ -148,54 +144,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Accounting
         Route::delete('/accounting/contacts', [AccountingContactController::class, 'destroyMany']);
         Route::resource('/accounting/contacts', AccountingContactController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
-
-
-
-        // Form
-        Route::delete('/forms', [FormController::class, 'destroyMany']);
-        Route::resource('/forms', FormController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
-
-
-
-        // Event
-        Route::post('/events/{event}/invites/import', [EventInviteController::class, 'import']);
-        Route::post('/events/{event}/invites/export', [EventInviteController::class, 'export']);
-        Route::patch('/events/{event}/invites/email', [EventInviteController::class, 'sendTemplatedEmail']);
-        Route::delete('/events/{event}/invites', [EventInviteController::class, 'destroyMany']);
-        Route::resource('/events/{event}/invites', EventInviteController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
-        
-        Route::delete('/events', [EventController::class, 'destroyMany']);
-        Route::resource('/events', EventController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
-
-        // Event invite
-        Route::patch('/event-invite/{code}/claim', [EventInviteController::class, 'claim']);
-        Route::patch('/event-invite/{code}/status', [EventInviteController::class, 'updateStatus']);
-        Route::post('/event-invite/{code}/details', [EventInviteController::class, 'updateDetails']);
-
-
-
-        // Screens
-        Route::delete('/screens/devices', [ScreenDeviceController::class, 'destroyMany']);
-        Route::resource('/screens/devices', ScreenDeviceController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
-        
-        Route::delete('/screens/playlists', [ScreenPlaylistController::class, 'destroyMany']);
-        Route::resource('/screens/playlists', ScreenPlaylistController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
-        
-        Route::delete('/screens', [ScreenController::class, 'destroyMany']);
-        Route::resource('/screens', ScreenController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
-
-
-
-        // Content
-        Route::patch('/content/posts/{postGroup}/review', [ContentPostController::class, 'updateReviewStatus']);
-        Route::patch('/content/posts/{postGroup}/approve', [ContentPostController::class, 'approveDraft']);
-        Route::delete('/content/posts', [ContentPostController::class, 'destroyMany']);
-        Route::resource('/content/posts', ContentPostController::class)->only(['show', 'index', 'store', 'update', 'destroy'])->parameters(['posts' => 'postGroup']);
-        
-        Route::delete('/content/spaces', [ContentSpaceController::class, 'destroyMany']);
-        Route::resource('/content/spaces', ContentSpaceController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
-        
-        Route::delete('/categories', [CategoryController::class, 'destroyMany']);
-        Route::resource('/categories', CategoryController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
     });
 });
