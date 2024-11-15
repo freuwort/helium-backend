@@ -54,6 +54,7 @@ class RegisterRequest extends FormRequest
             'username' => ['required', 'string', 'max:255', 'unique:users,username'],
             'password' => ['required', Rules\Password::defaults()],
             'gdpr' => ['required', 'accepted'],
+            'terms' => ['required', 'accepted'],
 
             'salutation' => ['required', 'string', 'max:255'],
             'prefix' => ['required', 'string', 'max:255'],
