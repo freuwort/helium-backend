@@ -18,6 +18,7 @@ class DomainController extends Controller
         $settings = Setting::where('key', 'like', 'company_%');
         $settings->orWhere('key', 'like', 'legal_%');
         $settings->orWhere('key', 'like', 'registration_profiles');
+        $settings->orWhere('key', 'like', 'policy_allow_registration');
 
         // Settings only authenticated users
         if ($request->user())
