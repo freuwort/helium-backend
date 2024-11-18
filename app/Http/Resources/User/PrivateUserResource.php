@@ -62,7 +62,7 @@ class PrivateUserResource extends JsonResource
             'shipping_address' => BasicAddressResource::make($this->shipping_address),
 
             'roles' => BasicRoleResource::collection($this->roles),
-            'permissions' => $this->permissions->pluck('name'),
+            'permissions' => $this->getAllPermissions()->pluck('name'),
 
             // Extra
             'settings' => $this->settings,
