@@ -14,6 +14,7 @@ use App\Listeners\SendBlockedNotification;
 use App\Listeners\SendEnabledNotification;
 use App\Listeners\SendUnblockedNotification;
 use App\Listeners\SetDefaultTwoFactorMethod;
+use App\Listeners\VerifyTwoFactorViaRemember;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\Verified;
@@ -34,6 +35,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         Login::class => [
             LogSuccessfulLogin::class,
+            VerifyTwoFactorViaRemember::class,
         ],
         Verified::class => [
             SendAdministrativeUserVerifiedTheirEmailNotification::class,
