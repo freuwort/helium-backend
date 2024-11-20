@@ -88,22 +88,6 @@ return [
             ],
         ],
 
-        'profiles' => [
-            'driver' => 'local',
-            'root' => storage_path('app/profiles'),
-            'url' => env('APP_URL').'/profiles',
-            'visibility' => 'private',
-            'throw' => false,
-            'allow_subdirectory_creation' => false,
-            'allow_custom_filename' => false,
-            'use_for_media' => true,
-            'default_access' => null,
-            'generate_thumbnails' => true,
-            'ignore' => [
-                'profiles/.gitignore'
-            ],
-        ],
-
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

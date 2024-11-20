@@ -8,7 +8,7 @@ trait HasAddresses
 {
     public function updateAddress(string $type, array|null $address): bool
     {
-        if (!in_array($type, $this->address_types)) {
+        if (!in_array($type, $this->address_columns)) {
             return false;
         }
 

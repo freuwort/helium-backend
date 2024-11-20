@@ -31,6 +31,8 @@ return new class extends Migration
             $table->timestamps();
 
             // Visuals
+            $table->string('avatar')->nullable();
+            $table->string('banner')->nullable();
             $table->string('name')->nullable();
             $table->string('salutation')->nullable();
             $table->string('prefix')->nullable();

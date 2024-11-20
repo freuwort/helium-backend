@@ -6,21 +6,20 @@ namespace App\Models;
 use App\Classes\Permissions\Permissions;
 use App\Notifications\ResetPasswordNotification;
 use App\Traits\HasAddresses;
-use App\Traits\HasMedia;
 use App\Traits\HasTwoFactorAuthentication;
-use App\Traits\SyncMany;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasRoles, HasApiTokens, HasFactory, HasTwoFactorAuthentication, HasMedia, HasAddresses, Notifiable, SyncMany, SoftDeletes;
+    use HasRoles, HasApiTokens, HasFactory, HasTwoFactorAuthentication, HasAddresses, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'username',
@@ -36,6 +35,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'blocked_at',
         'block_reason',
         'deleted_at',
+
+        'avatar',
+        'banner',
 
         'name',
         'salutation',
@@ -74,12 +76,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'two_factor_methods',
     ];
 
-    public $media_types = [
+    public $profile_media_columns = [
         'avatar',
         'banner',
     ];
 
-    public $address_types = [
+    public $address_columns = [
         'main',
         'billing',
         'shipping',
@@ -91,6 +93,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public static function boot()
     {
         parent::boot();
+
+        static::created(function ($model) {
+            $model->updateName();
+            $model->setDefaultProfileMedia();
+        });
 
         static::saving(function ($model) {
             $model->updateName();
@@ -252,17 +259,38 @@ class User extends Authenticatable implements MustVerifyEmail
 
 
     /**
-     * Get the default profile media.
+     * Set the default profile media.
+     * 
+     * @return void
+     */
+    public function setDefaultProfileMedia(): void
+    {
+        $rand = rand(1, 8);
+
+        foreach ($this->profile_media_columns as $column) {
+            $this->{$column} = url('/default/'.$column.'_'.$rand.'.jpg');
+        }
+
+        $this->saveQuietly();
+    }
+
+    /**
+     * Upload profile media.
      * 
      * @param  string  $type
-     * @return string
+     * @param  \Illuminate\Http\UploadedFile  $file
+     * @return void
      */
-    public function getDefaultProfileMedia(string $type): string
+    public function uploadProfileMedia(string $type, $file): void
     {
-        if ($type == 'avatar') return url('/default/profile_'.((intval(hash('crc32b', $this->email)) % 8) + 1).'.jpg');
-        if ($type == 'banner') return url('/default/banner_'.((intval(hash('crc32b', $this->email)) % 8) + 1).'.jpg');
+        if (!in_array($type, $this->profile_media_columns)) return;
 
-        return url('/default/banner_1.jpg');
+        $name = $this->id.'_'.$type.'.'.$file->getClientOriginalExtension();
+        
+        Storage::putFileAs('public/profiles', $file, $name);
+
+        $this->{$type} = url('/storage/profiles/'.$name);
+        $this->saveQuietly();
     }
 
     /**

@@ -59,7 +59,7 @@ class UserController extends Controller
         $this->authorize('viewAny', User::class);
 
         // Base query
-        $query = User::with(['media', 'roles', 'permissions', 'roles.permissions']);
+        $query = User::with(['roles', 'permissions', 'roles.permissions']);
 
         // Search
         if ($request->filter_search)
@@ -289,7 +289,7 @@ class UserController extends Controller
     {
         $this->authorize('uploadAvatar', $user);
 
-        $user->uploadProfileMedia($request->file('file'), 'avatar');
+        $user->uploadProfileMedia('avatar', $request->file('file'));
     }
 
 
@@ -298,7 +298,7 @@ class UserController extends Controller
     {
         $this->authorize('uploadBanner', $user);
 
-        $user->uploadProfileMedia($request->file('file'), 'banner');
+        $user->uploadProfileMedia('banner', $request->file('file'));
     }
 
     

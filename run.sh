@@ -12,7 +12,6 @@ mkdir -p storage/logs
 mkdir -p storage/app/public
 mkdir -p storage/app/domain
 mkdir -p storage/app/forms
-mkdir -p storage/app/profiles
 mkdir -p storage/app/temp
 chmod -R 777 storage
 

@@ -11,8 +11,8 @@ class BasicUserResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'avatar' => $this->getProfileMedia('avatar'),
-            'banner' => $this->getProfileMedia('banner'),
+            'avatar' => $this->avatar,
+            'banner' => $this->banner,
             'name' => $this->name ?? '',
             'username' => $this->username,
         ];

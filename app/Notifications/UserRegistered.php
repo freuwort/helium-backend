@@ -28,8 +28,8 @@ class UserRegistered extends Notification implements ShouldQueue
         $this->user_email = $user->email ?? '';
         $this->user_username = $user->username ?? '';
         $this->user_name = $user->name ?? '';
-        $this->user_avatar = $user->getProfileMedia('avatar') ?? '';
-        $this->user_banner = $user->getProfileMedia('banner') ?? '';
+        $this->user_avatar = $user->avatar ?? '';
+        $this->user_banner = $user->banner ?? '';
     }
 
     /**
