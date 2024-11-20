@@ -93,13 +93,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public static function boot()
     {
         parent::boot();
-
-        static::created(function ($model) {
-            $model->updateName();
-            $model->setDefaultProfileMedia();
-        });
-
+        
         static::saving(function ($model) {
+            $model->setDefaultProfileMedia();
             $model->updateName();
         });
     }
@@ -268,7 +264,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $rand = rand(1, 8);
 
         foreach ($this->profile_media_columns as $column) {
-            $this->{$column} = url('/default/'.$column.'_'.$rand.'.jpg');
+            if (!$this->{$column}) $this->{$column} = url('/default/'.$column.'_'.$rand.'.jpg');
         }
 
         $this->saveQuietly();
