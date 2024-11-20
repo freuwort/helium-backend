@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\User;
 
+use App\Models\Role;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ImportUsersRequest extends FormRequest
@@ -15,16 +16,12 @@ class ImportUsersRequest extends FormRequest
 
     public function prepareForValidation(): void
     {
-        $this->merge(['items' =>
-            collect($this->items)
-            ->map(fn ($item) => [
-                ...$item,
-                'enabled_at' => now(),
-                'email_verified_at' => now(),
-                'roles' => is_string($item['roles']) ? explode(',', $item['roles']) : $item['roles'],
-            ])
-            ->toArray(),
-        ]);
+        $this->merge(['items' => collect($this->items)->map(fn ($item) => [
+            ...$item,
+            'enabled_at' => now(),
+            'email_verified_at' => now(),
+            'roles' => Role::whereIn('name', is_string($item['roles']) ? explode(',', $item['roles']) : $item['roles'])->pluck('id')->toArray(),
+        ])->toArray()]);
     }
 
     

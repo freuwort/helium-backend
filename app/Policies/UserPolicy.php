@@ -61,7 +61,7 @@ class UserPolicy
         foreach ($models as $model)
         {
             if (!$model['roles']) continue;
-            if ($model['roles']->isEmpty()) continue;
+            if (collect($model['roles'])->isEmpty()) continue;
 
             if (!$user->can(Permissions::SYSTEM_ASSIGN_ROLES)) return Response::deny('You are missing the required permission.');
 
