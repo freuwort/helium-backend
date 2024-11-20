@@ -126,7 +126,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/users/roles', [UserRoleController::class, 'assignRoles']);
         Route::delete('/users/roles', [UserRoleController::class, 'revokeRoles']);
         Route::delete('/users', [UserController::class, 'destroyMany']);
-        Route::resource('/users', UserController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
+        Route::delete('/users/force', [UserController::class, 'forceDeleteMany']);
+        Route::patch('/users/restore', [UserController::class, 'restoreMany']);
+        Route::resource('/users', UserController::class)->only(['show', 'index', 'store', 'update']);
     
         // Media
         Route::post('/upload', [FileController::class, 'upload']);

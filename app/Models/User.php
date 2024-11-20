@@ -259,8 +259,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getDefaultProfileMedia(string $type): string
     {
-        if ($type == 'avatar') return url('/default/profile_'.((crc32($this->email) % 8) + 1).'.jpg');
-        if ($type == 'banner') return url('/default/banner_'.((crc32($this->email) % 8) + 1).'.jpg');
+        if ($type == 'avatar') return url('/default/profile_'.((intval(hash('crc32b', $this->email)) % 8) + 1).'.jpg');
+        if ($type == 'banner') return url('/default/banner_'.((intval(hash('crc32b', $this->email)) % 8) + 1).'.jpg');
 
         return url('/default/banner_1.jpg');
     }

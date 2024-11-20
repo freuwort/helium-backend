@@ -196,15 +196,11 @@ class UserPolicy
 
     
     
-    public function restore(User $user, User $model): Response
+    public function restoreMany(User $user, Collection $models): Response
     {
-        return Response::deny();
-    }
+        // Permission check
+        if (!$user->can([Permissions::SYSTEM_VIEW_USERS, Permissions::SYSTEM_DELETE_USERS, Permissions::SYSTEM_CREATE_USERS])) return Response::deny('You are missing the required permission.');
 
-    
-    
-    public function forceDelete(User $user, User $model): Response
-    {
-        return Response::deny();
+        return Response::allow();
     }
 }

@@ -81,6 +81,10 @@ class UserController extends Controller
             $query->whereNotIn('id', $request->filter_exclude);
         }
 
+        if ($request->filter_deleted) {
+            $query->onlyTrashed();
+        }
+
         if ($request->filter_roles) {
             $query->whereHas('roles', function ($query) use ($request) {
                 $query->whereIn('name', $request->filter_roles);
@@ -317,5 +321,31 @@ class UserController extends Controller
         $this->authorize('deleteMany', [User::class, $users->get()]);
 
         $users->delete();
+    }
+
+
+
+    public function restoreMany(Request $request)
+    {
+        $request->validate(['ids.*' => ['required', 'integer', 'exists:users,id']]);
+        
+        $users = User::withTrashed()->whereIn('id', $request->ids);
+
+        $this->authorize('restoreMany', [User::class, $users->get()]);
+
+        $users->restore();
+    }
+
+
+
+    public function forceDeleteMany(Request $request)
+    {
+        $request->validate(['ids.*' => ['required', 'integer', 'exists:users,id']]);
+        
+        $users = User::withTrashed()->whereIn('id', $request->ids);
+
+        $this->authorize('deleteMany', [User::class, $users->get()]);
+
+        $users->forceDelete();
     }
 }
