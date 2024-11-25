@@ -51,8 +51,8 @@ class UserRegistered extends Notification implements ShouldQueue
     {
         $via = [];
 
-        if ($notifiable->wantsNotificationsFor(type: 'user_registered', via: 'mail') !== false) $via[] = 'mail';
-        if ($notifiable->wantsNotificationsFor(type: 'user_registered', via: 'database') !== false) $via[] = 'database';
+        if ($notifiable->wantsNotificationsFor(type: 'user_registered', via: 'mail') === true) $via[] = 'mail';
+        if ($notifiable->wantsNotificationsFor(type: 'user_registered', via: 'database') === true) $via[] = 'database';
 
         return $via;
     }
