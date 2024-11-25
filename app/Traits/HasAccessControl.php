@@ -158,21 +158,17 @@ trait HasAccessControl
         // Get computed access
         $access = self::computeAccessVia($accessable);
 
-
         // Guest check
-        if (!count($permissibles) && isset($access['any']['guest']) && in_array($access['any']['guest'], $permissions)) return true;
+        if (isset($access['any']['guest']) && in_array($access['any']['guest'], $permissions)) return true;
 
         // Check each model
-        foreach ($permissibles as $permissible)
-        {
-            // Get keys
+        foreach ($permissibles as $permissible) {
             $group = (string) $permissible::class;
             $id = (string) $permissible->getKey();
 
-            // Check access
+            // Check model access
             if (isset($access[$group][$id]) && in_array($access[$group][$id], $permissions)) return true;
         }
-
 
         // No match
         return false;
@@ -180,14 +176,14 @@ trait HasAccessControl
 
     public static function canUser(?User $user, array $permissions, $accessable): bool
     {
-        // Check for guest
-        if (!$user) return self::can([], $permissions, $accessable);
-
         // Check for admin
-        if ($user->can(Permissions::ADMIN_PERMISSIONS)) return true;
+        if ($user && $user->can(Permissions::ADMIN_PERMISSIONS)) return true;
 
-        // Check for user + roles
-        return self::can([$user, ...$user->roles()->get()], $permissions, $accessable);
+        // Get permissibles
+       $permissibles = $user ? [$user, ...$user->roles()->get()] : [];
+
+        // Check permissibles
+        return self::can($permissibles, $permissions, $accessable);
 
     }
     // END: Access control
