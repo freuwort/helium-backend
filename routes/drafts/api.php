@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Accounting\AccountingContactController;
 use App\Http\Controllers\Auth\UserController as AuthUserController;
 use App\Http\Controllers\Content\CategoryController;
 use App\Http\Controllers\Content\ContentPostController;
@@ -55,7 +56,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware(['verified', 'verified.tfa', 'enabled', 'password.changed', 'tfa.enabled'])->group(function () {
         
         // Personal User Routes
-        // Route::delete('/user', [AuthUserController::class, 'delete']);
+        Route::delete('/user', [AuthUserController::class, 'delete']);
+
+
+
+        // Accounting
+        Route::delete('/accounting/contacts', [AccountingContactController::class, 'destroyMany']);
+        Route::resource('/accounting/contacts', AccountingContactController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
 
 
 

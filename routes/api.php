@@ -1,27 +1,17 @@
 <?php
 
-use App\Http\Controllers\Accounting\AccountingContactController;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\UserController as AuthUserController;
 use App\Http\Controllers\Auth\UserSettingController;
-use App\Http\Controllers\Content\CategoryController;
-use App\Http\Controllers\Content\ContentPostController;
-use App\Http\Controllers\Content\ContentSpaceController;
 use App\Http\Controllers\Debug\DebugController;
 use App\Http\Controllers\Domain\DomainController;
 use App\Http\Controllers\Domain\DomainSettingController;
-use App\Http\Controllers\Event\EventController;
-use App\Http\Controllers\Event\EventInviteController;
-use App\Http\Controllers\Form\FormController;
 use App\Http\Controllers\Media\FileController;
 use App\Http\Controllers\Media\DirectoryController;
 use App\Http\Controllers\Media\MediaController;
 use App\Http\Controllers\Notification\NotificationController;
 use App\Http\Controllers\Permission\PermissionController;
 use App\Http\Controllers\Permission\RoleController;
-use App\Http\Controllers\Screen\ScreenController;
-use App\Http\Controllers\Screen\ScreenDeviceController;
-use App\Http\Controllers\Screen\ScreenPlaylistController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserRoleController;
 use Illuminate\Support\Facades\Route;
@@ -140,11 +130,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/media/rename', [MediaController::class, 'rename']);
         Route::delete('/media', [MediaController::class, 'destroy']);
         Route::patch('/media/discover', [MediaController::class, 'discover']);
-
-
-
-        // Accounting
-        Route::delete('/accounting/contacts', [AccountingContactController::class, 'destroyMany']);
-        Route::resource('/accounting/contacts', AccountingContactController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
     });
 });
