@@ -58,7 +58,7 @@ class MediaController extends Controller
             'path' => ['required', 'string'],
         ]);
 
-        switch ($request->validated('action')) {
+        switch ($request->action) {
             case 'discover': Media::discover($request->path); break;
         }
     }
