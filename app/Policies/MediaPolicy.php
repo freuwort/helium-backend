@@ -21,9 +21,8 @@ class MediaPolicy
 
 
 
-    public function discover(User $user): Response
+    public function adminAction(User $user): Response
     {
-        // Permission check
         if (!$user->can(Permissions::ADMIN_PERMISSIONS)) return Response::deny('You are missing the required permission.');
 
         return Response::allow();

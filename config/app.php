@@ -55,6 +55,8 @@ return [
     |
     */
 
+    'force_https' => env('BASE_PROTOCOL', 'http://') === 'https://',
+
     'url' => env('APP_URL', 'http://localhost'),
 
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),

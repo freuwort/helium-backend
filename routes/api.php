@@ -129,6 +129,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/media/move', [MediaController::class, 'move']);
         Route::patch('/media/rename', [MediaController::class, 'rename']);
         Route::delete('/media', [MediaController::class, 'destroy']);
-        Route::patch('/media/discover', [MediaController::class, 'discover']);
+        Route::patch('/media/repair', [MediaController::class, 'repair']);
     });
 });

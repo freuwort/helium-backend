@@ -7,6 +7,7 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,10 +25,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Enforce https
+        if (config('app.force_https')) {
+            URL::forceScheme('https');
+        }
+
+        // Set reset password url
         ResetPassword::createUrlUsing(function (User $user, string $token) {
             return config('app.frontend_url')."/reset-password?token=$token&email=$user->email";
         });
 
+        // Set verification email response
         VerifyEmail::toMailUsing(function (User $user, string $url) {
             return (new MailMessage)
             ->subject(__('Email Adresse bestätigen'))
