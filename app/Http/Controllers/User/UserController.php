@@ -32,7 +32,8 @@ class UserController extends Controller
                 $query
                     ->orWhereFuzzy('username', $request->filter_search)
                     ->orWhereFuzzy('email', $request->filter_search)
-                    ->whereFuzzy('name', $request->filter_search);
+                    ->orwhereFuzzy('name', $request->filter_search)
+                    ->orWhereFuzzy('organisation', $request->filter_search);
             });
         }
 
