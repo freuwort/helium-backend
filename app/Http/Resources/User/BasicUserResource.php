@@ -15,6 +15,7 @@ class BasicUserResource extends JsonResource
             'banner' => $this->banner,
             'name' => $this->name ?? '',
             'username' => $this->username,
+            'email' => $this->email,
         ];
     }
 }
