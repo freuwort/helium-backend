@@ -30,65 +30,55 @@ trait HasAccessControl
 
 
     // START: Scopes
-    public function scopeWhereModelHasAccess($query, Model|null $model, array $permissions, bool $hasParentAccess)
+    public function scopeWhereVisibleToUser($query, User|null $user, bool $hasParentAccess)
     {
         // Check for admin
-        if ($model instanceof User && $model->can(Permissions::ADMIN_PERMISSIONS)) return $query;
-        
-        // Define columns
-        $inheritAccessColumn = 'inherit_access';
+        if ($user instanceof User && $user->can(Permissions::ADMIN_PERMISSIONS)) {
+            return $query;
+        }
 
         // Main query
-        return $query->where(function ($query) use ($model, $permissions, $hasParentAccess, $inheritAccessColumn) {
-            return $query
+        return $query->where(function ($query) use ($user, $hasParentAccess) {
+
             // Where inherit access
-            ->where(function ($query) use ($hasParentAccess, $inheritAccessColumn) {
-                return $query
-                ->where($inheritAccessColumn, true)
+            $query->where(function ($query) use ($hasParentAccess) {
+                $query
+                ->where('inherit_access', true)
                 ->when($hasParentAccess, function ($query) {
                     return $query;
-                }, function ($query) use ($inheritAccessColumn) {
-                    return $query->where($inheritAccessColumn, false);
+                }, function ($query) {
+                    return $query->where('inherit_access', false);
                 });
-            })
+            });
 
             // Where owner
-            ->orWhere(function ($query) use ($model) {
-                return $query
-                ->when(!!$model, function ($query) use ($model) {
-                    return $query
-                    ->where('owner_id', $model->getKey())
-                    ->where('owner_type', $model::class);
-                });
-            })
+            if ($user instanceof User) {
+                $query->orWherePolymorphic('owner', $user);
+            }
 
             // Where custom access
-            ->orWhere(function ($query) use ($model, $permissions, $inheritAccessColumn) {
-                return $query
-                ->where($inheritAccessColumn, false)
-                ->where(function ($query) use ($model, $permissions) {
+            $query->orWhere(function ($query) use ($user) {
+                $query
+                ->where('inherit_access', false)
+                ->where(function ($query) use ($user) {
                     
                     // Public access
-                    $query
-                    ->whereHas('accesses', function ($query) use ($permissions) {
-                        return $query
-                        ->whereNull('type')
-                        ->whereNull('permissible_id')
-                        ->whereNull('permissible_type')
-                        ->whereIn('permission', [...$permissions, null]);
+                    $query->whereHas('accesses', function ($query) {
+                        $query
+                        ->wherePolymorphicNull('permissible')
+                        ->whereIn('permission', ['read', 'write', 'admin']);
                     });
 
-                    // Early return when no model
-                    if (!$model) return $query;
+                    // Early return if no usre
+                    if (!$user instanceof User) {
+                        return $query;
+                    }
 
                     // Specific access
-                    $query
-                    ->orWhereHas('accesses', function ($query) use ($model, $permissions) {
-                        return $query
-                        ->whereNull('type')
-                        ->where('permissible_id', $model->getKey())
-                        ->where('permissible_type', $model::class)
-                        ->whereIn('permission', [...$permissions, null]);
+                    $query->orWhereHas('accesses', function ($query) use ($user) {
+                        $query
+                        ->wherePolymorphicIn('permissible', [$user, ...$user->roles()->get()])
+                        ->whereIn('permission', ['read', 'write', 'admin']);
                     });
                 });
             });

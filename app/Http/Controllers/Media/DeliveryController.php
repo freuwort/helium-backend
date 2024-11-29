@@ -10,13 +10,25 @@ use Illuminate\Support\Facades\Storage;
 
 class DeliveryController extends Controller
 {
+    private bool $hasAccessToRequestedPath = false;
+
+
+
     public function __invoke(Request $request)
     {
-        if (!Media::canUser(auth()->user(), ['read', 'write', 'admin'], $request->path)) return abort(403);
+        $this->hasAccessToRequestedPath = Media::canUser($request->user(), Media::READ_ACCESS, $request->path);
 
-        if (!$request->expectsJson())                       return $this->serve($request);
-        if ($request->expectsJson() && !$request->exact)    return $this->index($request);
-        if ($request->expectsJson() && $request->exact)     return $this->show($request);
+        if (!$request->expectsJson()) {
+            return $this->serve($request);
+        }
+
+        if ($request->expectsJson() && !$request->exact) {
+            return $this->index($request);
+        }
+
+        if ($request->expectsJson() && $request->exact) {
+            return $this->show($request);
+        }
     }
 
 
@@ -27,8 +39,7 @@ class DeliveryController extends Controller
         $query = Media::whereChildOfPath($request->path)->with('accesses');
 
         // Search
-        if ($request->filter_search)
-        {
+        if ($request->filter_search) {
             $query
             ->whereFuzzy(function ($query) use ($request) {
                 $query
@@ -43,11 +54,7 @@ class DeliveryController extends Controller
         $query->orderByDefault();
 
         // Access Management
-        $user = $request->user();
-        $permissions = ['read', 'write', 'admin'];
-        $hasParentAccess = Media::canUser($user, $permissions, $request->path);
-
-        $query->whereModelHasAccess($user, $permissions, $hasParentAccess);
+        $query->whereVisibleToUser($request->user(), $this->hasAccessToRequestedPath);
 
         // Return collection + pagination
         return MediaResource::collection($query->paginate($request->size ?? 20));
@@ -57,6 +64,8 @@ class DeliveryController extends Controller
 
     private function show(Request $request)
     {
+        if (!$this->hasAccessToRequestedPath) return abort(403);
+
         return MediaResource::make(Media::findPathOrFail($request->path));
     }
 
@@ -64,6 +73,8 @@ class DeliveryController extends Controller
 
     private function serve(Request $request)
     {
+        if (!$this->hasAccessToRequestedPath) return abort(403);
+
         return response()->file(Storage::path(Media::findPathOrFail($request->path)->src_path));
     }
 }

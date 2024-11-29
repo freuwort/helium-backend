@@ -36,6 +36,10 @@ class Media extends Model
         'inherit_access' => 'boolean',
     ];
 
+    public const READ_ACCESS = ['read', 'write', 'admin'];
+    public const WRITE_ACCESS = ['write', 'admin'];
+    public const ADMIN_ACCESS = ['admin'];
+
 
 
     public static function boot()

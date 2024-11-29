@@ -8,48 +8,11 @@ use App\Http\Requests\Media\DestroyMediaRequest;
 use App\Http\Requests\Media\MoveMediaRequest;
 use App\Http\Requests\Media\RenameMediaRequest;
 use App\Http\Requests\Media\ShareMediaRequest;
-use App\Http\Resources\Media\MediaResource;
 use App\Models\Media;
 use Illuminate\Http\Request;
 
 class MediaController extends Controller
 {
-    public function index(Request $request)
-    {
-        $this->authorize('view', [Media::class, $request->path]);
-
-        // Base query
-        $query = Media::whereChildOfPath($request->path)->with('accesses');
-
-        // Search
-        if ($request->filter_search)
-        {
-            $query
-            ->whereFuzzy(function ($query) use ($request) {
-                $query
-                ->orWhereFuzzy('src_path', $request->filter_search)
-                ->orWhereFuzzy('name', $request->filter_search);
-            });
-        }
-
-        // Filter
-
-        // Sort
-        $query->orderByDefault();
-
-        // Access Management
-        $user = $request->user();
-        $permissions = ['read', 'write', 'admin'];
-        $hasParentAccess = Media::canUser($user, $permissions, $request->path);
-
-        $query->whereModelHasAccess($user, $permissions, $hasParentAccess);
-
-        // Return collection + pagination
-        return MediaResource::collection($query->paginate($request->size ?? 20));
-    }
-
-
-
     public function repair(Request $request) {
         $this->authorize('adminAction', [Media::class]);
 

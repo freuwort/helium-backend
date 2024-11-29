@@ -123,7 +123,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Media
         Route::post('/upload', [FileController::class, 'upload']);
         Route::post('/directory', [DirectoryController::class, 'store']);
-        Route::get('/media/{path}', [MediaController::class, 'index'])->where('path', '(.*)');
         Route::post('/media/copy', [MediaController::class, 'copy']);
         Route::patch('/media/share', [MediaController::class, 'share']);
         Route::patch('/media/move', [MediaController::class, 'move']);
