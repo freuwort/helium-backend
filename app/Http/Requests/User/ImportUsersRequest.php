@@ -14,13 +14,23 @@ class ImportUsersRequest extends FormRequest
 
 
 
+    private static function parseArray($array, $divider = ','): array
+    {
+        if (is_null($array)) return [];
+        if (is_string($array)) return explode($divider, $array);
+        if (is_array($array)) return $array;
+        return [];
+    }
+
+
+
     public function prepareForValidation(): void
     {
         $this->merge(['items' => collect($this->items)->map(fn ($item) => [
             ...$item,
             'enabled_at' => now(),
             'email_verified_at' => now(),
-            'roles' => Role::whereIn('name', is_string($item['roles']) ? explode(',', $item['roles']) : $item['roles'])->pluck('id')->toArray(),
+            'roles' => Role::whereIn('name', self::parseArray($item['roles']))->pluck('id')->toArray(),
         ])->toArray()]);
     }
 
