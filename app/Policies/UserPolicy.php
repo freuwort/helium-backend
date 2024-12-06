@@ -128,32 +128,6 @@ class UserPolicy
 
 
 
-    public function uploadAvatar(User $user, User $model): Response
-    {
-        // Check if domain policy allows profile avatar upload (only for the user themself)
-        if (Setting::getSetting('policy_allow_avatar_upload', false) && $user->id == $model->id) return Response::allow();
-
-        // Permission check
-        if ($user->can([Permissions::SYSTEM_VIEW_USERS, Permissions::SYSTEM_EDIT_USERS])) return Response::allow();
-        
-        return Response::deny('You are missing the required permission.');
-    }
-
-    
-
-    public function uploadBanner(User $user, User $model): Response
-    {
-        // Check if domain policy allows profile banner upload (only for the user themself)
-        if (Setting::getSetting('policy_allow_banner_upload', false) && $user->id == $model->id) return Response::allow();
-
-        // Permission check
-        if ($user->can([Permissions::SYSTEM_VIEW_USERS, Permissions::SYSTEM_EDIT_USERS])) return Response::allow();
-        
-        return Response::deny('You are missing the required permission.');
-    }
-
-
-
     public function delete(User $user, User $model): Response
     {
         // Permission check
