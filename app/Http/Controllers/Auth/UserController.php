@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\DestroyUserRequest;
+use App\Http\Requests\Auth\UpdateNameRequest;
+use App\Http\Requests\Auth\UpdateUsernameRequest;
 use App\Http\Requests\Auth\UpdateUserPasswordRequest;
 use App\Http\Requests\UploadProfileMediaRequest;
-use App\Http\Requests\User\UpdateUsernameRequest;
 use App\Http\Resources\User\PrivateUserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -33,9 +34,18 @@ class UserController extends Controller
 
 
 
+    public function updateName(UpdateNameRequest $request)
+    {
+        $request->user()->update($request->validated());
+        // TODO: Add event
+    }
+
+
+
     public function updateUsername(UpdateUsernameRequest $request)
     {
-        $request->user()->update($request->validated('username'));
+        $request->user()->update(['username' => $request->validated('username')]);
+        // TODO: Add event
     }
 
 
@@ -54,7 +64,7 @@ class UserController extends Controller
     {
         $this->authorize('uploadAvatar', $request->user());
 
-        $request->user()->uploadProfileMedia($request->file('file'), 'avatar');
+        $request->user()->uploadProfileMedia('avatar', $request->file('file'));
     }
 
 
@@ -63,7 +73,7 @@ class UserController extends Controller
     {
         $this->authorize('uploadBanner', $request->user());
 
-        $request->user()->uploadProfileMedia($request->file('file'), 'banner');
+        $request->user()->uploadProfileMedia('banner', $request->file('file'));
     }
 
 
