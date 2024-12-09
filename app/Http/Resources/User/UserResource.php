@@ -70,6 +70,8 @@ class UserResource extends JsonResource
             'has_elevated_permissions' => $this->has_elevated_permissions,
             
             'has_tfa_enabled' => $this->has_tfa_enabled,
+
+            'tokens' => $this->tokens,
         ];
     }
 }

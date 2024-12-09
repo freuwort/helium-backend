@@ -16,7 +16,7 @@ class DeliveryController extends Controller
 
     public function __invoke(Request $request)
     {
-        $this->hasAccessToRequestedPath = Media::canUser($request->user(), Media::READ_ACCESS, $request->path);
+        $this->hasAccessToRequestedPath = Media::canUser(auth('sanctum')->user(), Media::READ_ACCESS, $request->path);
 
         if (!$request->expectsJson()) {
             return $this->serve($request);
@@ -54,7 +54,7 @@ class DeliveryController extends Controller
         $query->orderByDefault();
 
         // Access Management
-        $query->whereVisibleToUser($request->user(), $this->hasAccessToRequestedPath);
+        $query->whereVisibleToUser(auth('sanctum')->user(), $this->hasAccessToRequestedPath);
 
         // Return collection + pagination
         return MediaResource::collection($query->paginate($request->size ?? 20));

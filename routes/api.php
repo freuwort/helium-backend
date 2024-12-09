@@ -14,6 +14,7 @@ use App\Http\Controllers\Permission\PermissionController;
 use App\Http\Controllers\Permission\RoleController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserRoleController;
+use App\Http\Controllers\User\UserTokenController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -114,6 +115,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/users/{user}/verify-phone', [UserController::class, 'updatePhoneVerified']);
         Route::patch('/users/{user}/enable', [UserController::class, 'updateEnabled']);
         Route::patch('/users/{user}/block', [UserController::class, 'updateBlocked']);
+        Route::post('/users/{user}/token', [UserTokenController::class, 'store']);
+        Route::delete('/users/{user}/token/{token}', [UserTokenController::class, 'destroy']);
         Route::put('/users/roles', [UserRoleController::class, 'assignRoles']);
         Route::delete('/users/roles', [UserRoleController::class, 'revokeRoles']);
         Route::delete('/users', [UserController::class, 'destroyMany']);
