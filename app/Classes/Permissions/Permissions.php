@@ -36,6 +36,12 @@ class Permissions
     // Media
     public const SYSTEM_ACCESS_MEDIA = 'system.access.media';
 
+    // Devices
+    public const SYSTEM_VIEW_DEVICES = 'system.view.devices';
+    public const SYSTEM_CREATE_DEVICES = 'system.create.devices';
+    public const SYSTEM_EDIT_DEVICES = 'system.edit.devices';
+    public const SYSTEM_DELETE_DEVICES = 'system.delete.devices';
+
 
     /**
      * App permissions:
@@ -118,6 +124,12 @@ class Permissions
                 ],
                 [
                     ['name' => self::SYSTEM_ACCESS_MEDIA, 'label' => 'Medien Zugriff', 'description' => 'Der Benutzer kann auf die Medien zugreifen.'],
+                ],
+                [
+                    ['name' => self::SYSTEM_VIEW_DEVICES, 'label' => 'Geräte anzeigen', 'description' => 'Der Benutzer kann Geräte ansehen.'],
+                    ['name' => self::SYSTEM_CREATE_DEVICES, 'label' => 'Geräte erstellen', 'description' => 'Der Benutzer kann Geräte erstellen.'],
+                    ['name' => self::SYSTEM_EDIT_DEVICES, 'label' => 'Geräte bearbeiten', 'description' => 'Der Benutzer kann Geräte bearbeiten.'],
+                    ['name' => self::SYSTEM_DELETE_DEVICES, 'label' => 'Geräte löschen', 'description' => 'Der Benutzer kann Geräte löschen.'],
                 ],
             ],
         ],

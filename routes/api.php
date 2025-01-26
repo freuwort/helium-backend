@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\UserController as AuthUserController;
 use App\Http\Controllers\Auth\UserSettingController;
 use App\Http\Controllers\Debug\DebugController;
+use App\Http\Controllers\Device\DeviceController;
 use App\Http\Controllers\Domain\DomainController;
 use App\Http\Controllers\Domain\DomainSettingController;
 use App\Http\Controllers\Media\FileController;
@@ -36,7 +37,8 @@ CORS > CSRF
 // General domain info
 Route::get('/domain/settings', [DomainController::class, 'index']);
 
-
+// Device activation
+Route::patch('/devices/activate', [DeviceController::class, 'activate']);
 
 /*//////////////////////////////////////////////////////////////////////////
 CORS > CSRF > Auth
@@ -133,5 +135,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/media/rename', [MediaController::class, 'rename']);
         Route::delete('/media', [MediaController::class, 'destroy']);
         Route::patch('/media/repair', [MediaController::class, 'repair']);
+
+        // Devices
+        Route::delete('/devices', [DeviceController::class, 'destroyMany']);
+        Route::resource('/devices', DeviceController::class)->only(['show', 'index', 'store', 'update', 'destroy']);
     });
 });
