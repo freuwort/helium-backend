@@ -96,7 +96,7 @@ class Device extends Model
     }
 
     public function validatePin($pin): bool {
-        return $this->pin === $pin && !$this->mustRegeneratePin();
+        return $this->pin === $pin && $this->mustRegeneratePin() === false;
     }
 
     public function activateAs(array $deviceInfo) {
@@ -109,6 +109,7 @@ class Device extends Model
         }
         
         $this->update([
+            'pin' => null,
             'type' => $deviceInfo['type'],
             'name' => $deviceInfo['name'],
             'os_platform' => $deviceInfo['os_platform'] ?? null,

@@ -96,11 +96,11 @@ class DeviceController extends Controller
             abort(403, 'Invalid PIN');
         }
 
-        $token = $device->activateAs($request->validated());
+        $token = $device->activateAs($request->only('type', 'name', 'os_platform', 'os_arch', 'os_release', 'app_version'));
 
         return response()->json([
             'id' => $device->id,
-            'token' => $token,
+            'token' => $token->plainTextToken,
         ]);
     }
 
