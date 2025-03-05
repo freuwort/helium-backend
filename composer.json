@@ -10,6 +10,7 @@
         "endroid/qr-code": "^5.0",
         "guzzlehttp/guzzle": "^7.2",
         "intervention/image-laravel": "*",
+        "knuckleswtf/scribe": "^4.31",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/telescope": "^5.1",
