@@ -8,7 +8,7 @@ use App\Models\EventInvite;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class EventPolicy
+class EventInvitePolicy
 {
     // TODO: Check if additional permission checks are needed
     public function basicViewAny(User $user): bool
