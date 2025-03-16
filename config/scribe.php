@@ -1,6 +1,7 @@
 <?php
 
 use Knuckles\Scribe\Extracting\Strategies;
+use Laravel\Telescope\Http\Middleware\Authorize;
 
 return [
     // The HTML <title> for the generated documentation. If this is empty, Scribe will infer it from config('app.name').
@@ -34,8 +35,11 @@ return [
 
             // Exclude these routes even if they matched the rules above.
             'exclude' => [
-                '/register'
                 // 'GET /health', 'admin.*'
+                '/_ignition/health-check',
+                '/_ignition/execute-solution',
+                '/_ignition/update-config',
+                '/register',
             ],
         ],
     ],
@@ -63,7 +67,7 @@ return [
 
         // URL path to use for the docs endpoint (if `add_routes` is true).
         // By default, `/docs` opens the HTML page, `/docs.postman` opens the Postman collection, and `/docs.openapi` the OpenAPI spec.
-        'docs_url' => '/docs',
+        'docs_url' => '/scribe',
 
         // Directory within `public` in which to store CSS and JS assets.
         // By default, assets are stored in `public/vendor/scribe`.
@@ -71,7 +75,16 @@ return [
         'assets_directory' => null,
 
         // Middleware to attach to the docs endpoint (if `add_routes` is true).
-        'middleware' => [],
+        'middleware' => [
+            'web',
+            'auth',
+            'verified',
+            'verified.tfa',
+            'enabled',
+            'password.changed',
+            'tfa.enabled',
+            'can:system.access.admin.panel,system.developer',
+        ],
     ],
 
     'external' => [
