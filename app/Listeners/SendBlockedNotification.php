@@ -6,7 +6,7 @@ use App\Notifications\UserBlocked;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class SendBlockedNotification
+class SendBlockedNotification implements ShouldQueue
 {
     public function handle(object $event): void
     {

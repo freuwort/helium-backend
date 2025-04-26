@@ -6,7 +6,7 @@ use App\Notifications\UserUnblocked;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class SendUnblockedNotification
+class SendUnblockedNotification implements ShouldQueue
 {
     public function handle(object $event): void
     {
