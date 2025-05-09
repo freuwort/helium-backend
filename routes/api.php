@@ -3,7 +3,6 @@
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\UserController as AuthUserController;
 use App\Http\Controllers\Auth\UserSettingController;
-use App\Http\Controllers\Debug\DebugController;
 use App\Http\Controllers\Domain\DomainController;
 use App\Http\Controllers\Domain\DomainSettingController;
 use App\Http\Controllers\Media\FileController;
@@ -83,8 +82,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
         // System
-        Route::get('/debug', [DebugController::class, 'index']);
-        Route::get('/debug/phpinfo', [DebugController::class, 'phpinfo']);
         Route::get('/notifications', [NotificationController::class, 'index']);
         Route::patch('/notifications/read', [NotificationController::class, 'markRead']);
         Route::patch('/notifications/unread', [NotificationController::class, 'markUnread']);
