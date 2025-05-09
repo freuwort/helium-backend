@@ -61,7 +61,7 @@ class Media extends Model
 
     public function children()
     {
-        return $this->hasMany(Media::class, 'parent_id')->orderByRaw("FIELD(mime_type , 'directory') DESC")->orderBy('src_path', 'asc');
+        return $this->hasMany(Media::class, 'parent_id')->orderByRaw("CASE WHEN mime_type = 'directory' THEN 0 ELSE 1 END")->orderBy('src_path', 'asc');
     }
 
     public function owner()
@@ -93,7 +93,7 @@ class Media extends Model
     public function scopeOrderByDefault($query)
     {
         return $query
-            ->orderByRaw("FIELD(mime_type , 'directory') DESC")
+            ->orderByRaw("CASE WHEN mime_type = 'directory' THEN 0 ELSE 1 END")
             ->orderBy('src_path', 'asc');
     }
     // END: Scopes
