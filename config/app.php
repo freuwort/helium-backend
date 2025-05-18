@@ -55,10 +55,14 @@ return [
     |
     */
 
-    'force_https' => env('BASE_PROTOCOL', 'http://') === 'https://',
+    'force_https' => env('APP_PROTOCOL', 'http://') === 'https://',
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'domain' => env('APP_DOMAIN', 'localhost'),
+    'prefix' => env('APP_PREFIX', 'api'),
+    'url' => env('APP_URL', 'http://localhost:8000'),
 
+    'frontend_domain' => env('FRONTEND_DOMAIN', 'localhost'),
+    'frontend_prefix' => env('FRONTEND_PREFIX', 'helium'),
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
 
     'asset_url' => env('ASSET_URL'),
