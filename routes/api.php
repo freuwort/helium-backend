@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\UserController as AuthUserController;
 use App\Http\Controllers\Auth\UserSettingController;
+use App\Http\Controllers\Backup\BackupController;
 use App\Http\Controllers\Domain\DomainController;
 use App\Http\Controllers\Domain\DomainSettingController;
 use App\Http\Controllers\Media\FileController;
@@ -89,6 +90,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         // Domain
         Route::patch('/settings', [DomainSettingController::class, 'update']);
         Route::post('/settings/logo', [DomainSettingController::class, 'uploadLogo']);
+
+        // Backup
+        Route::post('/backups/store', [BackupController::class, 'store']);
+        Route::post('/backups/restore', [BackupController::class, 'restore']);
+        Route::get('/backups', [BackupController::class, 'index']);
+        Route::get('/backups/{backup}', [BackupController::class, 'download'])->where('backup', '[a-zA-Z0-9\-_\.]+\.zip');
+        Route::delete('/backups/{backup}', [BackupController::class, 'destroy'])->where('backup', '[a-zA-Z0-9\-_\.]+\.zip');
     
         // Permissions
         Route::get('/permissions', [PermissionController::class, 'index']);

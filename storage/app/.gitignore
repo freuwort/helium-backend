@@ -1,7 +1,9 @@
 *
+!backups/
 !domain/
 !forms/
 !profiles/
 !public/
+!restore/
 !temp/
 !.gitignore

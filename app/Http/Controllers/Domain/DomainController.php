@@ -31,6 +31,7 @@ class DomainController extends Controller
         if ($request->user() && $request->user()->can(Permissions::SYSTEM_ADMIN))
         {
             $settings->orWhere('key', 'like', 'setup_%');
+            $settings->orWhere('key', 'like', 'backup_%');
         }
 
         $settings = $settings->get()->mapWithKeys(fn ($setting) => [$setting->key => $setting->value]);
