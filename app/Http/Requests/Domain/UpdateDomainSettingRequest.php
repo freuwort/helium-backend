@@ -66,6 +66,12 @@ class UpdateDomainSettingRequest extends FormRequest
             'registration_profiles.*.groups' => 'present|array',
             'registration_profiles.*.groups.*' => 'required|string|max:255',
             'registration_profiles.*.auto_enable' => 'required|boolean',
+
+            // Backups
+            'backup_auto_enabled' => 'nullable|boolean',
+            'backup_auto_interval' => 'nullable|string|in:daily,weekly,monthly,yearly',
+            'backup_auto_time' => 'nullable|string|date_format:H:i',
+            'backup_retention' => 'nullable|integer|min:1|max:365',
         ];
     }
 }
