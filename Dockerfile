@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     xpdf \
     poppler-utils \
-    inkscape
+    inkscape \
+    libpq-dev
 
 RUN pecl install imagick;
 RUN docker-php-ext-enable imagick;
@@ -24,7 +25,7 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 RUN a2enmod rewrite
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql zip gd
+RUN docker-php-ext-install zip gd pdo_mysql pdo_pgsql
 
 # Copy custom php.ini
 COPY ./php.ini /usr/local/etc/php/
