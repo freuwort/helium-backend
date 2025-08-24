@@ -25,7 +25,7 @@ echo "[4/8] Migrating..."
 if [ "$APP_ENV" == "local" ]; then
     php artisan migrate:fresh
 else
-    php artisan migrate
+    php artisan migrate --force
 fi
 
 
