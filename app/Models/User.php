@@ -264,7 +264,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $rand = rand(1, 8);
 
         foreach ($this->profile_media_columns as $column) {
-            if (!$this->{$column}) $this->{$column} = url('/default/'.$column.'_'.$rand.'.jpg');
+            if (!$this->{$column}) $this->{$column} = url('/api/default/'.$column.'_'.$rand.'.jpg');
         }
 
         $this->saveQuietly();
