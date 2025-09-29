@@ -21,7 +21,7 @@ class MacroServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Builder::macro('wherePolymorphic', function ($relation, Model $model = null) {
+        Builder::macro('wherePolymorphic', function ($relation, Model|null $model = null) {
             if (is_null($model)) {
                 return $this
                 ->whereNull("{$relation}_id")

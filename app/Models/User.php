@@ -295,7 +295,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @param  string  $name
      * @return void
      */
-    public function updateName(string $name = null): void
+    public function updateName(string|null $name = null): void
     {
         $this->name = $name ?: $this->fullname_or_nickname;
         $this->saveQuietly();
@@ -360,7 +360,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @param  string|null  $reason
      * @return void
      */
-    public function block(bool $blocked = true, string $reason = null): void
+    public function block(bool $blocked = true, string|null $reason = null): void
     {
         $this->update([
             'blocked_at' => $blocked ? now() : null,
