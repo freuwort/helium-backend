@@ -28,12 +28,12 @@ class UserController extends Controller
         // Search
         if ($request->filter_search)
         {
-            $query->whereFuzzy(function ($query) use ($request) {
+            $query->where(function ($query) use ($request) {
                 $query
-                    ->orWhereFuzzy('username', $request->filter_search)
-                    ->orWhereFuzzy('email', $request->filter_search)
-                    ->orWhereFuzzy('name', $request->filter_search)
-                    ->orWhereFuzzy('organisation', $request->filter_search);
+                    ->orWhereRaw("username % ?", [$request->filter_search])->orWhere('username', 'ILIKE', "%$request->filter_search%")
+                    ->orWhereRaw("email % ?", [$request->filter_search])->orWhere('email', 'ILIKE', "%$request->filter_search%")
+                    ->orWhereRaw("name % ?", [$request->filter_search])->orWhere('name', 'ILIKE', "%$request->filter_search%")
+                    ->orWhereRaw("organisation % ?", [$request->filter_search])->orWhere('organisation', 'ILIKE', "%$request->filter_search%");
             });
         }
 
@@ -65,15 +65,15 @@ class UserController extends Controller
         // Search
         if ($request->filter_search)
         {
-            $query->whereFuzzy(function ($query) use ($request) {
+            $query->where(function ($query) use ($request) {
                 $query
-                    ->orWhereFuzzy('username', $request->filter_search)
-                    ->orWhereFuzzy('email', $request->filter_search)
-                    ->orWhereFuzzy('phone', $request->filter_search)
-                    ->orWhereFuzzy('name', $request->filter_search)
-                    ->orWhereFuzzy('customer_id', $request->filter_search)
-                    ->orWhereFuzzy('employee_id', $request->filter_search)
-                    ->orWhereFuzzy('member_id', $request->filter_search);
+                    ->orWhereRaw("name % ?", [$request->filter_search])->orWhere('name', 'ILIKE', "%$request->filter_search%")
+                    ->orWhereRaw("username % ?", [$request->filter_search])->orWhere('username', 'ILIKE', "%$request->filter_search%")
+                    ->orWhereRaw("email % ?", [$request->filter_search])->orWhere('email', 'ILIKE', "%$request->filter_search%")
+                    ->orWhereRaw("phone % ?", [$request->filter_search])->orWhere('phone', 'ILIKE', "%$request->filter_search%")
+                    ->orWhereRaw("customer_id % ?", [$request->filter_search])->orWhere('customer_id', 'ILIKE', "%$request->filter_search%")
+                    ->orWhereRaw("employee_id % ?", [$request->filter_search])->orWhere('employee_id', 'ILIKE', "%$request->filter_search%")
+                    ->orWhereRaw("member_id % ?", [$request->filter_search])->orWhere('member_id', 'ILIKE', "%$request->filter_search%");
             });
         }
 
