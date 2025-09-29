@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 class Access extends Model
 {
     public $timestamps = false;
+
+    public $incrementing = false;
     
     protected $fillable = [
         'permissible_id',
