@@ -21,9 +21,9 @@ class AccountingContactController extends Controller
         // Search
         if ($request->filter_search)
         {
-            $query->whereFuzzy(function ($query) use ($request) {
+            $query->where(function ($query) use ($request) {
                 $query
-                    ->orWhereFuzzy('name', $request->filter_search);
+                    ->orWhereRaw("name % ?", [$request->filter_search])->orWhere('name', 'ILIKE', "%$request->filter_search%");
             });
         }
 

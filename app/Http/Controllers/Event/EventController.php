@@ -29,11 +29,11 @@ class EventController extends Controller
         // Search
         if ($request->filter_search)
         {
-            $query->whereFuzzy(function ($query) use ($request) {
+            $query->where(function ($query) use ($request) {
                 $query
-                    ->orWhereFuzzy('name', $request->filter_search)
-                    ->orWhereFuzzy('slug', $request->filter_search)
-                    ->orWhereFuzzy('description', $request->filter_search);
+                    ->orWhereRaw("name % ?", [$request->filter_search])->orWhere('name', 'ILIKE', "%$request->filter_search%")
+                    ->orWhereRaw("slug % ?", [$request->filter_search])->orWhere('slug', 'ILIKE', "%$request->filter_search%")
+                    ->orWhereRaw("description % ?", [$request->filter_search])->orWhere('description', 'ILIKE', "%$request->filter_search%");
             });
         }
 

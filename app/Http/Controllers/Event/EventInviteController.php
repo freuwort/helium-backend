@@ -32,12 +32,12 @@ class EventInviteController extends Controller
         // Search
         if ($request->filter_search)
         {
-            $query->whereFuzzy(function ($query) use ($request) {
+            $query->where(function ($query) use ($request) {
                 $query
-                    ->orWhereFuzzy('name', $request->filter_search)
-                    ->orWhereFuzzy('email', $request->filter_search)
-                    ->orWhereFuzzy('phone', $request->filter_search)
-                    ->orWhereFuzzy('code', $request->filter_search);
+                    ->orWhereRaw("name % ?", [$request->filter_search])->orWhere('name', 'ILIKE', "%$request->filter_search%")
+                    ->orWhereRaw("email % ?", [$request->filter_search])->orWhere('email', 'ILIKE', "%$request->filter_search%")
+                    ->orWhereRaw("phone % ?", [$request->filter_search])->orWhere('phone', 'ILIKE', "%$request->filter_search%")
+                    ->orWhereRaw("code % ?", [$request->filter_search])->orWhere('code', 'ILIKE', "%$request->filter_search%");
             });
         }
 

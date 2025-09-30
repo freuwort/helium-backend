@@ -40,11 +40,10 @@ class DeliveryController extends Controller
 
         // Search
         if ($request->filter_search) {
-            $query
-            ->whereFuzzy(function ($query) use ($request) {
+            $query->where(function ($query) use ($request) {
                 $query
-                ->orWhereFuzzy('src_path', $request->filter_search)
-                ->orWhereFuzzy('name', $request->filter_search);
+                    ->orWhereRaw("src_path % ?", [$request->filter_search])->orWhere('src_path', 'ILIKE', "%$request->filter_search%")
+                    ->orWhereRaw("name % ?", [$request->filter_search])->orWhere('name', 'ILIKE', "%$request->filter_search%");
             });
         }
 

@@ -30,10 +30,9 @@ class ContentPostController extends Controller
         // Search
         if ($request->filter_search)
         {
-            $query
-            ->whereFuzzy(function ($query) use ($request) {
+            $query->where(function ($query) use ($request) {
                 $query
-                ->orWhereFuzzy('post.name', $request->filter_search);
+                    ->orWhereRaw("post.name % ?", [$request->filter_search])->orWhere('post.name', 'ILIKE', "%$request->filter_search%");
             });
         }
 
