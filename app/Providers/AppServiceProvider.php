@@ -30,11 +30,6 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        // Set reset password url
-        ResetPassword::createUrlUsing(function (User $user, string $token) {
-            return config('app.frontend_url')."/reset-password?token=$token&email=$user->email";
-        });
-
         // Set verification email response
         VerifyEmail::toMailUsing(function (User $user, string $url) {
             return (new MailMessage)

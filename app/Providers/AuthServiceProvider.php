@@ -25,10 +25,6 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
-            return config('app.frontend_url')."/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
-        });
-
         // Grant all abilities to users with the super admin permission
         Gate::after(function ($user, $ability) {
             return $user->hasAnyPermission([Permissions::SYSTEM_SUPER_ADMIN, Permissions::SYSTEM_ADMIN]);
