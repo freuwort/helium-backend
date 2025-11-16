@@ -89,7 +89,7 @@ class MediaConversion
         $width = 300;
         $height = 300;
         $colors = Utils::interpolateColors('#ff00ff', '#f59e0b', $sampleSize);
-        $image = Image::read(public_path('default/thumbnail_background_audio.png'))
+        $image = Image::read(public_path('api/default/thumbnail_background_audio.png'))
         ->pad($width, $height, '#00000000', 'center');
         
         foreach ($amplitudes as $key => $amplitude)
@@ -125,7 +125,7 @@ class MediaConversion
 
         $image = Image::read($output)
         ->pad(300, 300, '#00000000', 'center')
-        ->place(public_path('default/thumbnail_foreground_video.png'), 'center', 0, 0, 100);
+        ->place(public_path('api/default/thumbnail_foreground_video.png'), 'center', 0, 0, 100);
 
         // Remove temp file
         unlink($output);
